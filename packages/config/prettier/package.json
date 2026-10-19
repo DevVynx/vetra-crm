@@ -1,0 +1,10 @@
+{
+  "name": "@vetra/prettier-config",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "base.mjs",
+  "exports": {
+    "./base": "./base.mjs"
+  },
+  "private": true
+}

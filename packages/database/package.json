@@ -1,0 +1,25 @@
+{
+  "name": "@vetra/database",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "db:generate": "pnpm env:load drizzle-kit generate",
+    "db:migrate": "pnpm env:load drizzle-kit migrate",
+    "db:studio": "pnpm env:load drizzle-kit studio",
+    "env:load": "dotenv -e ../../.env --"
+  },
+  "dependencies": {
+    "@vetra/env": "workspace:*",
+    "drizzle-orm": "0.45.2",
+    "pg": "8.23.0"
+  },
+  "devDependencies": {
+    "@vetra/tsconfig": "workspace:*",
+    "dotenv-cli": "11.0.0",
+    "drizzle-kit": "0.31.11",
+    "tsx": "^4.7.2"
+  }
+}

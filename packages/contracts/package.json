@@ -1,0 +1,20 @@
+{
+  "name": "@vetra/contracts",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "sideEffects": false,
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.6.1"
+  },
+  "devDependencies": {
+    "@vetra/tsconfig": "workspace:*",
+    "@types/node": "22.20.2",
+    "typescript": "7.0.2"
+  }
+}

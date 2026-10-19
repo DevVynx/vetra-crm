@@ -1,0 +1,10 @@
+{
+  "extends": "@vetra/tsconfig/web.json",
+  "compilerOptions": {
+    "types": ["vite/client", "node"],
+    "rootDir": "./src",
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

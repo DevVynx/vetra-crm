@@ -1,0 +1,17 @@
+{
+  "name": "@vetra/infra",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@vetra/tsconfig": "workspace:*",
+    "@types/node": "22.20.2",
+    "typescript": "7.0.2"
+  }
+}
