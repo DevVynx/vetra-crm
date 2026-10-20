@@ -22,8 +22,10 @@ Planned capabilities, roughly in order:
   there's real data to show.
 - **Integration with the prospecting pipeline** — see "Relationship with the
   prospecting pipeline" below.
-- **WhatsApp** — manual sending first (`wa.me` link + copy message); WAHA later,
-  mainly to receive and log conversations.
+- **WhatsApp (WAHA)** — part of the first version, with its own "WhatsApp" tab: an
+  inbox of conversations linked to leads (open a lead's chat, create a lead from a
+  chat). Interface first, backend integration afterwards. The first cold approach
+  stays manually sent.
 - **AI-assisted text generation** (follow-ups, objection replies) — later; provider
   not decided.
 
@@ -68,17 +70,18 @@ builds and deploys a branded demo site, and writes the WhatsApp approach message
 
 ## Decisions log
 
-| Date       | Decision                                                                                        | Rationale                                                                                                                                    |
-| ---------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-10-19 | No login / authentication.                                                                      | Local, single-person use. Removed from every layer in `VET-1`.                                                                               |
-| 2026-10-19 | API listens on `127.0.0.1` only; CORS allows only the web app's origin.                         | Without authentication, network isolation is what protects the data.                                                                         |
-| 2026-10-19 | Keep PostgreSQL (Docker).                                                                       | Already configured; Docker is needed anyway for WAHA. Switching to SQLite would be rework with no real gain.                                 |
-| 2026-10-19 | UI in Portuguese, hardcoded, no i18n.                                                           | Personal tool; i18n would be YAGNI. Backend stays language-neutral (stable error codes).                                                     |
-| 2026-10-19 | Vetra may later be distributed to other people, but always **run locally**, never hosted.       | Not acted on yet. Keep data access isolated in repositories; packaging/installation for third parties is decided when that scenario is real. |
-| 2026-10-19 | Single `Lead` entity in the first version (no separate Opportunity).                            | Selling more than one project to the same client is rare. Can be split later.                                                                |
-| 2026-10-19 | Vetra owns lead state; the prospecting pipeline owns files; linked by `slug`.                   | Avoids duplicating the pipeline's agentic work and its large template library.                                                               |
-| 2026-10-19 | WhatsApp: manual sending first; WAHA later, mainly for receiving.                               | WAHA uses unofficial WhatsApp Web — automated cold outreach risks a number ban.                                                              |
-| 2026-10-19 | Build order: app shell → Leads screens with mock data typed by contracts → backend → dashboard. | See the product before building the logic; the dashboard needs real data.                                                                    |
+| Date       | Decision                                                                                                | Rationale                                                                                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-19 | No login / authentication.                                                                              | Local, single-person use. Removed from every layer in `VET-1`.                                                                                                                      |
+| 2026-10-19 | API listens on `127.0.0.1` only; CORS allows only the web app's origin.                                 | Without authentication, network isolation is what protects the data.                                                                                                                |
+| 2026-10-19 | Keep PostgreSQL (Docker).                                                                               | Already configured; Docker is needed anyway for WAHA. Switching to SQLite would be rework with no real gain.                                                                        |
+| 2026-10-19 | UI in Portuguese, hardcoded, no i18n.                                                                   | Personal tool; i18n would be YAGNI. Backend stays language-neutral (stable error codes).                                                                                            |
+| 2026-10-19 | Vetra may later be distributed to other people, but always **run locally**, never hosted.               | Not acted on yet. Keep data access isolated in repositories; packaging/installation for third parties is decided when that scenario is real.                                        |
+| 2026-10-19 | Single `Lead` entity in the first version (no separate Opportunity).                                    | Selling more than one project to the same client is rare. Can be split later.                                                                                                       |
+| 2026-10-19 | Vetra owns lead state; the prospecting pipeline owns files; linked by `slug`.                           | Avoids duplicating the pipeline's agentic work and its large template library.                                                                                                      |
+| 2026-10-19 | WhatsApp: manual sending first; WAHA later, mainly for receiving.                                       | WAHA uses unofficial WhatsApp Web — automated cold outreach risks a number ban.                                                                                                     |
+| 2026-10-20 | WhatsApp via WAHA moves into the first version, with its own nav tab; first cold approach stays manual. | Seen as a differentiator worth having from the start. Receiving/replying is low-risk; automated cold outreach would still risk a number ban. Supersedes the 2026-10-19 entry above. |
+| 2026-10-19 | Build order: app shell → Leads screens with mock data typed by contracts → backend → dashboard.         | See the product before building the logic; the dashboard needs real data.                                                                                                           |
 
 ## Important notes
 
