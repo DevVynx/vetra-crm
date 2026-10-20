@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@fontsource-variable/unbounded";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -63,38 +64,38 @@
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  --card: #171717;
-  --card-foreground: #fafafa;
-  --popover: #262626;
-  --popover-foreground: #fafafa;
+  --background: #141415;
+  --foreground: #ededed;
+  --card: #19191b;
+  --card-foreground: #ededed;
+  --popover: #1c1c1e;
+  --popover-foreground: #ededed;
   --primary: #e5e5e5;
   --primary-foreground: #171717;
-  --secondary: #262626;
-  --secondary-foreground: #fafafa;
-  --muted: #262626;
-  --muted-foreground: #a1a1a1;
-  --accent: #404040;
-  --accent-foreground: #fafafa;
+  --secondary: #232325;
+  --secondary-foreground: #ededed;
+  --muted: #1e1e20;
+  --muted-foreground: #8b8b90;
+  --accent: #232325;
+  --accent-foreground: #ededed;
   --destructive: #ff6467;
   --destructive-foreground: #fafafa;
-  --border: #282828;
-  --input: #343434;
-  --ring: #737373;
+  --border: #232325;
+  --input: #2a2a2d;
+  --ring: #5c5c62;
   --chart-1: #91c5ff;
   --chart-2: #3a81f6;
   --chart-3: #2563ef;
   --chart-4: #1a4eda;
   --chart-5: #1f3fad;
-  --sidebar: #171717;
-  --sidebar-foreground: #fafafa;
-  --sidebar-primary: #1447e6;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #262626;
-  --sidebar-accent-foreground: #fafafa;
-  --sidebar-border: #282828;
-  --sidebar-ring: #525252;
+  --sidebar: #0b0b0c;
+  --sidebar-foreground: #d4d4d8;
+  --sidebar-primary: #ededed;
+  --sidebar-primary-foreground: #141415;
+  --sidebar-accent: #1c1c1e;
+  --sidebar-accent-foreground: #ededed;
+  --sidebar-border: #1c1c1e;
+  --sidebar-ring: #5c5c62;
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
@@ -157,6 +158,7 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
+  --font-brand: "Unbounded Variable", var(--font-sans);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

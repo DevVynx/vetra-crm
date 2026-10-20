@@ -1,14 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_app/")({
-  component: Index,
-});
+import { PagePlaceholder } from "@/shared/components/layout/PagePlaceholder";
 
-function Index() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-2 p-4 text-center">
-      <h1 className="text-2xl font-semibold">Vetra</h1>
-      <p className="text-muted-foreground">Em construção.</p>
-    </div>
-  );
-}
+export const Route = createFileRoute("/_app/")({
+  staticData: { title: "Hoje" },
+  component: () => (
+    <PagePlaceholder description="Seus follow-ups e próximas ações aparecerão aqui." />
+  ),
+});
