@@ -1,6 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "default",
+  "style": "base-nova",
   "rsc": false,
   "tsx": true,
   "tailwind": {
@@ -13,10 +13,10 @@
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/shared/components",
-    "utils": "@/shared/utils/lib",
+    "utils": "@/shared/utils/cn",
     "ui": "@/shared/components/ui",
     "lib": "@/shared/lib",
-    "hooks": "@/shared/hooks/lib"
+    "hooks": "@/shared/hooks"
   },
   "registries": {
     "@diceui": "https://diceui.com/r/{name}.json",
