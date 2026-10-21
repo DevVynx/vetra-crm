@@ -24,7 +24,7 @@ export function DashboardSection({
     <section className={cn("bg-card flex flex-col gap-3 rounded-xl border p-4", className)}>
       <header className="flex items-center gap-2">
         <Icon className={cn("size-4", iconClassName)} />
-        <h2 className="text-sm font-medium">{title}</h2>
+        <h2 className="text-sm font-semibold">{title}</h2>
         {count !== undefined && <Badge variant="secondary">{count}</Badge>}
       </header>
       {children}

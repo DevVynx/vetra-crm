@@ -18,6 +18,7 @@ import { formatCompactCurrency, formatCurrency } from "@/shared/utils/format";
 import { useDashboardRevenue } from "../queries/useDashboardRevenue";
 import { DashboardSection } from "./DashboardSection";
 import { SectionSkeleton } from "./SectionSkeleton";
+import { TooltipRow } from "./TooltipRow";
 
 const chartConfig = {
   soldInCents: { label: "Vendido", color: "var(--chart-1)" },
@@ -49,22 +50,6 @@ function evenlySpacedTicks(buckets: string[], plotWidth: number, minSpacing: num
 const formatBucket = (iso: unknown, pattern: string) =>
   typeof iso === "string" ? format(new Date(iso), pattern, { locale: ptBR }) : "";
 
-function SeriesValue({ name, value }: { name: keyof typeof chartConfig; value: number }) {
-  return (
-    <div className="flex w-full items-center gap-2">
-      <span
-        aria-hidden
-        className="h-2.5 w-1 shrink-0 rounded-[2px]"
-        style={{ backgroundColor: chartConfig[name].color }}
-      />
-      <span className="text-muted-foreground">{chartConfig[name].label}</span>
-      <span className="text-foreground ml-auto font-medium tabular-nums">
-        {formatCurrency(value)}
-      </span>
-    </div>
-  );
-}
-
 export function RevenueChart({ period }: { period: DashboardPeriod }) {
   const { data, isPending } = useDashboardRevenue(period);
   const { ref: chartRef, width: chartWidth } = useElementWidth<HTMLDivElement>();
@@ -92,8 +77,11 @@ export function RevenueChart({ period }: { period: DashboardPeriod }) {
 
   return (
     <DashboardSection {...sectionProps}>
-      <p className="text-muted-foreground -mt-2 text-xs">Acumulado no período</p>
-      <ChartContainer ref={chartRef} config={chartConfig} className="aspect-auto h-72 w-full">
+      <ChartContainer
+        ref={chartRef}
+        config={chartConfig}
+        className="aspect-auto min-h-72 w-full flex-1"
+      >
         <AreaChart data={data.points} margin={CHART_MARGIN}>
           <defs>
             {series.map((key) => (
@@ -127,12 +115,17 @@ export function RevenueChart({ period }: { period: DashboardPeriod }) {
                 labelFormatter={(_, payload) =>
                   formatBucket(payload[0]?.payload?.bucketStart, formats.tooltip)
                 }
-                formatter={(value, name) => (
-                  <SeriesValue
-                    name={name === "soldInCents" ? "soldInCents" : "receivedInCents"}
-                    value={Number(value)}
-                  />
-                )}
+                formatter={(value, name) => {
+                  const config =
+                    name === "soldInCents" ? chartConfig.soldInCents : chartConfig.receivedInCents;
+                  return (
+                    <TooltipRow
+                      label={config.label}
+                      color={config.color}
+                      value={formatCurrency(Number(value))}
+                    />
+                  );
+                }}
               />
             }
           />

@@ -1,13 +1,16 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
+import type { DashboardPeriod } from "@vetra/contracts";
 
 import { dashboardMockApi } from "../mocks/mockApi";
 import { dashboardQueryKeys } from "./keys";
 
-export const dashboardFunnelQueryOptions = queryOptions({
-  queryKey: dashboardQueryKeys.funnel,
-  queryFn: () => dashboardMockApi.getFunnel(),
-});
+export const dashboardFunnelQueryOptions = (period: DashboardPeriod) =>
+  queryOptions({
+    queryKey: dashboardQueryKeys.funnel(period),
+    queryFn: () => dashboardMockApi.getFunnel({ period }),
+    placeholderData: keepPreviousData,
+  });
 
-export function useDashboardFunnel() {
-  return useQuery(dashboardFunnelQueryOptions);
+export function useDashboardFunnel(period: DashboardPeriod) {
+  return useQuery(dashboardFunnelQueryOptions(period));
 }

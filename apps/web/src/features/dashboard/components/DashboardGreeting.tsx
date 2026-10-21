@@ -28,7 +28,7 @@ export function DashboardGreeting({ period, onPeriodChange }: DashboardGreetingP
         <p className="text-muted-foreground text-sm first-letter:uppercase">
           {formatLongDate(now)}
         </p>
-        <h2 className="text-2xl font-medium tracking-tight">
+        <h2 className="text-2xl font-semibold tracking-tight">
           {greetingFor(now.getHours())}, {mockProfile.firstName}
         </h2>
       </div>

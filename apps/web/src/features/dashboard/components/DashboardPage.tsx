@@ -3,18 +3,21 @@ import { useState } from "react";
 
 import { Badge } from "@/shared/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { cn } from "@/shared/utils/cn";
 
 import { usePendingCount } from "../queries/usePendingCount";
 import { AwaitingConversations } from "./AwaitingConversations";
+import { ConversionByNicheChart } from "./ConversionByNicheChart";
 import { DashboardGreeting } from "./DashboardGreeting";
 import { KpiStrip } from "./KpiStrip";
 import { LeadsWithoutNextAction } from "./LeadsWithoutNextAction";
+import { ProspectingChart } from "./ProspectingChart";
 import { RevenueChart } from "./RevenueChart";
 import { SalesFunnel } from "./SalesFunnel";
 import { TodayActions } from "./TodayActions";
 
 const DEFAULT_PERIOD: DashboardPeriod = "month";
-const PANEL_GRID = "grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]";
+const PANEL_GRID = "grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]";
 
 export function DashboardPage() {
   const [period, setPeriod] = useState(DEFAULT_PERIOD);
@@ -36,7 +39,7 @@ export function DashboardPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="operation" className={PANEL_GRID}>
+        <TabsContent value="operation" className={cn(PANEL_GRID, "items-start")}>
           <TodayActions />
           <aside className="flex flex-col gap-6">
             <AwaitingConversations />
@@ -44,9 +47,15 @@ export function DashboardPage() {
           </aside>
         </TabsContent>
 
-        <TabsContent value="performance" className={PANEL_GRID}>
-          <RevenueChart period={period} />
-          <SalesFunnel />
+        <TabsContent value="performance" className="flex flex-col gap-6">
+          <div className={PANEL_GRID}>
+            <RevenueChart period={period} />
+            <SalesFunnel period={period} />
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <ProspectingChart period={period} />
+            <ConversionByNicheChart period={period} />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

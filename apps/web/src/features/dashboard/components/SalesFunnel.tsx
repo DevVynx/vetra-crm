@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import type { FunnelStep } from "@vetra/contracts";
-import { FunnelIcon } from "lucide-react";
+import type { DashboardPeriod, FunnelStep } from "@vetra/contracts";
+import { FunnelIcon, UsersIcon } from "lucide-react";
 import { Funnel, FunnelChart, LabelList } from "recharts";
 
 import {
@@ -14,6 +14,7 @@ import { formatPercent } from "@/shared/utils/format";
 import { funnelStages, leadStageColor, leadStageLabels } from "../constants/leadStages";
 import { useDashboardFunnel } from "../queries/useDashboardFunnel";
 import { DashboardSection } from "./DashboardSection";
+import { SectionEmpty } from "./SectionEmpty";
 import { SectionSkeleton } from "./SectionSkeleton";
 
 const chartConfig: ChartConfig = Object.fromEntries(
@@ -22,6 +23,8 @@ const chartConfig: ChartConfig = Object.fromEntries(
     { label: leadStageLabels[stage], color: leadStageColor(stage) },
   ])
 );
+
+const MIN_BAND_RATIO = 0.15;
 
 const conversionRate = (count: number, previousCount: number) =>
   previousCount === 0 ? 0 : count / previousCount;
@@ -56,8 +59,8 @@ function FunnelLegend({ funnel }: { funnel: FunnelStep[] }) {
   );
 }
 
-export function SalesFunnel() {
-  const { data, isPending } = useDashboardFunnel();
+export function SalesFunnel({ period }: { period: DashboardPeriod }) {
+  const { data, isPending } = useDashboardFunnel(period);
 
   if (isPending || !data) {
     return (
@@ -69,17 +72,55 @@ export function SalesFunnel() {
 
   const { funnel } = data;
   const first = funnel[0];
+
+  if (!first?.reachedCount) {
+    return (
+      <DashboardSection title="Funil de vendas" icon={FunnelIcon} iconClassName="text-chart-1">
+        <SectionEmpty icon={UsersIcon} title="Nenhum lead prospectado no período" />
+      </DashboardSection>
+    );
+  }
+
   const last = funnel.at(-1);
-  const overallRate =
-    first && last ? conversionRate(last.reachedCount, first.reachedCount) : undefined;
-  const chartData = funnel.map((step) => ({ ...step, fill: `var(--color-${step.stage})` }));
+  const overallRate = last ? conversionRate(last.reachedCount, first.reachedCount) : undefined;
+  // Band widths are proportional, but with a floor so an empty stage still shows its band
+  // and count; the label and tooltip always show the real number.
+  const minBandWidth = first.reachedCount * MIN_BAND_RATIO;
+  const chartData = funnel.map((step) => ({
+    ...step,
+    bandWidth: Math.max(step.reachedCount, minBandWidth),
+    fill: `var(--color-${step.stage})`,
+  }));
 
   return (
     <DashboardSection title="Funil de vendas" icon={FunnelIcon} iconClassName="text-chart-1">
       <ChartContainer config={chartConfig} className="aspect-auto h-44 w-full">
         <FunnelChart>
-          <ChartTooltip content={<ChartTooltipContent nameKey="stage" hideLabel />} />
-          <Funnel data={chartData} dataKey="reachedCount" nameKey="stage" lastShapeType="rectangle">
+          <ChartTooltip
+            content={
+              <ChartTooltipContent
+                nameKey="stage"
+                hideLabel
+                formatter={(_, __, item) => {
+                  const step = item.payload as FunnelStep;
+                  return (
+                    <div className="flex w-full items-center gap-2">
+                      <span
+                        aria-hidden
+                        className="size-2.5 shrink-0 rounded-[2px]"
+                        style={{ backgroundColor: leadStageColor(step.stage) }}
+                      />
+                      <span className="text-muted-foreground">{leadStageLabels[step.stage]}</span>
+                      <span className="text-foreground ml-auto font-medium tabular-nums">
+                        {step.reachedCount}
+                      </span>
+                    </div>
+                  );
+                }}
+              />
+            }
+          />
+          <Funnel data={chartData} dataKey="bandWidth" nameKey="stage" lastShapeType="rectangle">
             <LabelList
               dataKey="reachedCount"
               position="center"

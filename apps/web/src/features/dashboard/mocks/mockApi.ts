@@ -1,8 +1,11 @@
 import type {
   CompleteNextActionRequest,
   CreateNextActionRequest,
+  DashboardConversionByNicheResponse,
   DashboardFunnelResponse,
+  DashboardPeriod,
   DashboardPeriodQuery,
+  DashboardProspectingResponse,
   DashboardRevenueResponse,
   DashboardSummaryResponse,
   LeadStage,
@@ -11,14 +14,19 @@ import type {
   ListLeadsWithoutNextActionResponse,
   ListNextActionsResponse,
   NextAction,
+  NicheConversion,
+  ProspectingGranularity,
   RescheduleNextActionRequest,
   RevenueGranularity,
 } from "@vetra/contracts";
 import {
   eachDayOfInterval,
   eachMonthOfInterval,
+  eachWeekOfInterval,
   endOfDay,
   endOfMonth,
+  endOfWeek,
+  max,
   min,
   startOfMonth,
 } from "date-fns";
@@ -36,6 +44,7 @@ import {
 // a future endpoint, so replacing it with an axios call is the only change the hooks need.
 
 const MOCK_LATENCY_IN_MS = 250;
+const TOP_NICHES = 11;
 
 const negotiatingStages = new Set<LeadStage>(["conversing", "meeting", "proposal_sent"]);
 
@@ -61,6 +70,9 @@ const receivedIn = (range: DateRange | null) =>
   sumBy(paymentsIn(range), (item) => item.amountInCents);
 const soldIn = (range: DateRange | null) =>
   sumBy(salesIn(range), (deal) => deal.closedValueInCents);
+
+const prospectingGranularityFor = (period: DashboardPeriod): ProspectingGranularity =>
+  period === "week" ? "day" : period === "month" ? "week" : "month";
 
 const isActive = (lead: LeadSummary) => lead.stage !== "won" && lead.stage !== "lost";
 
@@ -118,7 +130,8 @@ export const dashboardMockApi = {
 
     return respond({
       granularity,
-      points: buckets.map((bucketStart) => {
+      points: buckets.map((rawBucketStart) => {
+        const bucketStart = max([rawBucketStart, start]);
         const upToBucket = { start, end: min([bucketEnd(bucketStart), now]) };
         return {
           bucketStart: bucketStart.toISOString(),
@@ -129,14 +142,89 @@ export const dashboardMockApi = {
     });
   },
 
-  getFunnel(): Promise<DashboardFunnelResponse> {
+  getFunnel({ period }: DashboardPeriodQuery): Promise<DashboardFunnelResponse> {
+    const { current } = periodRanges(period);
+    const cohort = mockLeads.filter((lead) => isWithin(lead.prospectedAt, current));
+
     return respond({
       // Without stage history, "reached" is approximated by the current stage; lost and
       // no-response leads are left out because their last stage is unknown.
       funnel: funnelStages.map((stage, index) => ({
         stage,
-        reachedCount: mockLeads.filter((lead) => funnelStages.indexOf(lead.stage) >= index).length,
+        reachedCount: cohort.filter((lead) => funnelStages.indexOf(lead.stage) >= index).length,
       })),
+    });
+  },
+
+  getProspecting({ period }: DashboardPeriodQuery): Promise<DashboardProspectingResponse> {
+    const now = new Date();
+    const firstProspectedAt = min(mockLeads.map((lead) => new Date(lead.prospectedAt)));
+    const start = periodRanges(period).current?.start ?? startOfMonth(firstProspectedAt);
+    const granularity = prospectingGranularityFor(period);
+    const buckets = {
+      day: () => eachDayOfInterval({ start, end: now }),
+      week: () => eachWeekOfInterval({ start, end: now }, { weekStartsOn: 1 }),
+      month: () => eachMonthOfInterval({ start, end: now }),
+    }[granularity]();
+    const bucketEnd = {
+      day: endOfDay,
+      week: (date: Date) => endOfWeek(date, { weekStartsOn: 1 }),
+      month: endOfMonth,
+    }[granularity];
+
+    return respond({
+      granularity,
+      points: buckets.map((rawBucketStart) => {
+        const bucketStart = max([rawBucketStart, start]);
+        const cohort = mockLeads.filter((lead) =>
+          isWithin(lead.prospectedAt, {
+            start: bucketStart,
+            end: min([bucketEnd(rawBucketStart), now]),
+          })
+        );
+        return {
+          bucketStart: bucketStart.toISOString(),
+          prospectedCount: cohort.length,
+          wonCount: cohort.filter((lead) => lead.stage === "won").length,
+        };
+      }),
+    });
+  },
+
+  getConversionByNiche({
+    period,
+  }: DashboardPeriodQuery): Promise<DashboardConversionByNicheResponse> {
+    const { current } = periodRanges(period);
+    const byNiche = new Map<string, NicheConversion>();
+
+    for (const lead of mockLeads.filter((item) => isWithin(item.prospectedAt, current))) {
+      const entry = byNiche.get(lead.niche) ?? {
+        niche: lead.niche,
+        prospectedCount: 0,
+        wonCount: 0,
+      };
+      byNiche.set(lead.niche, {
+        ...entry,
+        prospectedCount: entry.prospectedCount + 1,
+        wonCount: entry.wonCount + (lead.stage === "won" ? 1 : 0),
+      });
+    }
+
+    const conversionOf = (item: NicheConversion) => item.wonCount / item.prospectedCount;
+    const ranked = [...byNiche.values()].sort(
+      (a, b) => conversionOf(b) - conversionOf(a) || b.prospectedCount - a.prospectedCount
+    );
+    const rest = ranked.slice(TOP_NICHES);
+
+    return respond({
+      niches: ranked.slice(0, TOP_NICHES),
+      others:
+        rest.length === 0
+          ? null
+          : {
+              prospectedCount: sumBy(rest, (item) => item.prospectedCount),
+              wonCount: sumBy(rest, (item) => item.wonCount),
+            },
     });
   },
 
