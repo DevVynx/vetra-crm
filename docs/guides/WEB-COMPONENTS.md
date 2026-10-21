@@ -42,6 +42,23 @@ default padding overridden by a prop) correctly.
   `LeadForm`, `LeadsTable`). Don't move a feature component into `shared/` until a
   second feature actually needs it.
 
+## Where a constant lives
+
+A constant goes to `features/<name>/constants/` only when at least one of these is true:
+
+- **It's used by more than one file** (e.g. stage labels read by a badge, a chart, and a
+  mock).
+- **It's domain vocabulary, not a detail of one screen** (e.g. "the `won` stage is called
+  _Fechado_"), which other screens will need too.
+
+Otherwise it stays at the top of the component that uses it: a chart config, the
+definitions of a KPI row, a default value only one page reads, a small helper like
+`greetingFor`. Moving those out only makes the reader open two files to understand
+one component.
+
+The same "second consumer" rule as components applies: a feature constant moves to
+`shared/` only when another feature actually needs it.
+
 ## Forms
 
 Every form uses `react-hook-form`, with the schema colocated in the same file as the
