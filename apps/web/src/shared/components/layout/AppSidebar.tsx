@@ -11,7 +11,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
 } from "@/shared/components/ui/sidebar";
 
 import { footerNavigation, mainNavigation, type NavigationItem } from "./navigation";
@@ -77,8 +76,6 @@ export function AppSidebar() {
       <SidebarFooter>
         <NavigationMenu items={footerNavigation} />
       </SidebarFooter>
-
-      <SidebarRail />
     </Sidebar>
   );
 }
