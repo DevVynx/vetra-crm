@@ -98,10 +98,10 @@ Only add them manually when deliberately overriding this default on a specific e
 
 ### 2.6 Specific Tokens
 
-| Token                          | Usage                    | Rule                                         |
-| ------------------------------ | ------------------------ | -------------------------------------------- |
-| `sidebar-*`                    | Sidebar exclusive colors | Separate to avoid conflict with main content |
-| `chart-*` (chart-1 to chart-5) | Reserved chart colors    | Dashboards, analytics, admin charts          |
+| Token                          | Usage                    | Rule                                                             |
+| ------------------------------ | ------------------------ | ---------------------------------------------------------------- |
+| `sidebar-*`                    | Sidebar exclusive colors | Separate to avoid conflict with main content                     |
+| `chart-*` (chart-1 to chart-6) | Categorical data colors  | Charts and KPI icons/labels on the Painel; one distinct hue each |
 
 `sidebar-*` mirrors the main token structure, just scoped to the sidebar component so it never fights with the page's own theme:
 
@@ -112,6 +112,27 @@ Only add them manually when deliberately overriding this default on a specific e
 | `bg-sidebar-accent` / `text-sidebar-accent-foreground`   | `accent` / `accent-foreground`   | Hover state on nav items                           |
 | `border-sidebar-border`                                  | `border`                         | Divider inside the sidebar (e.g. between sections) |
 | `ring-sidebar-ring`                                      | `ring`                           | Focus ring on interactive sidebar elements         |
+
+### 2.7 Status and Funnel Stages
+
+The neutral palette alone makes dense screens hard to scan, so Vetra adds a small set of
+colored tokens. They are **accents**: use them for text, icons, dots, thin borders, or a
+tinted background at low opacity (`bg-success/10`), never for large surfaces.
+
+| Token                              | Usage                                                   | Example                                 |
+| ---------------------------------- | ------------------------------------------------------- | --------------------------------------- |
+| `text-success` / `bg-success`      | Positive outcome or money that came in                  | "Recebido", "Tudo em dia"               |
+| `text-warning` / `bg-warning`      | Needs attention soon, not yet a problem                 | "A receber", due today                  |
+| `text-info` / `bg-info`            | Neutral highlight that should still stand out           | Recurring revenue, informational badges |
+| `bg-info` + `text-info-foreground` | The single colored button for a secondary creation flow | "Novo projeto" on the Painel            |
+| `stage-*`                          | One color per funnel stage, same everywhere             | Stage badges, Kanban columns, funnel    |
+
+Stage tokens: `stage-prospected`, `stage-demo_published`, `stage-approach_sent`,
+`stage-conversing`, `stage-meeting`, `stage-proposal_sent`, `stage-won`, `stage-lost`,
+`stage-no_response`. The names match the `LeadStage` values on purpose, so a stage resolves to its color
+with `leadStageColor(stage)` (the web's lead stage constants) instead of a per-stage map.
+
+Overdue / error states keep using `destructive` (section 2.3).
 
 ---
 
@@ -149,7 +170,9 @@ Which color to use?
 
 6. Is it something specific?
    ├── Sidebar? → sidebar-*
-   ├── Chart? → chart-*
+   ├── Chart or KPI accent? → chart-*
+   ├── A lead's funnel stage? → stage-*
+   ├── Positive / attention / informational status? → success / warning / info
    └── Otherwise → rethink the design
 ```
 
@@ -167,7 +190,7 @@ Which color to use?
 
 5. **Card vs Popover** — `card` is for persistent containers on the page; `popover` is for temporary elements that overlay content.
 
-6. **Green accent for promotions** — To highlight promotional values (discounts, free shipping, sale prices), use `text-green-600` / `bg-green-500` as a spot color. This is one of the few cases where a Tailwind utility color is acceptable, as long as it is used **only** for the promotional element itself, not for containers or broad backgrounds.
+6. **Colored accents only through tokens** — Never reach for Tailwind palette utilities (`text-green-600`, `bg-amber-50`); use `success`, `warning`, `info`, `stage-*`, or `chart-*` (section 2.7), and keep them on the element that carries the meaning, not on containers or broad backgrounds.
 
 ---
 
@@ -220,8 +243,8 @@ Which color to use?
 // ❌ Bad - flashy background for a supporting block
 <div className="bg-amber-50 p-3">...</div>
 
-// ✅ Good - neutral background with highlight only on the promotional element
+// ✅ Good - neutral background with the accent token only on the meaningful element
 <div className="bg-muted p-3">
-  <span className="text-green-600 font-bold">$50.00</span> to free shipping
+  <span className="text-success font-bold">R$ 900</span> recebido hoje
 </div>
 ```
