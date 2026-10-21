@@ -16,10 +16,14 @@ Planned capabilities, roughly in order:
 
 - **Lead management** — register, organize, and follow leads through the commercial
   pipeline (stages, interactions timeline, next action / follow-up).
-- **"Hoje" (today) view** — overdue and due follow-ups; the screen that drives the
-  daily routine.
-- **Dashboard** — pipeline overview and prospecting performance. Comes last, once
-  there's real data to show.
+- **Painel** (home, route `/`) — one page that merges the "today" view and the
+  dashboard: money KPIs, a sales funnel chart, the actions of the day (overdue and
+  due follow-ups), conversations awaiting a reply and leads without a next action.
+- **Minimal post-sale record** on won leads — closed value, installments (due date,
+  paid or not), monthly recurring fee and project status (in production / delivered),
+  so the Painel money KPIs are real. The full Projetos tab (with Linear) is later.
+- **Analysis metrics page** (response rate, approach performance) — after the first
+  version.
 - **Integration with the prospecting pipeline** — see "Relationship with the
   prospecting pipeline" below.
 - **WhatsApp (WAHA)** — part of the first version, with its own "WhatsApp" tab: an
@@ -70,18 +74,21 @@ builds and deploys a branded demo site, and writes the WhatsApp approach message
 
 ## Decisions log
 
-| Date       | Decision                                                                                                | Rationale                                                                                                                                                                           |
-| ---------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-10-19 | No login / authentication.                                                                              | Local, single-person use. Removed from every layer in `VET-1`.                                                                                                                      |
-| 2026-10-19 | API listens on `127.0.0.1` only; CORS allows only the web app's origin.                                 | Without authentication, network isolation is what protects the data.                                                                                                                |
-| 2026-10-19 | Keep PostgreSQL (Docker).                                                                               | Already configured; Docker is needed anyway for WAHA. Switching to SQLite would be rework with no real gain.                                                                        |
-| 2026-10-19 | UI in Portuguese, hardcoded, no i18n.                                                                   | Personal tool; i18n would be YAGNI. Backend stays language-neutral (stable error codes).                                                                                            |
-| 2026-10-19 | Vetra may later be distributed to other people, but always **run locally**, never hosted.               | Not acted on yet. Keep data access isolated in repositories; packaging/installation for third parties is decided when that scenario is real.                                        |
-| 2026-10-19 | Single `Lead` entity in the first version (no separate Opportunity).                                    | Selling more than one project to the same client is rare. Can be split later.                                                                                                       |
-| 2026-10-19 | Vetra owns lead state; the prospecting pipeline owns files; linked by `slug`.                           | Avoids duplicating the pipeline's agentic work and its large template library.                                                                                                      |
-| 2026-10-19 | WhatsApp: manual sending first; WAHA later, mainly for receiving.                                       | WAHA uses unofficial WhatsApp Web — automated cold outreach risks a number ban.                                                                                                     |
-| 2026-10-20 | WhatsApp via WAHA moves into the first version, with its own nav tab; first cold approach stays manual. | Seen as a differentiator worth having from the start. Receiving/replying is low-risk; automated cold outreach would still risk a number ban. Supersedes the 2026-10-19 entry above. |
-| 2026-10-19 | Build order: app shell → Leads screens with mock data typed by contracts → backend → dashboard.         | See the product before building the logic; the dashboard needs real data.                                                                                                           |
+| Date       | Decision                                                                                                      | Rationale                                                                                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-19 | No login / authentication.                                                                                    | Local, single-person use. Removed from every layer in `VET-1`.                                                                                                                      |
+| 2026-10-19 | API listens on `127.0.0.1` only; CORS allows only the web app's origin.                                       | Without authentication, network isolation is what protects the data.                                                                                                                |
+| 2026-10-19 | Keep PostgreSQL (Docker).                                                                                     | Already configured; Docker is needed anyway for WAHA. Switching to SQLite would be rework with no real gain.                                                                        |
+| 2026-10-19 | UI in Portuguese, hardcoded, no i18n.                                                                         | Personal tool; i18n would be YAGNI. Backend stays language-neutral (stable error codes).                                                                                            |
+| 2026-10-19 | Vetra may later be distributed to other people, but always **run locally**, never hosted.                     | Not acted on yet. Keep data access isolated in repositories; packaging/installation for third parties is decided when that scenario is real.                                        |
+| 2026-10-19 | Single `Lead` entity in the first version (no separate Opportunity).                                          | Selling more than one project to the same client is rare. Can be split later.                                                                                                       |
+| 2026-10-19 | Vetra owns lead state; the prospecting pipeline owns files; linked by `slug`.                                 | Avoids duplicating the pipeline's agentic work and its large template library.                                                                                                      |
+| 2026-10-19 | WhatsApp: manual sending first; WAHA later, mainly for receiving.                                             | WAHA uses unofficial WhatsApp Web — automated cold outreach risks a number ban.                                                                                                     |
+| 2026-10-20 | WhatsApp via WAHA moves into the first version, with its own nav tab; first cold approach stays manual.       | Seen as a differentiator worth having from the start. Receiving/replying is low-risk; automated cold outreach would still risk a number ban. Supersedes the 2026-10-19 entry above. |
+| 2026-10-20 | "Hoje" and Dashboard merged into a single home page, **Painel** (`/`). No Dashboard tab in the first version. | One screen answers "how is the funnel" and "what do I do now". Deeper analysis metrics get their own page later.                                                                    |
+| 2026-10-20 | Painel KPIs: Vendido, Recebido, A receber, Recorrente, Projetos ativos, Em negociação. No pipeline-value KPI. | Shows money that already happened plus live negotiations. An estimated lead value is a guess, so leads only store the **closed value**.                                             |
+| 2026-10-20 | Won leads get a minimal post-sale record in the first version (installments, monthly fee, project status).    | Makes Recebido / A receber / Recorrente / Projetos ativos real instead of mocked. The full Projetos tab and Linear integration stay later.                                          |
+| 2026-10-19 | Build order: app shell → Leads screens with mock data typed by contracts → backend → dashboard.               | See the product before building the logic; the dashboard needs real data.                                                                                                           |
 
 ## Important notes
 
