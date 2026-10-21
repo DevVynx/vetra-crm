@@ -20,5 +20,6 @@ export const leadSummarySchema = z.object({
   niche: z.string(),
   city: z.string(),
   stage: leadStageSchema,
+  prospectedAt: z.iso.datetime(),
 });
 export type LeadSummary = z.infer<typeof leadSummarySchema>;

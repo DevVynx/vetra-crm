@@ -39,7 +39,8 @@ export type DashboardSummaryResponse = z.infer<typeof dashboardSummaryResponseSc
 
 export const funnelStepSchema = z.object({
   stage: leadStageSchema,
-  // Leads that reached this stage at some point, not the ones currently in it.
+  // Cohort count: leads prospected in the period that reached this stage at some point,
+  // not the ones currently in it.
   reachedCount: countSchema,
 });
 export type FunnelStep = z.infer<typeof funnelStepSchema>;
@@ -63,3 +64,37 @@ export const dashboardRevenueResponseSchema = z.object({
   points: z.array(revenuePointSchema),
 });
 export type DashboardRevenueResponse = z.infer<typeof dashboardRevenueResponseSchema>;
+
+export const prospectingGranularitySchema = z.enum(["day", "week", "month"]);
+export type ProspectingGranularity = z.infer<typeof prospectingGranularitySchema>;
+
+export const prospectingPointSchema = z.object({
+  bucketStart: z.iso.datetime(),
+  prospectedCount: countSchema,
+  // Of the leads prospected in this bucket, the ones that ended up closed (same cohort logic
+  // as the funnel), so it never exceeds prospectedCount.
+  wonCount: countSchema,
+});
+export type ProspectingPoint = z.infer<typeof prospectingPointSchema>;
+
+export const dashboardProspectingResponseSchema = z.object({
+  granularity: prospectingGranularitySchema,
+  points: z.array(prospectingPointSchema),
+});
+export type DashboardProspectingResponse = z.infer<typeof dashboardProspectingResponseSchema>;
+
+export const nicheConversionSchema = z.object({
+  niche: z.string(),
+  prospectedCount: countSchema,
+  wonCount: countSchema,
+});
+export type NicheConversion = z.infer<typeof nicheConversionSchema>;
+
+export const dashboardConversionByNicheResponseSchema = z.object({
+  niches: z.array(nicheConversionSchema),
+  // Niches beyond the best-converting ones, folded together so the chart keeps a fixed size.
+  others: nicheConversionSchema.omit({ niche: true }).nullable(),
+});
+export type DashboardConversionByNicheResponse = z.infer<
+  typeof dashboardConversionByNicheResponseSchema
+>;
