@@ -43,7 +43,7 @@ Schemas Zod + tipos para o que a página consome — apenas os campos necessári
    - **A receber**, **Recorrente** (valor "/mês"), **Projetos ativos** e **Em negociação** — mostram o estado atual, não mudam com o período e ficam sem variação por enquanto
 3. **Abas** logo abaixo dos indicadores, que trocam a área de baixo sem rolar a página. A aba **Operação** abre por padrão e mostra quantas pendências existem (ações atrasadas e de hoje + conversas esperando), para que o urgente nunca fique escondido:
    - **Operação** — Ações do dia, Conversas esperando você e Sem próxima ação
-   - **Desempenho** — gráfico de área **Recebido × Vendido** (acumulado no período, segue o seletor; um ponto por dia em semana/mês e por mês nos demais) e o **Funil de vendas**
+   - **Desempenho** — Recebido × Vendido, Funil de vendas, Prospecção e Conversão por nicho
 
 ### Aba Operação
 
@@ -56,8 +56,12 @@ Schemas Zod + tipos para o que a página consome — apenas os campos necessári
 
 ### Aba Desempenho
 
-- **Recebido × Vendido** — gráfico de área (componente `chart`, Recharts) com as duas séries juntas; o espaço entre elas é o que ainda vai entrar
-- **Funil de vendas** — gráfico de funil com quantos leads alcançaram cada etapa, de Prospectado a Fechado, e a conversão entre etapas
+Duas linhas de gráficos; em cada linha os cards têm a mesma altura (o menor estica até o maior).
+
+- **Recebido × Vendido** — gráfico de área (componente `chart`, Recharts) com as duas séries juntas, acumuladas no período; o espaço entre elas é o que ainda vai entrar. Rótulos do eixo com espaçamento fixo conforme a largura; meses só com a sigla (o ano aparece no balão)
+- **Funil de vendas** — segue o período **por safra**: dos leads prospectados no período, quantos alcançaram cada etapa, e a conversão entre etapas. Etapas exibidas serão configuráveis depois (Configurações)
+- **Prospecção** — barras agrupadas de leads prospectados × fechados por dia (semana), semana (mês) ou mês (demais períodos); fechados = leads daquela safra que viraram clientes
+- **Conversão por nicho** — barras horizontais com a % de leads prospectados no período que fecharam, nos 11 nichos com maior conversão (desempate: mais leads) + "Outros" com os de menor conversão; até 6 linhas numa coluna, acima disso divide em duas colunas; o balão mostra "N de M"
 
 ### Geral
 
