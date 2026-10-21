@@ -1,17 +1,16 @@
-import { CalendarCheckIcon, LayoutDashboardIcon, SettingsIcon, UsersIcon } from "lucide-react";
+import { LayoutDashboardIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import type { ComponentType } from "react";
 
 import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
 
 export type NavigationItem = {
   title: string;
-  to: "/" | "/leads" | "/whatsapp" | "/dashboard" | "/configuracoes";
+  to: "/" | "/leads" | "/whatsapp" | "/configuracoes";
   icon: ComponentType<{ className?: string }>;
 };
 
 export const mainNavigation: NavigationItem[] = [
-  { title: "Hoje", to: "/", icon: CalendarCheckIcon },
-  { title: "Dashboard", to: "/dashboard", icon: LayoutDashboardIcon },
+  { title: "Painel", to: "/", icon: LayoutDashboardIcon },
   { title: "Leads", to: "/leads", icon: UsersIcon },
   { title: "WhatsApp", to: "/whatsapp", icon: WhatsAppIcon },
 ];

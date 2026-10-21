@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PagePlaceholder } from "@/shared/components/layout/PagePlaceholder";
+import { DashboardPage } from "@/features/dashboard/components/DashboardPage";
 
 export const Route = createFileRoute("/_app/")({
-  staticData: { title: "Hoje" },
-  component: () => (
-    <PagePlaceholder description="Seus follow-ups e próximas ações aparecerão aqui." />
-  ),
+  staticData: { title: "Painel" },
+  component: DashboardPage,
 });

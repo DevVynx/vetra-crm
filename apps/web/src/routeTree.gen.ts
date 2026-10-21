@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
-import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppLeadsRouteImport } from './routes/_app/leads'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
 
@@ -30,11 +29,6 @@ const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => AppRoute,
 } as any)
-const AppDashboardRoute = AppDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppLeadsRoute = AppLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -49,13 +43,11 @@ const AppWhatsappRoute = AppWhatsappRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/configuracoes': typeof AppConfiguracoesRoute
-  '/dashboard': typeof AppDashboardRoute
   '/leads': typeof AppLeadsRoute
   '/whatsapp': typeof AppWhatsappRoute
 }
 export interface FileRoutesByTo {
   '/configuracoes': typeof AppConfiguracoesRoute
-  '/dashboard': typeof AppDashboardRoute
   '/leads': typeof AppLeadsRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/': typeof AppIndexRoute
@@ -64,21 +56,19 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/_app/configuracoes': typeof AppConfiguracoesRoute
-  '/_app/dashboard': typeof AppDashboardRoute
   '/_app/leads': typeof AppLeadsRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
   '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/configuracoes' | '/dashboard' | '/leads' | '/whatsapp'
+  fullPaths: '/' | '/configuracoes' | '/leads' | '/whatsapp'
   fileRoutesByTo: FileRoutesByTo
-  to: '/configuracoes' | '/dashboard' | '/leads' | '/whatsapp' | '/'
+  to: '/configuracoes' | '/leads' | '/whatsapp' | '/'
   id:
     | '__root__'
     | '/_app'
     | '/_app/configuracoes'
-    | '/_app/dashboard'
     | '/_app/leads'
     | '/_app/whatsapp'
     | '/_app/'
@@ -111,13 +101,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppConfiguracoesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/dashboard': {
-      id: '/_app/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AppDashboardRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/leads': {
       id: '/_app/leads'
       path: '/leads'
@@ -137,7 +120,6 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
-  AppDashboardRoute: typeof AppDashboardRoute
   AppLeadsRoute: typeof AppLeadsRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -145,7 +127,6 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppConfiguracoesRoute: AppConfiguracoesRoute,
-  AppDashboardRoute: AppDashboardRoute,
   AppLeadsRoute: AppLeadsRoute,
   AppWhatsappRoute: AppWhatsappRoute,
   AppIndexRoute: AppIndexRoute,
