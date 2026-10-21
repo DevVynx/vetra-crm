@@ -7,7 +7,6 @@ import { cn } from "@/shared/utils/cn";
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
 
-const INITIAL_DIMENSION = { width: 320, height: 200 } as const;
 type TooltipNameType = number | string;
 
 export type ChartConfig = Record<
@@ -37,20 +36,50 @@ function useChart() {
   return context;
 }
 
+type ChartSize = { width: number; height: number };
+type SizedChart = React.ReactElement<Partial<ChartSize>>;
+
+// Replaces Recharts' ResponsiveContainer: the measured size feeds the chart through a
+// deferred value, so while a layout animation (e.g. the sidebar collapsing) keeps changing
+// the size, React renders the chart in low-priority slices instead of blocking every frame.
+function SizedChartFrame({ children }: { children: SizedChart }) {
+  const [element, setElement] = React.useState<HTMLDivElement | null>(null);
+  const [size, setSize] = React.useState<ChartSize>({ width: 0, height: 0 });
+  const deferredSize = React.useDeferredValue(size);
+
+  React.useEffect(() => {
+    if (!element) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) setSize({ width: entry.contentRect.width, height: entry.contentRect.height });
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [element]);
+
+  const chart = React.useMemo(
+    () =>
+      deferredSize.width > 0 && deferredSize.height > 0
+        ? React.cloneElement(children, deferredSize)
+        : null,
+    [children, deferredSize]
+  );
+
+  return (
+    <div ref={setElement} style={{ width: "100%", height: "100%" }}>
+      <div style={{ width: 0, height: 0, overflow: "visible" }}>{chart}</div>
+    </div>
+  );
+}
+
 function ChartContainer({
   id,
   className,
   children,
   config,
-  initialDimension = INITIAL_DIMENSION,
   ...props
 }: React.ComponentProps<"div"> & {
   config: ChartConfig;
-  children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
-  initialDimension?: {
-    width: number;
-    height: number;
-  };
+  children: SizedChart;
 }) {
   const uniqueId = React.useId();
   const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`;
@@ -67,9 +96,7 @@ function ChartContainer({
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer initialDimension={initialDimension}>
-          {children}
-        </RechartsPrimitive.ResponsiveContainer>
+        <SizedChartFrame>{children}</SizedChartFrame>
       </div>
     </ChartContext.Provider>
   );
