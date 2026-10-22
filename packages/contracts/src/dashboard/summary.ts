@@ -48,7 +48,7 @@ export type FunnelStep = z.infer<typeof funnelStepSchema>;
 export const dashboardFunnelResponseSchema = z.object({ funnel: z.array(funnelStepSchema) });
 export type DashboardFunnelResponse = z.infer<typeof dashboardFunnelResponseSchema>;
 
-export const revenueGranularitySchema = z.enum(["day", "month"]);
+export const revenueGranularitySchema = z.enum(["day", "month", "year"]);
 export type RevenueGranularity = z.infer<typeof revenueGranularitySchema>;
 
 export const revenuePointSchema = z.object({
@@ -65,7 +65,7 @@ export const dashboardRevenueResponseSchema = z.object({
 });
 export type DashboardRevenueResponse = z.infer<typeof dashboardRevenueResponseSchema>;
 
-export const prospectingGranularitySchema = z.enum(["day", "week", "month"]);
+export const prospectingGranularitySchema = z.enum(["day", "week", "month", "year"]);
 export type ProspectingGranularity = z.infer<typeof prospectingGranularitySchema>;
 
 export const prospectingPointSchema = z.object({

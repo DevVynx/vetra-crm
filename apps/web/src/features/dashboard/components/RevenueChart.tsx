@@ -16,6 +16,7 @@ import { useElementWidth } from "@/shared/hooks/useElementWidth";
 import { formatCompactCurrency, formatCurrency } from "@/shared/utils/format";
 
 import { useDashboardRevenue } from "../queries/useDashboardRevenue";
+import { evenlySpacedTicks, withYearOnLongMonthlyAxis } from "../utils/chartTicks";
 import { DashboardSection } from "./DashboardSection";
 import { SectionSkeleton } from "./SectionSkeleton";
 import { TooltipRow } from "./TooltipRow";
@@ -30,22 +31,14 @@ const series = ["soldInCents", "receivedInCents"] as const;
 const Y_AXIS_WIDTH = 64;
 const CHART_MARGIN = { left: 4, right: 24, top: 8 };
 
-// minTickSpacing is roughly the widest label plus breathing room, in pixels.
 const bucketFormats: Record<
   RevenueGranularity,
   { tick: string; tooltip: string; minTickSpacing: number }
 > = {
   day: { tick: "d MMM", tooltip: "EEEE, d 'de' MMMM", minTickSpacing: 56 },
   month: { tick: "MMM", tooltip: "MMMM 'de' yyyy", minTickSpacing: 40 },
+  year: { tick: "yyyy", tooltip: "yyyy", minTickSpacing: 48 },
 };
-
-// Recharts' own tick thinning skips labels unevenly; a fixed step keeps the gaps equal.
-function evenlySpacedTicks(buckets: string[], plotWidth: number, minSpacing: number) {
-  if (plotWidth <= 0) return buckets;
-  const maxTicks = Math.max(2, Math.floor(plotWidth / minSpacing));
-  const step = Math.ceil(buckets.length / maxTicks);
-  return buckets.filter((_, index) => index % step === 0);
-}
 
 const formatBucket = (iso: unknown, pattern: string) =>
   typeof iso === "string" ? format(new Date(iso), pattern, { locale: ptBR }) : "";
@@ -67,7 +60,11 @@ export function RevenueChart({ period }: { period: DashboardPeriod }) {
     );
   }
 
-  const formats = bucketFormats[data.granularity];
+  const formats = withYearOnLongMonthlyAxis(
+    bucketFormats[data.granularity],
+    data.granularity,
+    data.points.length
+  );
   const plotWidth = chartWidth - Y_AXIS_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
   const ticks = evenlySpacedTicks(
     data.points.map((point) => point.bucketStart),

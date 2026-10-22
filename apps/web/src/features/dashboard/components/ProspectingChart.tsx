@@ -12,8 +12,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/shared/components/ui/chart";
+import { useElementWidth } from "@/shared/hooks/useElementWidth";
 
 import { useDashboardProspecting } from "../queries/useDashboardProspecting";
+import { evenlySpacedTicks, withYearOnLongMonthlyAxis } from "../utils/chartTicks";
 import { DashboardSection } from "./DashboardSection";
 import { SectionSkeleton } from "./SectionSkeleton";
 import { TooltipRow } from "./TooltipRow";
@@ -23,10 +25,17 @@ const chartConfig = {
   wonCount: { label: "Fechados", color: "var(--chart-2)" },
 } satisfies ChartConfig;
 
-const bucketFormats: Record<ProspectingGranularity, { tick: string; tooltip: string }> = {
-  day: { tick: "EEE", tooltip: "EEEE, d 'de' MMMM" },
-  week: { tick: "d MMM", tooltip: "'Semana de' d 'de' MMMM" },
-  month: { tick: "MMM", tooltip: "MMMM 'de' yyyy" },
+const Y_AXIS_WIDTH = 32;
+const CHART_MARGIN = { left: 4, right: 8, top: 8 };
+
+const bucketFormats: Record<
+  ProspectingGranularity,
+  { tick: string; tooltip: string; minTickSpacing: number }
+> = {
+  day: { tick: "EEE", tooltip: "EEEE, d 'de' MMMM", minTickSpacing: 40 },
+  week: { tick: "d MMM", tooltip: "'Semana de' d 'de' MMMM", minTickSpacing: 56 },
+  month: { tick: "MMM", tooltip: "MMMM 'de' yyyy", minTickSpacing: 40 },
+  year: { tick: "yyyy", tooltip: "yyyy", minTickSpacing: 48 },
 };
 
 const formatBucket = (iso: unknown, pattern: string) =>
@@ -34,6 +43,7 @@ const formatBucket = (iso: unknown, pattern: string) =>
 
 export function ProspectingChart({ period }: { period: DashboardPeriod }) {
   const { data, isPending } = useDashboardProspecting(period);
+  const { ref: chartRef, width: chartWidth } = useElementWidth<HTMLDivElement>();
   const sectionProps = {
     title: "Prospecção",
     icon: TargetIcon,
@@ -48,22 +58,37 @@ export function ProspectingChart({ period }: { period: DashboardPeriod }) {
     );
   }
 
-  const formats = bucketFormats[data.granularity];
+  const formats = withYearOnLongMonthlyAxis(
+    bucketFormats[data.granularity],
+    data.granularity,
+    data.points.length
+  );
+  const plotWidth = chartWidth - Y_AXIS_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
+  const ticks = evenlySpacedTicks(
+    data.points.map((point) => point.bucketStart),
+    plotWidth,
+    formats.minTickSpacing
+  );
 
   return (
     <DashboardSection {...sectionProps}>
-      <ChartContainer config={chartConfig} className="aspect-auto min-h-60 w-full flex-1">
-        <BarChart data={data.points} margin={{ left: 4, right: 8, top: 8 }} maxBarSize={20}>
+      <ChartContainer
+        ref={chartRef}
+        config={chartConfig}
+        className="aspect-auto min-h-60 w-full flex-1"
+      >
+        <BarChart data={data.points} margin={CHART_MARGIN} maxBarSize={20}>
           <CartesianGrid vertical={false} />
           <XAxis
             dataKey="bucketStart"
             tickLine={false}
             axisLine={false}
             tickMargin={8}
+            ticks={ticks}
             interval={0}
             tickFormatter={(value) => formatBucket(value, formats.tick)}
           />
-          <YAxis tickLine={false} axisLine={false} width={32} allowDecimals={false} />
+          <YAxis tickLine={false} axisLine={false} width={Y_AXIS_WIDTH} allowDecimals={false} />
           <ChartTooltip
             cursor={{ fill: "var(--muted)", opacity: 0.5 }}
             content={

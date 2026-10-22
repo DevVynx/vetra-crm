@@ -20,15 +20,19 @@ import type {
   RevenueGranularity,
 } from "@vetra/contracts";
 import {
+  differenceInMonths,
   eachDayOfInterval,
   eachMonthOfInterval,
   eachWeekOfInterval,
+  eachYearOfInterval,
   endOfDay,
   endOfMonth,
   endOfWeek,
+  endOfYear,
   max,
   min,
   startOfMonth,
+  startOfYear,
 } from "date-fns";
 
 import { funnelStages } from "../constants/leadStages";
@@ -45,6 +49,7 @@ import {
 
 const MOCK_LATENCY_IN_MS = 250;
 const TOP_NICHES = 11;
+const MAX_MONTHLY_SPAN_IN_MONTHS = 24;
 
 const negotiatingStages = new Set<LeadStage>(["conversing", "meeting", "proposal_sent"]);
 
@@ -71,8 +76,26 @@ const receivedIn = (range: DateRange | null) =>
 const soldIn = (range: DateRange | null) =>
   sumBy(salesIn(range), (deal) => deal.closedValueInCents);
 
-const prospectingGranularityFor = (period: DashboardPeriod): ProspectingGranularity =>
-  period === "week" ? "day" : period === "month" ? "week" : "month";
+// "All time" switches to yearly buckets once monthly ones would no longer fit in a chart.
+const hasLongHistory = (period: DashboardPeriod, firstDate: Date) =>
+  period === "all_time" && differenceInMonths(new Date(), firstDate) > MAX_MONTHLY_SPAN_IN_MONTHS;
+
+const revenueGranularityFor = (period: DashboardPeriod, firstSaleAt: Date): RevenueGranularity => {
+  if (period === "week" || period === "month") return "day";
+  return hasLongHistory(period, firstSaleAt) ? "year" : "month";
+};
+
+const prospectingGranularityFor = (
+  period: DashboardPeriod,
+  firstProspectedAt: Date
+): ProspectingGranularity => {
+  if (period === "week") return "day";
+  if (period === "month") return "week";
+  return hasLongHistory(period, firstProspectedAt) ? "year" : "month";
+};
+
+const allTimeStart = (granularity: RevenueGranularity | ProspectingGranularity, first: Date) =>
+  granularity === "year" ? startOfYear(first) : startOfMonth(first);
 
 const isActive = (lead: LeadSummary) => lead.stage !== "won" && lead.stage !== "lost";
 
@@ -119,14 +142,14 @@ export const dashboardMockApi = {
   getRevenue({ period }: DashboardPeriodQuery): Promise<DashboardRevenueResponse> {
     const now = new Date();
     const firstSaleAt = min(wonDeals.map((deal) => new Date(deal.closedAt)));
-    const start = periodRanges(period).current?.start ?? startOfMonth(firstSaleAt);
-    const granularity: RevenueGranularity =
-      period === "week" || period === "month" ? "day" : "month";
-    const buckets =
-      granularity === "day"
-        ? eachDayOfInterval({ start, end: now })
-        : eachMonthOfInterval({ start, end: now });
-    const bucketEnd = granularity === "day" ? endOfDay : endOfMonth;
+    const granularity = revenueGranularityFor(period, firstSaleAt);
+    const start = periodRanges(period).current?.start ?? allTimeStart(granularity, firstSaleAt);
+    const buckets = {
+      day: () => eachDayOfInterval({ start, end: now }),
+      month: () => eachMonthOfInterval({ start, end: now }),
+      year: () => eachYearOfInterval({ start, end: now }),
+    }[granularity]();
+    const bucketEnd = { day: endOfDay, month: endOfMonth, year: endOfYear }[granularity];
 
     return respond({
       granularity,
@@ -159,17 +182,20 @@ export const dashboardMockApi = {
   getProspecting({ period }: DashboardPeriodQuery): Promise<DashboardProspectingResponse> {
     const now = new Date();
     const firstProspectedAt = min(mockLeads.map((lead) => new Date(lead.prospectedAt)));
-    const start = periodRanges(period).current?.start ?? startOfMonth(firstProspectedAt);
-    const granularity = prospectingGranularityFor(period);
+    const granularity = prospectingGranularityFor(period, firstProspectedAt);
+    const start =
+      periodRanges(period).current?.start ?? allTimeStart(granularity, firstProspectedAt);
     const buckets = {
       day: () => eachDayOfInterval({ start, end: now }),
       week: () => eachWeekOfInterval({ start, end: now }, { weekStartsOn: 1 }),
       month: () => eachMonthOfInterval({ start, end: now }),
+      year: () => eachYearOfInterval({ start, end: now }),
     }[granularity]();
     const bucketEnd = {
       day: endOfDay,
       week: (date: Date) => endOfWeek(date, { weekStartsOn: 1 }),
       month: endOfMonth,
+      year: endOfYear,
     }[granularity];
 
     return respond({
