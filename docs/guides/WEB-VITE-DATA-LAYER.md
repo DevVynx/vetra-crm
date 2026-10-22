@@ -37,6 +37,21 @@ One `useX()` hook per mutation, under `features/<name>/mutations/`, wrapping
 through `useQueryUtils` (below) inside its `onSuccess`, not by importing
 `useQueryClient` directly in the mutation hook.
 
+## Shared queries and mutations
+
+A query or mutation lives in its feature (`features/<name>/queries`, `mutations`). When two or
+more features need the same data, it moves to `shared/queries/<domain>/` (query hooks and their
+`keys.ts`) or `shared/mutations/<domain>/` (mutation hooks and cache-invalidation helpers),
+never to `shared/hooks/`, which is only for generic UI hooks (`useHotkey`, `useDebouncedCallback`...).
+
+Today: `shared/queries/leads` (`useLead`, keys) and `shared/mutations/leads`
+(`useInvalidateAfterLeadChange`) are used by both `features/leads` and `features/customers`, since
+a customer is a won lead. `shared/queries/next-actions` and `shared/mutations/next-actions` serve
+the dashboard and the lead screen, through the shared `next-actions` components.
+
+Don't move something there "just in case": start in the feature and promote it when a second
+feature needs it.
+
 ## `useQueryUtils`
 
 `shared/lib/tanstack/useQueryUtils.ts` is a thin, typed wrapper over

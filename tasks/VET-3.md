@@ -62,6 +62,7 @@ Duas linhas de gráficos; em cada linha os cards têm a mesma altura (o menor es
 - **Funil de vendas** — segue o período **por safra**: dos leads prospectados no período, quantos alcançaram cada etapa, e a conversão entre etapas. Etapas exibidas serão configuráveis depois (Configurações)
 - **Prospecção** — barras agrupadas de leads prospectados × fechados por dia (semana), semana (mês) ou mês (demais períodos); fechados = leads daquela safra que viraram clientes
 - **Conversão por nicho** — barras horizontais com a % de leads prospectados no período que fecharam, nos 11 nichos com maior conversão (desempate: mais leads) + "Outros" com os de menor conversão; até 6 linhas numa coluna, acima disso divide em duas colunas; o balão mostra "N de M"
+- **Histórico longo** — só em "Todo o período": se o intervalo (do primeiro registro até hoje) passar de 24 meses, Recebido × Vendido e Prospecção passam a ter pontos **anuais** (eixo e balão só com o ano). Entre 13 e 24 meses continuam mensais, com o ano no rótulo ("mai/25"); até 12 meses, só a sigla do mês. Os rótulos do eixo sempre se adaptam à largura. O endpoint de receita e o de prospecção aplicam o mesmo corte quando o backend existir
 
 ### Geral
 
