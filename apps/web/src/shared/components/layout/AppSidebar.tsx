@@ -1,4 +1,5 @@
 import { Link, useMatchRoute } from "@tanstack/react-router";
+import { SearchIcon } from "lucide-react";
 
 import vetraIcon from "@/shared/assets/vetra-icon.svg";
 import {
@@ -36,6 +37,22 @@ function NavigationMenu({ items }: { items: NavigationItem[] }) {
   );
 }
 
+function SidebarSearch() {
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <SidebarMenuButton variant="outline" disabled aria-label="Buscar (em breve)">
+          <SearchIcon />
+          <span className="text-muted-foreground flex-1">Buscar…</span>
+          <kbd className="text-muted-foreground bg-muted rounded px-1.5 py-0.5 text-[10px] font-medium">
+            Ctrl K
+          </kbd>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  );
+}
+
 export function AppSidebar() {
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -67,7 +84,8 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="flex flex-col gap-3">
+            <SidebarSearch />
             <NavigationMenu items={mainNavigation} />
           </SidebarGroupContent>
         </SidebarGroup>

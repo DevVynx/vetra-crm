@@ -41,3 +41,18 @@ const compactCurrencyFormatter = new Intl.NumberFormat("pt-BR", {
 export function formatCompactCurrency(valueInCents: number): string {
   return compactCurrencyFormatter.format(valueInCents / 100);
 }
+
+export function formatPhone(phone: string): string {
+  const match = /^55(\d{2})(\d{4,5})(\d{4})$/.exec(phone);
+  return match ? `+55 (${match[1]}) ${match[2]}-${match[3]}` : phone;
+}
+
+export function parseCurrencyToCents(text: string): number | null {
+  const normalized = text.replace(/[^\d,]/g, "").replace(",", ".");
+  const value = Number(normalized);
+  return Number.isFinite(value) && value > 0 ? Math.round(value * 100) : null;
+}
+
+export function centsToInput(valueInCents: number): string {
+  return (valueInCents / 100).toFixed(2).replace(".", ",");
+}
