@@ -1,11 +1,13 @@
-import { Link } from "@tanstack/react-router";
 import type { DashboardPeriod } from "@vetra/contracts";
-import { BoxIcon, MessageSquarePlusIcon, UserPlusIcon } from "lucide-react";
+import { BoxIcon, UserPlusIcon } from "lucide-react";
+import { useState } from "react";
 
+import { CreateLeadSheet } from "@/features/leads/components/CreateLeadSheet";
 import { Button } from "@/shared/components/ui/button";
+import { useHotkey } from "@/shared/hooks/useHotkey";
+import { mockProfile } from "@/shared/mocks/fixtures";
 import { formatLongDate } from "@/shared/utils/date";
 
-import { mockProfile } from "../mocks/fixtures";
 import { PeriodSelect } from "./PeriodSelect";
 
 function greetingFor(hour: number): string {
@@ -21,6 +23,8 @@ type DashboardGreetingProps = {
 
 export function DashboardGreeting({ period, onPeriodChange }: DashboardGreetingProps) {
   const now = new Date();
+  const [isCreatingLead, setIsCreatingLead] = useState(false);
+  useHotkey("n", () => setIsCreatingLead(true));
 
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
@@ -34,17 +38,14 @@ export function DashboardGreeting({ period, onPeriodChange }: DashboardGreetingP
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" nativeButton={false} render={<Link to="/leads" />}>
+        <Button variant="outline" className="font-semibold" title="Novo lead (N)" onClick={() => setIsCreatingLead(true)}>
           <UserPlusIcon />
           Novo lead
         </Button>
-        <Button className="bg-info text-info-foreground hover:bg-info/85">
+        <CreateLeadSheet open={isCreatingLead} onOpenChange={setIsCreatingLead} />
+        <Button className="bg-info text-info-foreground hover:bg-info/85 font-semibold">
           <BoxIcon />
           Novo projeto
-        </Button>
-        <Button variant="outline" disabled title="Disponível no detalhe do lead">
-          <MessageSquarePlusIcon />
-          Registrar interação
         </Button>
         <PeriodSelect value={period} onChange={onPeriodChange} />
       </div>

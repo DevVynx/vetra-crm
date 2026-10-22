@@ -1,5 +1,11 @@
+import { Link } from "@tanstack/react-router";
 import { CircleAlertIcon, CircleCheckIcon } from "lucide-react";
 
+import { LeadStageBadge } from "@/shared/components/LeadStageBadge";
+import { DefineNextActionPopover } from "@/shared/components/next-actions/DefineNextActionPopover";
+import { Section } from "@/shared/components/Section";
+import { SectionEmpty } from "@/shared/components/SectionEmpty";
+import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import {
   Item,
   ItemActions,
@@ -9,18 +15,13 @@ import {
 } from "@/shared/components/ui/item";
 
 import { useLeadsWithoutNextAction } from "../queries/useLeadsWithoutNextAction";
-import { DashboardSection } from "./DashboardSection";
-import { DefineNextActionPopover } from "./DefineNextActionPopover";
-import { LeadStageBadge } from "./LeadStageBadge";
-import { SectionEmpty } from "./SectionEmpty";
-import { SectionSkeleton } from "./SectionSkeleton";
 
 export function LeadsWithoutNextAction() {
   const { data, isPending } = useLeadsWithoutNextAction();
   const leads = data?.leads ?? [];
 
   return (
-    <DashboardSection
+    <Section
       title="Sem próxima ação"
       icon={CircleAlertIcon}
       iconClassName="text-warning"
@@ -35,7 +36,15 @@ export function LeadsWithoutNextAction() {
           {leads.map((lead) => (
             <Item key={lead.id} variant="outline" size="sm">
               <ItemContent>
-                <ItemTitle>{lead.businessName}</ItemTitle>
+                <ItemTitle>
+                  <Link
+                    to="/leads/$leadId"
+                    params={{ leadId: lead.id }}
+                    className="hover:underline"
+                  >
+                    {lead.businessName}
+                  </Link>
+                </ItemTitle>
                 <ItemDescription>
                   <LeadStageBadge stage={lead.stage} /> · {lead.city}
                 </ItemDescription>
@@ -47,6 +56,6 @@ export function LeadsWithoutNextAction() {
           ))}
         </div>
       )}
-    </DashboardSection>
+    </Section>
   );
 }

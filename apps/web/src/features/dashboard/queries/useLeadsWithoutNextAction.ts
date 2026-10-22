@@ -1,6 +1,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-import { dashboardMockApi } from "../mocks/mockApi";
+import { dashboardMockApi } from "@/shared/mocks/mockApi";
+
 import { dashboardQueryKeys } from "./keys";
 
 export const leadsWithoutNextActionQueryOptions = queryOptions({

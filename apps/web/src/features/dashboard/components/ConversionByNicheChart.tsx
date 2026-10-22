@@ -2,6 +2,9 @@ import type { DashboardPeriod } from "@vetra/contracts";
 import { PercentIcon } from "lucide-react";
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts";
 
+import { Section } from "@/shared/components/Section";
+import { SectionEmpty } from "@/shared/components/SectionEmpty";
+import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import {
   type ChartConfig,
   ChartContainer,
@@ -12,9 +15,6 @@ import { cn } from "@/shared/utils/cn";
 import { formatPercent } from "@/shared/utils/format";
 
 import { useConversionByNiche } from "../queries/useConversionByNiche";
-import { DashboardSection } from "./DashboardSection";
-import { SectionEmpty } from "./SectionEmpty";
-import { SectionSkeleton } from "./SectionSkeleton";
 import { TooltipRow } from "./TooltipRow";
 
 const chartConfig = {
@@ -22,7 +22,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 const OTHERS_LABEL = "Outros";
-// Past this many rows the chart splits into two columns instead of growing taller.
 const MAX_ROWS_PER_COLUMN = 6;
 const ROW_HEIGHT = 40;
 
@@ -104,17 +103,17 @@ export function ConversionByNicheChart({ period }: { period: DashboardPeriod }) 
 
   if (isPending || !data) {
     return (
-      <DashboardSection {...sectionProps}>
+      <Section {...sectionProps}>
         <SectionSkeleton rows={4} />
-      </DashboardSection>
+      </Section>
     );
   }
 
   if (data.niches.length === 0) {
     return (
-      <DashboardSection {...sectionProps}>
+      <Section {...sectionProps}>
         <SectionEmpty icon={PercentIcon} title="Nenhum lead prospectado no período" />
-      </DashboardSection>
+      </Section>
     );
   }
 
@@ -125,18 +124,18 @@ export function ConversionByNicheChart({ period }: { period: DashboardPeriod }) 
 
   if (rows.length <= MAX_ROWS_PER_COLUMN) {
     return (
-      <DashboardSection {...sectionProps}>
+      <Section {...sectionProps}>
         <NicheBars rows={rows} fixedHeight={false} />
-      </DashboardSection>
+      </Section>
     );
   }
 
   return (
-    <DashboardSection {...sectionProps}>
+    <Section {...sectionProps}>
       <div className="grid grid-cols-2 items-start gap-x-4">
         <NicheBars rows={rows.slice(0, MAX_ROWS_PER_COLUMN)} fixedHeight />
         <NicheBars rows={rows.slice(MAX_ROWS_PER_COLUMN)} fixedHeight />
       </div>
-    </DashboardSection>
+    </Section>
   );
 }

@@ -1,13 +1,13 @@
 import type { NextAction } from "@vetra/contracts";
 import { ListTodoIcon, PartyPopperIcon } from "lucide-react";
 
+import { NextActionItem } from "@/shared/components/next-actions/NextActionItem";
+import { Section } from "@/shared/components/Section";
+import { SectionEmpty } from "@/shared/components/SectionEmpty";
+import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import { cn } from "@/shared/utils/cn";
 
 import { useGroupedNextActions } from "../queries/useGroupedNextActions";
-import { DashboardSection } from "./DashboardSection";
-import { NextActionItem } from "./NextActionItem";
-import { SectionEmpty } from "./SectionEmpty";
-import { SectionSkeleton } from "./SectionSkeleton";
 
 type ActionGroupProps = {
   label: string;
@@ -43,9 +43,9 @@ export function TodayActions() {
 
   if (isPending || !data) {
     return (
-      <DashboardSection title="Ações do dia" {...SECTION_ICON}>
+      <Section title="Ações do dia" {...SECTION_ICON}>
         <SectionSkeleton rows={4} />
-      </DashboardSection>
+      </Section>
     );
   }
 
@@ -53,7 +53,7 @@ export function TodayActions() {
   const total = overdue.length + today.length;
 
   return (
-    <DashboardSection title="Ações do dia" count={total} {...SECTION_ICON}>
+    <Section title="Ações do dia" count={total} {...SECTION_ICON}>
       {total === 0 ? (
         <SectionEmpty
           icon={PartyPopperIcon}
@@ -66,6 +66,6 @@ export function TodayActions() {
           <ActionGroup label="Hoje" actions={today} />
         </div>
       )}
-    </DashboardSection>
+    </Section>
   );
 }

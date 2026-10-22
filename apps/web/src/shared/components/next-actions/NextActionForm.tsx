@@ -1,12 +1,11 @@
 import type { NextActionInput } from "@vetra/contracts";
 import { Controller, useForm } from "react-hook-form";
 
+import { DueDatePicker } from "@/shared/components/next-actions/DueDatePicker";
 import { Button } from "@/shared/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { formatDayLabel } from "@/shared/utils/date";
-
-import { DueDatePicker } from "./DueDatePicker";
 
 type NextActionFormValues = {
   description: string;

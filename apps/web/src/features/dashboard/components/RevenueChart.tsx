@@ -4,6 +4,8 @@ import { ptBR } from "date-fns/locale";
 import { ChartAreaIcon } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
+import { Section } from "@/shared/components/Section";
+import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import {
   type ChartConfig,
   ChartContainer,
@@ -17,8 +19,6 @@ import { formatCompactCurrency, formatCurrency } from "@/shared/utils/format";
 
 import { useDashboardRevenue } from "../queries/useDashboardRevenue";
 import { evenlySpacedTicks, withYearOnLongMonthlyAxis } from "../utils/chartTicks";
-import { DashboardSection } from "./DashboardSection";
-import { SectionSkeleton } from "./SectionSkeleton";
 import { TooltipRow } from "./TooltipRow";
 
 const chartConfig = {
@@ -54,9 +54,9 @@ export function RevenueChart({ period }: { period: DashboardPeriod }) {
 
   if (isPending || !data) {
     return (
-      <DashboardSection {...sectionProps}>
+      <Section {...sectionProps}>
         <SectionSkeleton rows={4} />
-      </DashboardSection>
+      </Section>
     );
   }
 
@@ -73,7 +73,7 @@ export function RevenueChart({ period }: { period: DashboardPeriod }) {
   );
 
   return (
-    <DashboardSection {...sectionProps}>
+    <Section {...sectionProps}>
       <ChartContainer
         ref={chartRef}
         config={chartConfig}
@@ -140,6 +140,6 @@ export function RevenueChart({ period }: { period: DashboardPeriod }) {
           <ChartLegend content={<ChartLegendContent />} />
         </AreaChart>
       </ChartContainer>
-    </DashboardSection>
+    </Section>
   );
 }

@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import type { RescheduleNextActionRequest } from "@vetra/contracts";
 
-import { dashboardMockApi } from "../mocks/mockApi";
-import { useInvalidateNextActions } from "./useInvalidateNextActions";
+import { dashboardMockApi } from "@/shared/mocks/mockApi";
+import { useInvalidateNextActions } from "@/shared/mutations/next-actions/useInvalidateNextActions";
 
 type RescheduleNextActionVariables = { id: string } & RescheduleNextActionRequest;
 

@@ -2,6 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { MessageCircleIcon } from "lucide-react";
 
 import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
+import { Section } from "@/shared/components/Section";
+import { SectionEmpty } from "@/shared/components/SectionEmpty";
+import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import {
   Item,
   ItemContent,
@@ -12,16 +15,13 @@ import {
 import { formatRelative } from "@/shared/utils/date";
 
 import { useAwaitingConversations } from "../queries/useAwaitingConversations";
-import { DashboardSection } from "./DashboardSection";
-import { SectionEmpty } from "./SectionEmpty";
-import { SectionSkeleton } from "./SectionSkeleton";
 
 export function AwaitingConversations() {
   const { data, isPending } = useAwaitingConversations();
   const conversations = data?.conversations ?? [];
 
   return (
-    <DashboardSection
+    <Section
       title="Conversas esperando você"
       icon={WhatsAppIcon}
       iconClassName="text-success"
@@ -63,6 +63,6 @@ export function AwaitingConversations() {
           ))}
         </div>
       )}
-    </DashboardSection>
+    </Section>
   );
 }

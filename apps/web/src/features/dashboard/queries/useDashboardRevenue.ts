@@ -1,7 +1,8 @@
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 import type { DashboardPeriod } from "@vetra/contracts";
 
-import { dashboardMockApi } from "../mocks/mockApi";
+import { dashboardMockApi } from "@/shared/mocks/mockApi";
+
 import { dashboardQueryKeys } from "./keys";
 
 export const dashboardRevenueQueryOptions = (period: DashboardPeriod) =>

@@ -3,19 +3,19 @@ import type { DashboardPeriod, FunnelStep } from "@vetra/contracts";
 import { FunnelIcon, UsersIcon } from "lucide-react";
 import { Funnel, FunnelChart, LabelList } from "recharts";
 
+import { Section } from "@/shared/components/Section";
+import { SectionEmpty } from "@/shared/components/SectionEmpty";
+import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/shared/components/ui/chart";
+import { funnelStages, leadStageColor, leadStageLabels } from "@/shared/constants/leadStages";
 import { formatPercent } from "@/shared/utils/format";
 
-import { funnelStages, leadStageColor, leadStageLabels } from "../constants/leadStages";
 import { useDashboardFunnel } from "../queries/useDashboardFunnel";
-import { DashboardSection } from "./DashboardSection";
-import { SectionEmpty } from "./SectionEmpty";
-import { SectionSkeleton } from "./SectionSkeleton";
 
 const chartConfig: ChartConfig = Object.fromEntries(
   funnelStages.map((stage) => [
@@ -64,9 +64,9 @@ export function SalesFunnel({ period }: { period: DashboardPeriod }) {
 
   if (isPending || !data) {
     return (
-      <DashboardSection title="Funil de vendas" icon={FunnelIcon} iconClassName="text-chart-1">
+      <Section title="Funil de vendas" icon={FunnelIcon} iconClassName="text-chart-1">
         <SectionSkeleton rows={3} />
-      </DashboardSection>
+      </Section>
     );
   }
 
@@ -75,9 +75,9 @@ export function SalesFunnel({ period }: { period: DashboardPeriod }) {
 
   if (!first?.reachedCount) {
     return (
-      <DashboardSection title="Funil de vendas" icon={FunnelIcon} iconClassName="text-chart-1">
+      <Section title="Funil de vendas" icon={FunnelIcon} iconClassName="text-chart-1">
         <SectionEmpty icon={UsersIcon} title="Nenhum lead prospectado no período" />
-      </DashboardSection>
+      </Section>
     );
   }
 
@@ -93,7 +93,7 @@ export function SalesFunnel({ period }: { period: DashboardPeriod }) {
   }));
 
   return (
-    <DashboardSection title="Funil de vendas" icon={FunnelIcon} iconClassName="text-chart-1">
+    <Section title="Funil de vendas" icon={FunnelIcon} iconClassName="text-chart-1">
       <ChartContainer config={chartConfig} className="aspect-auto h-44 w-full">
         <FunnelChart>
           <ChartTooltip
@@ -139,6 +139,6 @@ export function SalesFunnel({ period }: { period: DashboardPeriod }) {
           <span className="text-foreground font-medium">{formatPercent(overallRate)}</span>
         </p>
       )}
-    </DashboardSection>
+    </Section>
   );
 }

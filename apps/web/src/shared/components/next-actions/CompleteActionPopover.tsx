@@ -2,6 +2,7 @@ import type { NextAction } from "@vetra/contracts";
 import { CheckIcon } from "lucide-react";
 import { useState } from "react";
 
+import NextActionForm from "@/shared/components/next-actions/NextActionForm";
 import { Button } from "@/shared/components/ui/button";
 import {
   Popover,
@@ -11,10 +12,8 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
-
-import { useCompleteNextAction } from "../mutations/useCompleteNextAction";
-import { suggestNextAction } from "../utils/suggestNextAction";
-import NextActionForm from "./NextActionForm";
+import { useCompleteNextAction } from "@/shared/mutations/next-actions/useCompleteNextAction";
+import { suggestNextAction } from "@/shared/utils/suggestNextAction";
 
 export function CompleteActionPopover({ action }: { action: NextAction }) {
   const [open, setOpen] = useState(false);

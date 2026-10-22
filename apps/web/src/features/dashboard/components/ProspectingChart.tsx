@@ -4,6 +4,8 @@ import { ptBR } from "date-fns/locale";
 import { TargetIcon } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
+import { Section } from "@/shared/components/Section";
+import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import {
   type ChartConfig,
   ChartContainer,
@@ -16,8 +18,6 @@ import { useElementWidth } from "@/shared/hooks/useElementWidth";
 
 import { useDashboardProspecting } from "../queries/useDashboardProspecting";
 import { evenlySpacedTicks, withYearOnLongMonthlyAxis } from "../utils/chartTicks";
-import { DashboardSection } from "./DashboardSection";
-import { SectionSkeleton } from "./SectionSkeleton";
 import { TooltipRow } from "./TooltipRow";
 
 const chartConfig = {
@@ -52,9 +52,9 @@ export function ProspectingChart({ period }: { period: DashboardPeriod }) {
 
   if (isPending || !data) {
     return (
-      <DashboardSection {...sectionProps}>
+      <Section {...sectionProps}>
         <SectionSkeleton rows={4} />
-      </DashboardSection>
+      </Section>
     );
   }
 
@@ -71,7 +71,7 @@ export function ProspectingChart({ period }: { period: DashboardPeriod }) {
   );
 
   return (
-    <DashboardSection {...sectionProps}>
+    <Section {...sectionProps}>
       <ChartContainer
         ref={chartRef}
         config={chartConfig}
@@ -116,6 +116,6 @@ export function ProspectingChart({ period }: { period: DashboardPeriod }) {
           <ChartLegend content={<ChartLegendContent />} />
         </BarChart>
       </ChartContainer>
-    </DashboardSection>
+    </Section>
   );
 }

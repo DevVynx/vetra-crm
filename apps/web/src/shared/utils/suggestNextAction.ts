@@ -1,9 +1,7 @@
 import type { NextAction, NextActionInput } from "@vetra/contracts";
 
-import { inDays } from "./dueDates";
+import { inDays } from "@/shared/utils/dueDates";
 
-// Days after the previous contact for each follow-up step (D+2, D+5, D+10).
-// Mocked here until the cadence becomes configurable and owned by the backend.
 const FOLLOW_UP_GAPS_IN_DAYS = [2, 3, 5];
 
 function followUp(step: number): NextActionInput {

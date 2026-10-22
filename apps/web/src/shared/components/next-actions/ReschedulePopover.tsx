@@ -2,6 +2,7 @@ import type { NextAction } from "@vetra/contracts";
 import { CalendarClockIcon } from "lucide-react";
 import { useState } from "react";
 
+import { DueDatePicker } from "@/shared/components/next-actions/DueDatePicker";
 import { Button } from "@/shared/components/ui/button";
 import {
   Popover,
@@ -10,22 +11,27 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
-
-import { useRescheduleNextAction } from "../mutations/useRescheduleNextAction";
-import { DueDatePicker } from "./DueDatePicker";
+import { useRescheduleNextAction } from "@/shared/mutations/next-actions/useRescheduleNextAction";
 
 export function ReschedulePopover({ action }: { action: NextAction }) {
   const [open, setOpen] = useState(false);
+  const [dueAt, setDueAt] = useState(() => new Date(action.dueAt));
   const rescheduleNextAction = useRescheduleNextAction();
 
-  const reschedule = (date: Date) =>
+  const reschedule = () =>
     rescheduleNextAction.mutate(
-      { id: action.id, dueAt: date.toISOString() },
+      { id: action.id, dueAt: dueAt.toISOString() },
       { onSuccess: () => setOpen(false) }
     );
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        if (next) setDueAt(new Date(action.dueAt));
+        setOpen(next);
+      }}
+    >
       <PopoverTrigger
         render={<Button size="icon-sm" variant="ghost" aria-label="Reagendar" title="Reagendar" />}
       >
@@ -35,7 +41,10 @@ export function ReschedulePopover({ action }: { action: NextAction }) {
         <PopoverHeader>
           <PopoverTitle>Reagendar</PopoverTitle>
         </PopoverHeader>
-        <DueDatePicker value={new Date(action.dueAt)} onChange={reschedule} />
+        <DueDatePicker value={dueAt} onChange={setDueAt} />
+        <Button size="sm" disabled={rescheduleNextAction.isPending} onClick={reschedule}>
+          Reagendar
+        </Button>
       </PopoverContent>
     </Popover>
   );

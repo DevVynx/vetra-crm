@@ -35,33 +35,19 @@ import {
   startOfYear,
 } from "date-fns";
 
-import { funnelStages } from "../constants/leadStages";
-import { type DateRange, isWithin, periodRanges } from "../utils/periodRanges";
-import {
-  buildMockAwaitingConversations,
-  buildMockNextActions,
-  buildMockWonDeals,
-  mockLeads,
-} from "./fixtures";
+import { type DateRange, isWithin, periodRanges } from "@/features/dashboard/utils/periodRanges";
+import { funnelStages } from "@/shared/constants/leadStages";
 
-// In-memory stand-in for apps/api while the backend doesn't exist. Each function mirrors
-// a future endpoint, so replacing it with an axios call is the only change the hooks need.
+import { mockLeads } from "./fixtures";
+import { mockStore, respond, sumBy } from "./store";
 
-const MOCK_LATENCY_IN_MS = 250;
+
 const TOP_NICHES = 11;
 const MAX_MONTHLY_SPAN_IN_MONTHS = 24;
 
 const negotiatingStages = new Set<LeadStage>(["conversing", "meeting", "proposal_sent"]);
 
-let nextActions = buildMockNextActions();
-const wonDeals = buildMockWonDeals();
-const awaitingConversations = buildMockAwaitingConversations();
-
-const respond = <T>(data: T) =>
-  new Promise<T>((resolve) => setTimeout(() => resolve(structuredClone(data)), MOCK_LATENCY_IN_MS));
-
-const sumBy = <T>(items: T[], amountOf: (item: T) => number) =>
-  items.reduce((total, item) => total + amountOf(item), 0);
+const { wonDeals, awaitingConversations } = mockStore;
 
 const changeRatio = (current: number, previous: number) =>
   previous === 0 ? null : (current - previous) / previous;
@@ -76,7 +62,6 @@ const receivedIn = (range: DateRange | null) =>
 const soldIn = (range: DateRange | null) =>
   sumBy(salesIn(range), (deal) => deal.closedValueInCents);
 
-// "All time" switches to yearly buckets once monthly ones would no longer fit in a chart.
 const hasLongHistory = (period: DashboardPeriod, firstDate: Date) =>
   period === "all_time" && differenceInMonths(new Date(), firstDate) > MAX_MONTHLY_SPAN_IN_MONTHS;
 
@@ -100,7 +85,7 @@ const allTimeStart = (granularity: RevenueGranularity | ProspectingGranularity, 
 const isActive = (lead: LeadSummary) => lead.stage !== "won" && lead.stage !== "lost";
 
 const findNextAction = (id: string): NextAction => {
-  const found = nextActions.find((item) => item.id === id);
+  const found = mockStore.nextActions.find((item) => item.id === id);
   if (!found) throw new Error(`Next action ${id} not found`);
   return found;
 };
@@ -120,7 +105,7 @@ export const dashboardMockApi = {
       },
       sold: {
         amountInCents: soldIn(current),
-        clientsCount: salesIn(current).length,
+        customersCount: salesIn(current).length,
         changeRatio: previous && changeRatio(soldIn(current), soldIn(previous)),
       },
       receivable: {
@@ -129,7 +114,7 @@ export const dashboardMockApi = {
       },
       recurring: {
         monthlyAmountInCents: sumBy(recurringDeals, (deal) => deal.monthlyFeeInCents ?? 0),
-        clientsCount: recurringDeals.length,
+        customersCount: recurringDeals.length,
       },
       activeProjectsCount: wonDeals.filter((deal) => deal.projectStatus === "in_production").length,
       negotiating: {
@@ -174,7 +159,7 @@ export const dashboardMockApi = {
       // no-response leads are left out because their last stage is unknown.
       funnel: funnelStages.map((stage, index) => ({
         stage,
-        reachedCount: cohort.filter((lead) => funnelStages.indexOf(lead.stage) >= index).length,
+        reachedCount: cohort.filter((lead) => funnelStages.indexOf(lead.stoppedAtStage ?? lead.stage) >= index).length,
       })),
     });
   },
@@ -255,7 +240,7 @@ export const dashboardMockApi = {
   },
 
   listNextActions(): Promise<ListNextActionsResponse> {
-    return respond({ nextActions });
+    return respond({ nextActions: mockStore.nextActions });
   },
 
   listAwaitingConversations(): Promise<ListAwaitingConversationsResponse> {
@@ -263,7 +248,7 @@ export const dashboardMockApi = {
   },
 
   listLeadsWithoutNextAction(): Promise<ListLeadsWithoutNextActionResponse> {
-    const leadIdsWithAction = new Set(nextActions.map((item) => item.lead.id));
+    const leadIdsWithAction = new Set(mockStore.nextActions.map((item) => item.lead.id));
     return respond({
       leads: mockLeads.filter((lead) => isActive(lead) && !leadIdsWithAction.has(lead.id)),
     });
@@ -271,8 +256,8 @@ export const dashboardMockApi = {
 
   completeNextAction(id: string, { next }: CompleteNextActionRequest): Promise<void> {
     const completed = findNextAction(id);
-    nextActions = [
-      ...nextActions.filter((item) => item.id !== id),
+    mockStore.nextActions = [
+      ...mockStore.nextActions.filter((item) => item.id !== id),
       { ...next, id: crypto.randomUUID(), lead: completed.lead },
     ];
     return respond(undefined);
@@ -280,14 +265,14 @@ export const dashboardMockApi = {
 
   rescheduleNextAction(id: string, { dueAt }: RescheduleNextActionRequest): Promise<void> {
     findNextAction(id);
-    nextActions = nextActions.map((item) => (item.id === id ? { ...item, dueAt } : item));
+    mockStore.nextActions = mockStore.nextActions.map((item) => (item.id === id ? { ...item, dueAt } : item));
     return respond(undefined);
   },
 
   createNextAction({ leadId, ...input }: CreateNextActionRequest): Promise<void> {
     const lead = mockLeads.find((item) => item.id === leadId);
     if (!lead) throw new Error(`Lead ${leadId} not found`);
-    nextActions = [...nextActions, { ...input, id: crypto.randomUUID(), lead }];
+    mockStore.nextActions = [...mockStore.nextActions, { ...input, id: crypto.randomUUID(), lead }];
     return respond(undefined);
   },
 };

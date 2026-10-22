@@ -1,5 +1,7 @@
 import type { DashboardPeriod } from "@vetra/contracts";
 
+import { nextActionsQueryKeys } from "@/shared/queries/next-actions/keys";
+
 export const dashboardQueryKeys = {
   summary: (period: DashboardPeriod) => ["dashboard", "summary", period] as const,
   revenue: (period: DashboardPeriod) => ["dashboard", "revenue", period] as const,
@@ -7,7 +9,7 @@ export const dashboardQueryKeys = {
   prospecting: (period: DashboardPeriod) => ["dashboard", "prospecting", period] as const,
   conversionByNiche: (period: DashboardPeriod) =>
     ["dashboard", "conversion-by-niche", period] as const,
-  nextActions: ["next-actions"] as const,
+  nextActions: nextActionsQueryKeys.all,
   awaitingConversations: ["conversations", "awaiting"] as const,
-  leadsWithoutNextAction: ["leads", "without-next-action"] as const,
+  leadsWithoutNextAction: nextActionsQueryKeys.leadsWithoutNextAction,
 };

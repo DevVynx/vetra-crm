@@ -2,6 +2,7 @@ import type { LeadSummary } from "@vetra/contracts";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 
+import NextActionForm from "@/shared/components/next-actions/NextActionForm";
 import { Button } from "@/shared/components/ui/button";
 import {
   Popover,
@@ -11,10 +12,8 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
-
-import { useCreateNextAction } from "../mutations/useCreateNextAction";
-import { inDays } from "../utils/dueDates";
-import NextActionForm from "./NextActionForm";
+import { useCreateNextAction } from "@/shared/mutations/next-actions/useCreateNextAction";
+import { inDays } from "@/shared/utils/dueDates";
 
 export function DefineNextActionPopover({ lead }: { lead: LeadSummary }) {
   const [open, setOpen] = useState(false);

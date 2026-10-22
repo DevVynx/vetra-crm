@@ -1,8 +1,7 @@
 import type { LeadStage } from "@vetra/contracts";
 
 import { Badge } from "@/shared/components/ui/badge";
-
-import { leadStageColor, leadStageLabels } from "../constants/leadStages";
+import { leadStageColor, leadStageLabels } from "@/shared/constants/leadStages";
 
 export function LeadStageBadge({ stage }: { stage: LeadStage }) {
   return (
