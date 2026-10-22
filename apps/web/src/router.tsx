@@ -11,5 +11,6 @@ declare module "@tanstack/react-router" {
 
   interface StaticDataRouteOption {
     title?: string;
+    parent?: { label: string; to: "/leads" | "/customers" };
   }
 }

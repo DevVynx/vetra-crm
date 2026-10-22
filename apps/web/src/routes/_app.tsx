@@ -2,6 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { AppSidebar } from "@/shared/components/layout/AppSidebar";
+import { PageCrumbProvider } from "@/shared/components/layout/PageCrumb";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { SIDEBAR_COOKIE_NAME, SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
 
@@ -16,14 +17,15 @@ function readSidebarOpen() {
 
 const AppLayout = () => (
   <SidebarProvider defaultOpen={readSidebarOpen()} className="h-svh">
+    <PageCrumbProvider>
     <AppSidebar />
-    {/* The inset is the app's frame: it never grows past the viewport, only its content scrolls. */}
     <SidebarInset className="md:border-border min-h-0 overflow-hidden md:border">
       <AppHeader />
       <ScrollArea className="min-h-0 flex-1">
         <Outlet />
       </ScrollArea>
     </SidebarInset>
+    </PageCrumbProvider>
   </SidebarProvider>
 );
 

@@ -12,8 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
-import { Route as AppLeadsRouteImport } from './routes/_app/leads'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
+import { Route as AppCustomersIndexRouteImport } from './routes/_app/customers.index'
+import { Route as AppCustomersCustomerIdRouteImport } from './routes/_app/customers.$customerId'
+import { Route as AppLeadsIndexRouteImport } from './routes/_app/leads.index'
+import { Route as AppLeadsLeadIdRouteImport } from './routes/_app/leads.$leadId'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -29,49 +32,90 @@ const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => AppRoute,
 } as any)
-const AppLeadsRoute = AppLeadsRouteImport.update({
-  id: '/leads',
-  path: '/leads',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppWhatsappRoute = AppWhatsappRouteImport.update({
   id: '/whatsapp',
   path: '/whatsapp',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCustomersIndexRoute = AppCustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCustomersCustomerIdRoute = AppCustomersCustomerIdRouteImport.update({
+  id: '/customers/$customerId',
+  path: '/customers/$customerId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLeadsIndexRoute = AppLeadsIndexRouteImport.update({
+  id: '/leads/',
+  path: '/leads/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLeadsLeadIdRoute = AppLeadsLeadIdRouteImport.update({
+  id: '/leads/$leadId',
+  path: '/leads/$leadId',
   getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/configuracoes': typeof AppConfiguracoesRoute
-  '/leads': typeof AppLeadsRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/leads/$leadId': typeof AppLeadsLeadIdRoute
+  '/customers/': typeof AppCustomersIndexRoute
+  '/leads/': typeof AppLeadsIndexRoute
 }
 export interface FileRoutesByTo {
   '/configuracoes': typeof AppConfiguracoesRoute
-  '/leads': typeof AppLeadsRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/': typeof AppIndexRoute
+  '/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/leads/$leadId': typeof AppLeadsLeadIdRoute
+  '/customers': typeof AppCustomersIndexRoute
+  '/leads': typeof AppLeadsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/_app/configuracoes': typeof AppConfiguracoesRoute
-  '/_app/leads': typeof AppLeadsRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/_app/leads/$leadId': typeof AppLeadsLeadIdRoute
+  '/_app/customers/': typeof AppCustomersIndexRoute
+  '/_app/leads/': typeof AppLeadsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/configuracoes' | '/leads' | '/whatsapp'
+  fullPaths:
+    | '/'
+    | '/configuracoes'
+    | '/whatsapp'
+    | '/customers/$customerId'
+    | '/leads/$leadId'
+    | '/customers/'
+    | '/leads/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/configuracoes' | '/leads' | '/whatsapp' | '/'
+  to:
+    | '/configuracoes'
+    | '/whatsapp'
+    | '/'
+    | '/customers/$customerId'
+    | '/leads/$leadId'
+    | '/customers'
+    | '/leads'
   id:
     | '__root__'
     | '/_app'
     | '/_app/configuracoes'
-    | '/_app/leads'
     | '/_app/whatsapp'
     | '/_app/'
+    | '/_app/customers/$customerId'
+    | '/_app/leads/$leadId'
+    | '/_app/customers/'
+    | '/_app/leads/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -101,13 +145,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppConfiguracoesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/leads': {
-      id: '/_app/leads'
-      path: '/leads'
-      fullPath: '/leads'
-      preLoaderRoute: typeof AppLeadsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/whatsapp': {
       id: '/_app/whatsapp'
       path: '/whatsapp'
@@ -115,21 +152,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWhatsappRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/customers/': {
+      id: '/_app/customers/'
+      path: '/customers'
+      fullPath: '/customers/'
+      preLoaderRoute: typeof AppCustomersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/customers/$customerId': {
+      id: '/_app/customers/$customerId'
+      path: '/customers/$customerId'
+      fullPath: '/customers/$customerId'
+      preLoaderRoute: typeof AppCustomersCustomerIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/leads/': {
+      id: '/_app/leads/'
+      path: '/leads'
+      fullPath: '/leads/'
+      preLoaderRoute: typeof AppLeadsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/leads/$leadId': {
+      id: '/_app/leads/$leadId'
+      path: '/leads/$leadId'
+      fullPath: '/leads/$leadId'
+      preLoaderRoute: typeof AppLeadsLeadIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
-  AppLeadsRoute: typeof AppLeadsRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppCustomersCustomerIdRoute: typeof AppCustomersCustomerIdRoute
+  AppLeadsLeadIdRoute: typeof AppLeadsLeadIdRoute
+  AppCustomersIndexRoute: typeof AppCustomersIndexRoute
+  AppLeadsIndexRoute: typeof AppLeadsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppConfiguracoesRoute: AppConfiguracoesRoute,
-  AppLeadsRoute: AppLeadsRoute,
   AppWhatsappRoute: AppWhatsappRoute,
   AppIndexRoute: AppIndexRoute,
+  AppCustomersCustomerIdRoute: AppCustomersCustomerIdRoute,
+  AppLeadsLeadIdRoute: AppLeadsLeadIdRoute,
+  AppCustomersIndexRoute: AppCustomersIndexRoute,
+  AppLeadsIndexRoute: AppLeadsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
