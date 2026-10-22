@@ -24,14 +24,14 @@ export const dashboardSummaryResponseSchema = z.object({
   }),
   sold: z.object({
     amountInCents: amountInCentsSchema,
-    clientsCount: countSchema,
+    customersCount: countSchema,
     changeRatio: changeRatioSchema,
   }),
   receivable: z.object({
     amountInCents: amountInCentsSchema,
     pendingInstallmentsCount: countSchema,
   }),
-  recurring: z.object({ monthlyAmountInCents: amountInCentsSchema, clientsCount: countSchema }),
+  recurring: z.object({ monthlyAmountInCents: amountInCentsSchema, customersCount: countSchema }),
   activeProjectsCount: countSchema,
   negotiating: z.object({ leadsCount: countSchema, proposalsCount: countSchema }),
 });
@@ -53,7 +53,6 @@ export type RevenueGranularity = z.infer<typeof revenueGranularitySchema>;
 
 export const revenuePointSchema = z.object({
   bucketStart: z.iso.datetime(),
-  // Running totals since the start of the period, so the last point matches the KPI cards.
   receivedInCents: amountInCentsSchema,
   soldInCents: amountInCentsSchema,
 });
@@ -92,7 +91,6 @@ export type NicheConversion = z.infer<typeof nicheConversionSchema>;
 
 export const dashboardConversionByNicheResponseSchema = z.object({
   niches: z.array(nicheConversionSchema),
-  // Niches beyond the best-converting ones, folded together so the chart keeps a fixed size.
   others: nicheConversionSchema.omit({ niche: true }).nullable(),
 });
 export type DashboardConversionByNicheResponse = z.infer<

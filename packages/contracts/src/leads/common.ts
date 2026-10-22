@@ -13,6 +13,9 @@ export const leadStageSchema = z.enum([
 ]);
 export type LeadStage = z.infer<typeof leadStageSchema>;
 
+export const liveStageSchema = leadStageSchema.exclude(["won", "lost", "no_response"]);
+export type LiveStage = z.infer<typeof liveStageSchema>;
+
 export const leadSummarySchema = z.object({
   id: z.string(),
   businessName: z.string(),
@@ -21,5 +24,6 @@ export const leadSummarySchema = z.object({
   city: z.string(),
   stage: leadStageSchema,
   prospectedAt: z.iso.datetime(),
+  stoppedAtStage: liveStageSchema.nullable(),
 });
 export type LeadSummary = z.infer<typeof leadSummarySchema>;
