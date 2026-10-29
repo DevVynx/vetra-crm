@@ -15,7 +15,6 @@ export type ActionsMenuItem = {
   icon: LucideIcon;
   onSelect?: () => void;
   destructive?: boolean;
-  separatorBefore?: boolean;
 };
 
 type ActionsMenuProps = {
@@ -35,9 +34,9 @@ export function ActionsMenu({ label, items, size = "icon-sm" }: ActionsMenuProps
         }
       />
       <DropdownMenuContent align="end">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <Fragment key={item.label}>
-            {item.separatorBefore && <DropdownMenuSeparator />}
+            {item.destructive && index > 0 && <DropdownMenuSeparator />}
             <DropdownMenuItem
               disabled={!item.onSelect}
               variant={item.destructive ? "destructive" : "default"}

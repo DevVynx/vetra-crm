@@ -23,7 +23,6 @@ export function CustomerActionsMenu({ customer }: { customer: CustomerDetail }) 
             label: "Excluir cliente",
             icon: Trash2Icon,
             destructive: true,
-            separatorBefore: true,
             onSelect: () => setIsDeleting(true),
           },
         ]}

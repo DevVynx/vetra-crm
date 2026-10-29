@@ -29,7 +29,6 @@ export function LeadActionsMenu({ lead }: { lead: LeadDetail }) {
       label: "Excluir lead",
       icon: Trash2Icon,
       destructive: true,
-      separatorBefore: true,
       onSelect: () => setDialog("delete"),
     },
   ];
