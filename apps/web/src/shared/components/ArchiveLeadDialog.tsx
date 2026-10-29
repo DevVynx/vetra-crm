@@ -1,3 +1,4 @@
+import { ArchiveIcon } from "lucide-react";
 import { useState } from "react";
 
 import { SegmentedChoice } from "@/shared/components/SegmentedChoice";
@@ -9,6 +10,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { leadStageLabels } from "@/shared/constants/leadStages";
@@ -40,6 +42,9 @@ export function ArchiveLeadDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
+          <AlertDialogMedia>
+            <ArchiveIcon />
+          </AlertDialogMedia>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
@@ -52,8 +57,8 @@ export function ArchiveLeadDialog({
         />
 
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction disabled={isPending} onClick={() => onConfirm(reason)}>
+          <AlertDialogCancel className="h-10">Cancelar</AlertDialogCancel>
+          <AlertDialogAction className="h-10 font-semibold" disabled={isPending} onClick={() => onConfirm(reason)}>
             Arquivar
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -1,3 +1,4 @@
+import { UserPlusIcon } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { ContactFormFields } from "@/shared/components/detail/ContactFormFields";
@@ -27,6 +28,7 @@ export function CreateLeadSheet({ open, onOpenChange }: CreateLeadSheetProps) {
 
   return (
     <FormSheet
+      icon={UserPlusIcon}
       open={open}
       onOpenChange={onOpenChange}
       title="Novo lead"

@@ -1,4 +1,5 @@
 import type { ProjectStatus } from "@vetra/contracts";
+import { FolderPlusIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 
 import { DateTimePicker } from "@/shared/components/DateTimePicker";
@@ -59,6 +60,7 @@ export function CreateProjectSheet({ customerId, open, onOpenChange }: CreatePro
 
   return (
     <FormSheet
+      icon={FolderPlusIcon}
       open={open}
       onOpenChange={onOpenChange}
       title="Novo projeto"

@@ -31,7 +31,7 @@ export function SegmentedChoice<T extends string>({
           role="radio"
           aria-checked={value === option.value}
           variant="outline"
-          className={cn(value === option.value && selectedChoiceClass)}
+          className={cn("h-10", value === option.value && selectedChoiceClass)}
           onClick={() => onChange(option.value)}
         >
           {value === option.value && <CheckIcon />}

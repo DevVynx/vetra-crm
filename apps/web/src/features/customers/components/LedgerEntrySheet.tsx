@@ -1,4 +1,5 @@
 import type { LedgerEntry, LedgerEntryStatus, LedgerEntryType } from "@vetra/contracts";
+import { ReceiptIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 
 import { DateTimePicker } from "@/shared/components/DateTimePicker";
@@ -85,6 +86,7 @@ export function LedgerEntrySheet({
 
   return (
     <FormSheet
+      icon={ReceiptIcon}
       open={open}
       onOpenChange={onOpenChange}
       title={entry ? "Editar registro" : "Novo registro"}

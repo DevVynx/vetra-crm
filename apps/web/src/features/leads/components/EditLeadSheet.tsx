@@ -1,4 +1,5 @@
 import type { LeadDetail } from "@vetra/contracts";
+import { PencilIcon } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { ContactFormFields } from "@/shared/components/detail/ContactFormFields";
@@ -36,6 +37,7 @@ export function EditLeadSheet({ lead, open, onOpenChange }: EditLeadSheetProps) 
 
   return (
     <FormSheet
+      icon={PencilIcon}
       open={open}
       onOpenChange={onOpenChange}
       title="Editar lead"

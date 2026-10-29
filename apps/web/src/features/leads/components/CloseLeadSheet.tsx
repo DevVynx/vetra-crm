@@ -1,3 +1,4 @@
+import { HandshakeIcon } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { DealFields, type DealFormValues, emptyDealValues } from "@/shared/components/detail/DealFields";
@@ -29,6 +30,7 @@ export function CloseLeadSheet({ leadId, businessName, open, onOpenChange }: Clo
 
   return (
     <FormSheet
+      icon={HandshakeIcon}
       open={open}
       onOpenChange={onOpenChange}
       title={`Fechar ${businessName}`}

@@ -1,3 +1,5 @@
+import { Trash2Icon } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -6,6 +8,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 
@@ -34,12 +37,18 @@ export function ConfirmDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
+          {destructive && (
+            <AlertDialogMedia>
+              <Trash2Icon />
+            </AlertDialogMedia>
+          )}
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel className="h-10">Cancelar</AlertDialogCancel>
           <AlertDialogAction
+            className="h-10 font-semibold"
             variant={destructive ? "destructive" : "default"}
             disabled={isPending}
             onClick={onConfirm}

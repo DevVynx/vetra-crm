@@ -1,3 +1,4 @@
+import { UserPlusIcon } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { ContactFormFields } from "@/shared/components/detail/ContactFormFields";
@@ -48,6 +49,7 @@ export function CreateCustomerSheet({ open, onOpenChange }: CreateCustomerSheetP
 
   return (
     <FormSheet
+      icon={UserPlusIcon}
       open={open}
       onOpenChange={onOpenChange}
       title="Novo cliente"
