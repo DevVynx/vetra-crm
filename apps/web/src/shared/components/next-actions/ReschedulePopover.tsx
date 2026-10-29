@@ -42,7 +42,11 @@ export function ReschedulePopover({ action }: { action: NextAction }) {
           <PopoverTitle>Reagendar</PopoverTitle>
         </PopoverHeader>
         <DueDatePicker value={dueAt} onChange={setDueAt} />
-        <Button size="sm" disabled={rescheduleNextAction.isPending} onClick={reschedule}>
+        <Button
+          className="h-10 font-semibold"
+          disabled={rescheduleNextAction.isPending}
+          onClick={reschedule}
+        >
           Reagendar
         </Button>
       </PopoverContent>

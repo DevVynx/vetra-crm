@@ -38,7 +38,7 @@ export function ExactTimePanel({ value, onChange, onDone, allowPast }: ExactTime
         <TimePickerColumns />
         <div className="flex items-center justify-between gap-2 border-t p-1.5">
           <TimePickerNow />
-          <Button type="button" size="sm" variant="secondary" onClick={onDone}>
+          <Button type="button" variant="secondary" className="font-semibold" onClick={onDone}>
             OK
           </Button>
         </div>
