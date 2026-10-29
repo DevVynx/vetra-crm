@@ -3,6 +3,7 @@ import { Fragment } from "react";
 
 import { leadStageColor, leadStageLabels } from "@/shared/constants/leadStages";
 import { useElementWidth } from "@/shared/hooks/useElementWidth";
+import { useTweenedNumbers } from "@/shared/hooks/useTweenedNumbers";
 
 const STAGE_HEIGHT = 34;
 const SIDE_PADDING = 8;
@@ -33,14 +34,16 @@ export function FunnelStream({ funnel }: { funnel: FunnelStep[] }) {
   const { ref, width } = useElementWidth<HTMLDivElement>();
   const first = funnel[0];
   const height = funnel.length * STAGE_HEIGHT;
+  const ratios = useTweenedNumbers(
+    funnel.map((step) =>
+      first?.reachedCount ? Math.max(step.reachedCount / first.reachedCount, MIN_BAND_RATIO) : 0
+    )
+  );
 
   if (!first) return null;
 
   const usable = Math.max(width - SIDE_PADDING * 2, 0);
-  const minCount = first.reachedCount * MIN_BAND_RATIO;
-  const halves = funnel.map(
-    (step) => (Math.max(step.reachedCount, minCount) / first.reachedCount) * (usable / 2)
-  );
+  const halves = ratios.map((ratio) => ratio * (usable / 2));
 
   const outline = (halfAt: (index: number) => number) => {
     const centers = funnel.map((_, index) => ({
@@ -97,7 +100,7 @@ export function FunnelStream({ funnel }: { funnel: FunnelStep[] }) {
                 y={(index + 0.5) * STAGE_HEIGHT}
                 textAnchor="middle"
                 dominantBaseline="central"
-                className="fill-black text-xs font-semibold tabular-nums"
+                className="animate-in fade-in fill-black text-xs font-semibold tabular-nums duration-1000"
                 pointerEvents="none"
               >
                 {step.reachedCount}
