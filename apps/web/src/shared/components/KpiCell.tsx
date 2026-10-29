@@ -53,8 +53,8 @@ export function KpiCell({
   return (
     <div className={cn("bg-card flex flex-col", compact ? "gap-1 px-3 py-2.5" : "gap-2 p-4")}>
       <div className="flex min-h-5 items-center justify-between gap-2">
-        <div className={cn("flex items-center gap-1.5 text-xs font-semibold", accentClassName)}>
-          <Icon className="size-3.5" />
+        <div className={cn("flex items-center gap-1.5 text-sm font-semibold", accentClassName)}>
+          <Icon className="size-4" />
           {label}
         </div>
         {changeRatio != null && <ChangeBadge ratio={changeRatio} />}
@@ -62,7 +62,7 @@ export function KpiCell({
       <p
         className={cn(
           "font-semibold tracking-tight tabular-nums",
-          compact ? "text-xl" : "text-2xl",
+          compact ? "text-xl" : "text-3xl",
           valueClassName
         )}
       >
