@@ -67,22 +67,22 @@ export function NoteEditor({
         <Button
           type="button"
           size="icon-sm"
-          aria-label="Salvar nota"
-          title="Salvar (Enter)"
-          disabled={!canSave}
-          onClick={save}
-        >
-          <CheckIcon />
-        </Button>
-        <Button
-          type="button"
-          size="icon-sm"
           variant="ghost"
           aria-label="Cancelar"
           title="Cancelar (Esc)"
           onClick={onCancel}
         >
           <XIcon />
+        </Button>
+        <Button
+          type="button"
+          size="icon-sm"
+          aria-label="Salvar nota"
+          title="Salvar (Enter)"
+          disabled={!canSave}
+          onClick={save}
+        >
+          <CheckIcon />
         </Button>
       </div>
     </div>
