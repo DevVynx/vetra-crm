@@ -28,3 +28,6 @@ export const customerDetailSchema = leadDetailSchema.extend({
   }),
 });
 export type CustomerDetail = z.infer<typeof customerDetailSchema>;
+
+export const getCustomerResponseSchema = customerDetailSchema;
+export type GetCustomerResponse = z.infer<typeof getCustomerResponseSchema>;

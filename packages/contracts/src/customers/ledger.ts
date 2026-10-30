@@ -35,5 +35,8 @@ export const createLedgerEntryRequestSchema = ledgerEntryInputSchema.extend({
 });
 export type CreateLedgerEntryRequest = z.infer<typeof createLedgerEntryRequestSchema>;
 
+export const createLedgerEntryResponseSchema = ledgerEntrySchema;
+export type CreateLedgerEntryResponse = z.infer<typeof createLedgerEntryResponseSchema>;
+
 export const updateLedgerEntryRequestSchema = ledgerEntryInputSchema;
 export type UpdateLedgerEntryRequest = z.infer<typeof updateLedgerEntryRequestSchema>;

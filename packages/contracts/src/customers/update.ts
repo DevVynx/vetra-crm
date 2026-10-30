@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { leadSummarySchema } from "../leads/common";
 import { leadContactFieldsSchema } from "../leads/contact";
 
 export const updateCustomerRequestSchema = leadContactFieldsSchema.extend({
@@ -12,3 +13,6 @@ export const createCustomerRequestSchema = updateCustomerRequestSchema.extend({
   firstInstallmentDueAt: z.iso.datetime(),
 });
 export type CreateCustomerRequest = z.infer<typeof createCustomerRequestSchema>;
+
+export const createCustomerResponseSchema = leadSummarySchema;
+export type CreateCustomerResponse = z.infer<typeof createCustomerResponseSchema>;

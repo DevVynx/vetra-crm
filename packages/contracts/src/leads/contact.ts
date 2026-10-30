@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { leadSummarySchema } from "./common";
+
 export const leadContactFieldsSchema = z.object({
   businessName: z.string().trim().min(1).max(120),
   contactName: z.string().trim().max(120).nullable(),
@@ -11,6 +13,9 @@ export const leadContactFieldsSchema = z.object({
 
 export const createLeadRequestSchema = leadContactFieldsSchema;
 export type CreateLeadRequest = z.infer<typeof createLeadRequestSchema>;
+
+export const createLeadResponseSchema = leadSummarySchema;
+export type CreateLeadResponse = z.infer<typeof createLeadResponseSchema>;
 
 export const updateLeadRequestSchema = leadContactFieldsSchema;
 export type UpdateLeadRequest = z.infer<typeof updateLeadRequestSchema>;

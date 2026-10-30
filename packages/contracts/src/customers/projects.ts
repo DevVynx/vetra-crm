@@ -24,3 +24,8 @@ export const createCustomerProjectRequestSchema = z.object({
   startedAt: z.iso.datetime(),
 });
 export type CreateCustomerProjectRequest = z.infer<typeof createCustomerProjectRequestSchema>;
+
+export const createCustomerProjectResponseSchema = customerProjectSchema;
+export type CreateCustomerProjectResponse = z.infer<
+  typeof createCustomerProjectResponseSchema
+>;

@@ -14,8 +14,8 @@ if a shape needs to change, it changes here first.
 
 ## File shape
 
-One file per resource/action under `src/<feature>/` (e.g. `createLead.ts`,
-`listLeads.ts`), plus a `common.ts` for pieces shared within that feature (e.g. the
+Files are grouped by resource under `src/<feature>/` (e.g. `contact.ts`, `list.ts`,
+`detail.ts`), plus a `common.ts` for pieces shared within that feature (e.g. the
 `Lead` shape itself). A schema file always exports the schema and its inferred type
 together, request and response paired:
 
@@ -26,6 +26,24 @@ export type CreateLeadRequest = z.infer<typeof createLeadRequestSchema>;
 export const createLeadResponseSchema = z.object({ lead: leadSchema });
 export type CreateLeadResponse = z.infer<typeof createLeadResponseSchema>;
 ```
+
+### Request/response pairing
+
+- An endpoint that **sends** data (POST/PATCH) has a `...Request`; one that **returns** data
+  has a `...Response`. The response is named after the endpoint even when it is just an
+  existing entity schema, so API handlers and web calls are typed by endpoint:
+
+  ```ts
+  export const createLeadResponseSchema = leadSummarySchema;
+  export type CreateLeadResponse = z.infer<typeof createLeadResponseSchema>;
+  ```
+
+- A read (GET) has only a `...Response`. Its filters and pagination travel in the query
+  string and are validated by a `...Query` schema (e.g. `listLeadsQuerySchema`), not a
+  request body.
+- An endpoint that returns nothing (204) has no response.
+- Entity schemas (`leadSummarySchema`, `leadNoteSchema`...) are building blocks and stay
+  reusable; the endpoint-named responses point at them.
 
 Each feature's files are re-exported through that feature's own `index.ts`, and the
 package's `src/index.ts` re-exports every feature plus `shared/`.

@@ -11,6 +11,9 @@ export const leadDetailSchema = leadSummarySchema.extend({
 });
 export type LeadDetail = z.infer<typeof leadDetailSchema>;
 
+export const getLeadResponseSchema = leadDetailSchema;
+export type GetLeadResponse = z.infer<typeof getLeadResponseSchema>;
+
 export const leadNoteSchema = z.object({
   id: z.string(),
   leadId: z.string(),
@@ -27,5 +30,11 @@ export const createLeadNoteRequestSchema = z.object({
 });
 export type CreateLeadNoteRequest = z.infer<typeof createLeadNoteRequestSchema>;
 
+export const createLeadNoteResponseSchema = leadNoteSchema;
+export type CreateLeadNoteResponse = z.infer<typeof createLeadNoteResponseSchema>;
+
 export const updateLeadNoteRequestSchema = createLeadNoteRequestSchema;
 export type UpdateLeadNoteRequest = CreateLeadNoteRequest;
+
+export const updateLeadNoteResponseSchema = leadNoteSchema;
+export type UpdateLeadNoteResponse = z.infer<typeof updateLeadNoteResponseSchema>;
