@@ -196,6 +196,7 @@ export function LeadsPage() {
             <LeadsTable
               leads={data.items}
               activeIndex={activeIndex}
+              isFull={data.items.length >= pageSize}
               selection={{
                 isSelecting,
                 selectedIds,

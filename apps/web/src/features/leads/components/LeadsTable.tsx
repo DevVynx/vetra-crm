@@ -112,10 +112,12 @@ export function LeadsTableSkeleton({ rows }: { rows: number }) {
 type LeadsTableProps = {
   leads: LeadListItem[];
   activeIndex: number;
+  // The page has as many rows as fit: they stretch to use the leftover height.
+  isFull: boolean;
   selection: LeadSelection;
 };
 
-export function LeadsTable({ leads, activeIndex, selection }: LeadsTableProps) {
+export function LeadsTable({ leads, activeIndex, isFull, selection }: LeadsTableProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -123,9 +125,9 @@ export function LeadsTable({ leads, activeIndex, selection }: LeadsTableProps) {
   }, [activeIndex]);
 
   return (
-    <Table>
+    <Table fillHeight={isFull}>
       <TableHeaders leads={leads} selection={selection} />
-      <TableBody>
+      <TableBody lastRowBorder={!isFull}>
         {leads.map((lead, index) => {
           const isSelected = selection.selectedIds.has(lead.id);
 

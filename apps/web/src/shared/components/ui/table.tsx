@@ -4,15 +4,19 @@ import * as React from "react"
 
 import { cn } from "@/shared/utils/cn"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({
+  className,
+  fillHeight = false,
+  ...props
+}: React.ComponentProps<"table"> & { fillHeight?: boolean }) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={cn("relative w-full overflow-x-auto", fillHeight && "h-full")}
     >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
+        className={cn("w-full caption-bottom text-sm", fillHeight && "h-full", className)}
         {...props}
       />
     </div>
@@ -29,11 +33,15 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   )
 }
 
-function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+function TableBody({
+  className,
+  lastRowBorder = false,
+  ...props
+}: React.ComponentProps<"tbody"> & { lastRowBorder?: boolean }) {
   return (
     <tbody
       data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
+      className={cn(!lastRowBorder && "[&_tr:last-child]:border-0", className)}
       {...props}
     />
   )

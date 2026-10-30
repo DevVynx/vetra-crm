@@ -148,7 +148,11 @@ export function CustomersPage() {
               </SectionEmpty>
             </div>
           ) : (
-            <CustomersTable customers={data.items} activeIndex={activeIndex} />
+            <CustomersTable
+            customers={data.items}
+            activeIndex={activeIndex}
+            isFull={data.items.length >= pageSize}
+          />
           )}
         </div>
       </div>

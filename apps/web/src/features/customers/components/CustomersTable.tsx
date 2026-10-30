@@ -75,9 +75,11 @@ export function CustomersTableSkeleton({ rows }: { rows: number }) {
 type CustomersTableProps = {
   customers: CustomerListItem[];
   activeIndex: number;
+  // The page has as many rows as fit: they stretch to use the leftover height.
+  isFull: boolean;
 };
 
-export function CustomersTable({ customers, activeIndex }: CustomersTableProps) {
+export function CustomersTable({ customers, activeIndex, isFull }: CustomersTableProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,9 +87,9 @@ export function CustomersTable({ customers, activeIndex }: CustomersTableProps) 
   }, [activeIndex]);
 
   return (
-    <Table>
+    <Table fillHeight={isFull}>
       <TableHeaders />
-      <TableBody>
+      <TableBody lastRowBorder={!isFull}>
         {customers.map((customer, index) => (
           <TableRow
             key={customer.id}
