@@ -1,6 +1,7 @@
 import { useFormContext } from "react-hook-form";
 import { z } from "zod";
 
+import { OptionalTag } from "@/shared/components/OptionalTag";
 import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { type ContactFormValues, normalizePhone } from "@/shared/utils/contactForm";
@@ -28,7 +29,9 @@ export function ContactFormFields({ showDocument = false }: { showDocument?: boo
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="contact-name">Contato</FieldLabel>
+        <FieldLabel htmlFor="contact-name">
+          Contato <OptionalTag />
+        </FieldLabel>
         <Input id="contact-name" placeholder="Ex.: Maria Silva" {...register("contactName")} />
       </Field>
 
@@ -52,7 +55,9 @@ export function ContactFormFields({ showDocument = false }: { showDocument?: boo
 
       {showDocument && (
         <Field>
-          <FieldLabel htmlFor="contact-document">Documento (CPF ou CNPJ)</FieldLabel>
+          <FieldLabel htmlFor="contact-document">
+            Documento (CPF ou CNPJ) <OptionalTag />
+          </FieldLabel>
           <Input
             id="contact-document"
             inputMode="numeric"
@@ -63,7 +68,9 @@ export function ContactFormFields({ showDocument = false }: { showDocument?: boo
       )}
 
       <Field data-invalid={Boolean(errors.email)}>
-        <FieldLabel htmlFor="contact-email">E-mail</FieldLabel>
+        <FieldLabel htmlFor="contact-email">
+          E-mail <OptionalTag />
+        </FieldLabel>
         <Input
           id="contact-email"
           inputMode="email"
