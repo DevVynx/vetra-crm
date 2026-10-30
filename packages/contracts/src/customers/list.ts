@@ -1,20 +1,23 @@
 import { z } from "zod";
 
+import { filtersParamSchema } from "../filters";
 import { leadSummarySchema } from "../leads/common";
 
 const amountInCentsSchema = z.number().int().nonnegative();
 const countSchema = z.number().int().nonnegative();
 
-export const customerListFilterSchema = z.enum([
-  "all",
-  "with_active_project",
-  "without_active_project",
-]);
-export type CustomerListFilter = z.infer<typeof customerListFilterSchema>;
+export const customerFilterFields = [
+  "niche",
+  "city",
+  "closed_value",
+  "monthly_fee",
+  "active_project",
+  "closed_at",
+] as const;
 
 export const listCustomersQuerySchema = z.object({
   q: z.string().trim().default(""),
-  filter: customerListFilterSchema.default("all"),
+  filters: filtersParamSchema(customerFilterFields),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
 });
@@ -35,6 +38,5 @@ export const listCustomersResponseSchema = z.object({
   total: countSchema,
   page: z.number().int().positive(),
   pageSize: z.number().int().positive(),
-  counts: z.record(customerListFilterSchema, countSchema),
 });
 export type ListCustomersResponse = z.infer<typeof listCustomersResponseSchema>;

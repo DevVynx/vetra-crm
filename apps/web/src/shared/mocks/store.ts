@@ -17,12 +17,6 @@ export const respond = <T>(data: T) =>
 export const sumBy = <T>(items: T[], amountOf: (item: T) => number) =>
   items.reduce((total, item) => total + amountOf(item), 0);
 
-export const normalizeText = (text: string) =>
-  text
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
-
 export function paginate<T>(items: T[], page: number, pageSize: number) {
   const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
   const currentPage = Math.min(page, pageCount);

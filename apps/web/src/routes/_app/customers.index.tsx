@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { customerListFilterSchema } from "@vetra/contracts";
+import { filterSchema } from "@vetra/contracts";
 import { z } from "zod";
 
 import { CustomersPage } from "@/features/customers/components/CustomersPage";
@@ -8,7 +8,7 @@ import { CustomersPage } from "@/features/customers/components/CustomersPage";
 // into the URL as soon as any param changes.
 const searchSchema = z.object({
   q: z.string().optional().catch(undefined),
-  filter: customerListFilterSchema.optional().catch(undefined),
+  filters: z.array(filterSchema).optional().catch(undefined),
   page: z.coerce.number().int().min(1).optional().catch(undefined),
 });
 

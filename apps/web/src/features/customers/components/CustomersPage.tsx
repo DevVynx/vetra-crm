@@ -1,9 +1,11 @@
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import type { CustomerListFilter } from "@vetra/contracts";
+import type { Filter } from "@vetra/contracts";
 import { HandshakeIcon, UserPlusIcon } from "lucide-react";
 import { useState } from "react";
 
-import { type FilterChipOption, FilterChips } from "@/shared/components/FilterChips";
+import { ActiveFilters } from "@/shared/components/filters/ActiveFilters";
+import { FilterButton } from "@/shared/components/filters/FilterButton";
+import { useFilterController } from "@/shared/components/filters/useFilterController";
 import { Pagination } from "@/shared/components/Pagination";
 import { SearchField } from "@/shared/components/SearchField";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
@@ -14,7 +16,8 @@ import { useListNavigation } from "@/shared/hooks/useListNavigation";
 import { TABLE_MIN_HEIGHT, useTablePageSize } from "@/shared/hooks/useTablePageSize";
 import { cn } from "@/shared/utils/cn";
 
-import { customerFilterLabels } from "../constants/customerFilters";
+import { buildCustomerFilterFields } from "../constants/customerFilterFields";
+import { useCustomerFilterOptions } from "../queries/useCustomerFilterOptions";
 import { useCustomers } from "../queries/useCustomers";
 import { CreateCustomerSheet } from "./CreateCustomerSheet";
 import { CustomersTable, CustomersTableSkeleton } from "./CustomersTable";
@@ -23,18 +26,20 @@ const SEARCH_DEBOUNCE_IN_MS = 300;
 
 const route = getRouteApi("/_app/customers/");
 
+const NO_FILTERS: Filter[] = [];
+
 const focusSearch = () => document.querySelector<HTMLInputElement>("[data-search-field]")?.focus();
 
 export function CustomersPage() {
   const search = route.useSearch();
-  const { q = "", filter = "all", page = 1 } = search;
+  const { q = "", filters = NO_FILTERS, page = 1 } = search;
   const navigate = route.useNavigate();
   const [searchText, setSearchText] = useState(q);
   const [isCreating, setIsCreating] = useState(false);
   const navigateToCustomer = useNavigate();
   const { ref: tableRef, pageSize } = useTablePageSize();
   const { data, isPending, isPlaceholderData } = useCustomers(
-    { q, filter, page, pageSize },
+    { q, filters, page, pageSize },
     { enabled: pageSize > 0 }
   );
 
@@ -45,11 +50,11 @@ export function CustomersPage() {
     });
   }, SEARCH_DEBOUNCE_IN_MS);
 
-  const changeFilter = (next: CustomerListFilter) =>
+  const changeFilters = (next: Filter[]) =>
     navigate({
       search: (previous) => ({
         ...previous,
-        filter: next === "all" ? undefined : next,
+        filters: next.length > 0 ? next : undefined,
         page: undefined,
       }),
     });
@@ -62,20 +67,26 @@ export function CustomersPage() {
     navigate({ search: {} });
   };
 
-  const filterOptions: FilterChipOption<CustomerListFilter>[] = (
-    ["all", "with_active_project", "without_active_project"] as const
-  ).map((value) => ({
-    value,
-    label: customerFilterLabels[value],
-    count: data?.counts[value],
-  }));
+  const niches = useCustomerFilterOptions("niche");
+  const cities = useCustomerFilterOptions("city");
+  const filterFields = buildCustomerFilterFields({
+    niches: niches.data?.items ?? [],
+    cities: cities.data?.items ?? [],
+    isLoading: niches.isPending || cities.isPending,
+  });
 
-  const hasActiveFilters = q !== "" || filter !== "all";
+  const filtering = useFilterController({
+    fields: filterFields,
+    value: filters,
+    onChange: changeFilters,
+  });
+
+  const hasActiveFilters = q !== "" || filters.length > 0;
   const customers = data?.items ?? [];
 
   const activeIndex = useListNavigation({
     count: customers.length,
-    resetKey: `${q}|${filter}|${page}`,
+    resetKey: `${q}|${JSON.stringify(filters)}|${page}`,
     onActivate: (index) => {
       const customer = customers[index];
       if (customer) {
@@ -91,20 +102,18 @@ export function CustomersPage() {
     <div className="flex h-full min-h-[32rem] flex-col gap-4 p-6">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-2xl font-semibold tracking-tight">Clientes</h2>
-        <Button variant="outline" className="font-semibold" title="Novo cliente (N)" onClick={() => setIsCreating(true)}>
+        <div className="flex gap-2">
+          <FilterButton controller={filtering} />
+          <Button variant="outline" className="dark:bg-background font-semibold" title="Novo cliente (N)" onClick={() => setIsCreating(true)}>
           <UserPlusIcon />
           Novo cliente
-        </Button>
+          </Button>
+        </div>
         <CreateCustomerSheet open={isCreating} onOpenChange={setIsCreating} />
       </div>
 
       <div className="flex flex-col gap-3">
-        <FilterChips
-          ariaLabel="Filtrar clientes"
-          options={filterOptions}
-          value={filter}
-          onChange={changeFilter}
-        />
+        <ActiveFilters controller={filtering} />
         <SearchField
           className="max-w-sm"
           placeholder="Buscar por nome, contato, nicho ou cidade"

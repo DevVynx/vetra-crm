@@ -1,12 +1,15 @@
 import type {
   CreateCustomerProjectRequest,
+  CreateCustomerProjectResponse,
   CreateCustomerRequest,
+  CreateCustomerResponse,
   CreateLedgerEntryRequest,
-  CustomerDetail,
-  CustomerListFilter,
+  CreateLedgerEntryResponse,
   CustomerListItem,
   CustomerProject,
-  LeadSummary,
+  FilterOptionsQuery,
+  FilterOptionsResponse,
+  GetCustomerResponse,
   LedgerEntry,
   ListCustomerProjectsResponse,
   ListCustomersQuery,
@@ -17,11 +20,12 @@ import type {
   WonDeal,
 } from "@vetra/contracts";
 
+import { normalizeText } from "@/shared/utils/text";
+
+import { distinctOptions, type FilterAccessors, matchesFilters } from "./filterEngine";
 import { addMockLead, leadContactFor, mockCustomerDocuments, mockLeads, updateMockLead } from "./fixtures";
-import { mockStore, normalizeText, openWonDeal, paginate, respond, sumBy } from "./store";
+import { mockStore, openWonDeal, paginate, respond, sumBy } from "./store";
 
-
-const CLIENT_FILTERS: CustomerListFilter[] = ["all", "with_active_project", "without_active_project"];
 
 const findDeal = (id: string): WonDeal => {
   const found = mockStore.wonDeals.find((deal) => deal.leadId === id);
@@ -75,17 +79,19 @@ const revenueOrExpenseEntry = (id: string, entryId: string): LedgerEntry => {
   return entry;
 };
 
-const matchesFilter = (leadId: string, filter: CustomerListFilter) => {
-  if (filter === "all") return true;
-  const hasActive = activeProjectsOf(leadId).length > 0;
-  return filter === "with_active_project" ? hasActive : !hasActive;
+const customerFilterAccessors: FilterAccessors<CustomerListItem> = {
+  niche: (customer) => customer.niche,
+  city: (customer) => customer.city,
+  closed_value: (customer) => customer.closedValueInCents,
+  monthly_fee: (customer) => customer.monthlyFeeInCents !== null,
+  active_project: (customer) => customer.activeProjectsCount > 0,
+  closed_at: (customer) => customer.closedAt,
 };
 
 export const customersMockApi = {
-  listCustomers({ q, filter, page, pageSize }: ListCustomersQuery): Promise<ListCustomersResponse> {
+  listCustomers({ q, filters, page, pageSize }: ListCustomersQuery): Promise<ListCustomersResponse> {
     const search = normalizeText(q);
     const items = mockStore.wonDeals
-      .filter((deal) => matchesFilter(deal.leadId, filter))
       .map((deal): CustomerListItem => {
         const lead = findLead(deal.leadId);
         return {
@@ -98,6 +104,7 @@ export const customersMockApi = {
           projectsCount: projectsOf(deal.leadId).length,
         };
       })
+      .filter((customer) => matchesFilters(customer, filters, customerFilterAccessors))
       .filter((customer) =>
         [customer.businessName, customer.contactName ?? "", customer.niche, customer.city].some((field) =>
           normalizeText(field).includes(search)
@@ -105,17 +112,16 @@ export const customersMockApi = {
       )
       .sort((a, b) => b.closedAt.localeCompare(a.closedAt));
 
-    const counts = Object.fromEntries(
-      CLIENT_FILTERS.map((option) => [
-        option,
-        mockStore.wonDeals.filter((deal) => matchesFilter(deal.leadId, option)).length,
-      ])
-    ) as ListCustomersResponse["counts"];
-
-    return respond({ ...paginate(items, page, pageSize), counts });
+    return respond(paginate(items, page, pageSize));
   },
 
-  getCustomer(id: string): Promise<CustomerDetail> {
+  getCustomerFilterOptions({ field }: FilterOptionsQuery): Promise<FilterOptionsResponse> {
+    return respond({
+      items: distinctOptions(mockStore.wonDeals.map((deal) => findLead(deal.leadId)[field])),
+    });
+  },
+
+  getCustomer(id: string): Promise<GetCustomerResponse> {
     const deal = findDeal(id);
     const lead = findLead(id);
     const projects = projectsOf(id);
@@ -170,7 +176,7 @@ export const customersMockApi = {
     return respond({ projects });
   },
 
-  createLedgerEntry(id: string, request: CreateLedgerEntryRequest): Promise<LedgerEntry> {
+  createLedgerEntry(id: string, request: CreateLedgerEntryRequest): Promise<CreateLedgerEntryResponse> {
     const deal = findDeal(id);
     const createdAt = new Date().toISOString();
     const entryId = crypto.randomUUID();
@@ -237,7 +243,7 @@ export const customersMockApi = {
     return respond(undefined);
   },
 
-  createCustomerProject(id: string, request: CreateCustomerProjectRequest): Promise<CustomerProject> {
+  createCustomerProject(id: string, request: CreateCustomerProjectRequest): Promise<CreateCustomerProjectResponse> {
     findDeal(id);
     const project: CustomerProject = {
       id: crypto.randomUUID(),
@@ -255,7 +261,7 @@ export const customersMockApi = {
     return respond(undefined);
   },
 
-  createCustomer({ document, closedValueInCents, firstInstallmentDueAt, ...contact }: CreateCustomerRequest): Promise<LeadSummary> {
+  createCustomer({ document, closedValueInCents, firstInstallmentDueAt, ...contact }: CreateCustomerRequest): Promise<CreateCustomerResponse> {
     const created = addMockLead(contact, "won");
     mockCustomerDocuments[created.id] = document;
     openWonDeal(created.id, closedValueInCents, firstInstallmentDueAt);

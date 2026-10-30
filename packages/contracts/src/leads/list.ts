@@ -1,19 +1,20 @@
 import { z } from "zod";
 
-import { liveStageSchema, leadSummarySchema } from "./common";
+import { filtersParamSchema } from "../filters";
+import { leadSummarySchema } from "./common";
 
-// "all" is every live lead (not won, lost or without response); "archived" is lost plus no_response.
-export const leadListFilterSchema = z.enum([
-  "all",
-  "without_next_action",
-  "archived",
-  ...liveStageSchema.options,
-]);
-export type LeadListFilter = z.infer<typeof leadListFilterSchema>;
+export const leadFilterFields = [
+  "stage",
+  "niche",
+  "city",
+  "next_action",
+  "last_contact",
+  "prospected_at",
+] as const;
 
 export const listLeadsQuerySchema = z.object({
   q: z.string().trim().default(""),
-  filter: leadListFilterSchema.default("all"),
+  filters: filtersParamSchema(leadFilterFields),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
 });
@@ -30,6 +31,5 @@ export const listLeadsResponseSchema = z.object({
   total: z.number().int().nonnegative(),
   page: z.number().int().positive(),
   pageSize: z.number().int().positive(),
-  counts: z.record(leadListFilterSchema, z.number().int().nonnegative()),
 });
 export type ListLeadsResponse = z.infer<typeof listLeadsResponseSchema>;

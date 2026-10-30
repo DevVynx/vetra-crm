@@ -1,4 +1,4 @@
-import type { LeadListFilter, LeadStage } from "@vetra/contracts";
+import type { LeadStage } from "@vetra/contracts";
 
 export const liveStages = [
   "prospected",
@@ -11,9 +11,3 @@ export const liveStages = [
 
 export const isLiveStage = (stage: LeadStage) =>
   (liveStages as readonly LeadStage[]).includes(stage);
-
-export const leadFilterLabels: Partial<Record<LeadListFilter, string>> = {
-  all: "Todos",
-  without_next_action: "Sem próxima ação",
-  archived: "Arquivados",
-};

@@ -1,22 +1,24 @@
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import type { LeadListFilter } from "@vetra/contracts";
+import type { Filter } from "@vetra/contracts";
 import { ListChecksIcon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { useState } from "react";
 
-import { type FilterChipOption, FilterChips } from "@/shared/components/FilterChips";
+import { ActiveFilters } from "@/shared/components/filters/ActiveFilters";
+import { FilterButton } from "@/shared/components/filters/FilterButton";
+import { useFilterController } from "@/shared/components/filters/useFilterController";
 import { Pagination } from "@/shared/components/Pagination";
 import { SearchField } from "@/shared/components/SearchField";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { Button } from "@/shared/components/ui/button";
 import { selectedChoiceClass } from "@/shared/constants/choiceStyles";
-import { leadStageColor, leadStageLabels } from "@/shared/constants/leadStages";
 import { useDebouncedCallback } from "@/shared/hooks/useDebouncedCallback";
 import { useHotkey } from "@/shared/hooks/useHotkey";
 import { useListNavigation } from "@/shared/hooks/useListNavigation";
 import { TABLE_MIN_HEIGHT, useTablePageSize } from "@/shared/hooks/useTablePageSize";
 import { cn } from "@/shared/utils/cn";
 
-import { leadFilterLabels, liveStages } from "../constants/leadFilters";
+import { buildLeadFilterFields } from "../constants/leadFilterFields";
+import { useLeadFilterOptions } from "../queries/useLeadFilterOptions";
 import { useLeads } from "../queries/useLeads";
 import { CreateLeadSheet } from "./CreateLeadSheet";
 import { LeadsBulkBar } from "./LeadsBulkBar";
@@ -26,11 +28,13 @@ const SEARCH_DEBOUNCE_IN_MS = 300;
 
 const route = getRouteApi("/_app/leads/");
 
+const NO_FILTERS: Filter[] = [];
+
 const focusSearch = () => document.querySelector<HTMLInputElement>("[data-search-field]")?.focus();
 
 export function LeadsPage() {
   const search = route.useSearch();
-  const { q = "", filter = "all", page = 1 } = search;
+  const { q = "", filters = NO_FILTERS, page = 1 } = search;
   const navigate = route.useNavigate();
   const [searchText, setSearchText] = useState(q);
   const [isCreating, setIsCreating] = useState(false);
@@ -39,7 +43,7 @@ export function LeadsPage() {
   const navigateToLead = useNavigate();
   const { ref: tableRef, pageSize } = useTablePageSize();
   const { data, isPending, isPlaceholderData } = useLeads(
-    { q, filter, page, pageSize },
+    { q, filters, page, pageSize },
     { enabled: pageSize > 0 }
   );
 
@@ -50,11 +54,11 @@ export function LeadsPage() {
     });
   }, SEARCH_DEBOUNCE_IN_MS);
 
-  const changeFilter = (next: LeadListFilter) =>
+  const changeFilters = (next: Filter[]) =>
     navigate({
       search: (previous) => ({
         ...previous,
-        filter: next === "all" ? undefined : next,
+        filters: next.length > 0 ? next : undefined,
         page: undefined,
       }),
     });
@@ -67,24 +71,21 @@ export function LeadsPage() {
     navigate({ search: {} });
   };
 
-  const counts = data?.counts;
-  const filterOptions: FilterChipOption<LeadListFilter>[] = [
-    { value: "all", label: leadFilterLabels.all ?? "Todos", count: counts?.all },
-    ...liveStages.map((stage) => ({
-      value: stage,
-      label: leadStageLabels[stage],
-      color: leadStageColor(stage),
-      count: counts?.[stage],
-    })),
-    {
-      value: "without_next_action",
-      label: leadFilterLabels.without_next_action ?? "",
-      count: counts?.without_next_action,
-    },
-    { value: "archived", label: leadFilterLabels.archived ?? "", count: counts?.archived },
-  ];
+  const niches = useLeadFilterOptions("niche");
+  const cities = useLeadFilterOptions("city");
+  const filterFields = buildLeadFilterFields({
+    niches: niches.data?.items ?? [],
+    cities: cities.data?.items ?? [],
+    isLoading: niches.isPending || cities.isPending,
+  });
 
-  const hasActiveFilters = q !== "" || filter !== "all";
+  const filtering = useFilterController({
+    fields: filterFields,
+    value: filters,
+    onChange: changeFilters,
+  });
+
+  const hasActiveFilters = q !== "" || filters.length > 0;
   const leads = data?.items ?? [];
 
   const stopSelecting = () => {
@@ -109,7 +110,7 @@ export function LeadsPage() {
 
   const activeIndex = useListNavigation({
     count: leads.length,
-    resetKey: `${q}|${filter}|${page}`,
+    resetKey: `${q}|${JSON.stringify(filters)}|${page}`,
     onActivate: (index) => {
       const lead = leads[index];
       if (!lead) return;
@@ -128,16 +129,17 @@ export function LeadsPage() {
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-2xl font-semibold tracking-tight">Leads</h2>
         <div className="flex gap-2">
+          <FilterButton controller={filtering} />
           <Button
             variant="outline"
-            className={cn(isSelecting && selectedChoiceClass)}
+            className={cn("dark:bg-background font-semibold", isSelecting && selectedChoiceClass)}
             aria-pressed={isSelecting}
             onClick={isSelecting ? stopSelecting : () => setIsSelecting(true)}
           >
             <ListChecksIcon />
             {isSelecting ? "Concluir seleção" : "Selecionar"}
           </Button>
-          <Button variant="outline" className="font-semibold" title="Novo lead (N)" onClick={() => setIsCreating(true)}>
+          <Button variant="outline" className="dark:bg-background font-semibold" title="Novo lead (N)" onClick={() => setIsCreating(true)}>
             <UserPlusIcon />
             Novo lead
           </Button>
@@ -146,12 +148,7 @@ export function LeadsPage() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <FilterChips
-          ariaLabel="Filtrar leads"
-          options={filterOptions}
-          value={filter}
-          onChange={changeFilter}
-        />
+        <ActiveFilters controller={filtering} />
         <SearchField
           className="max-w-sm"
           placeholder="Buscar por nome, contato, nicho ou cidade"

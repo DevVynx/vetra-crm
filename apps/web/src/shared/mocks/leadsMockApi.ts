@@ -1,10 +1,14 @@
 import {
   type CloseLeadRequest,
+  type CloseLeadResponse,
   type CreateLeadNoteRequest,
+  type CreateLeadNoteResponse,
   type CreateLeadRequest,
-  type LeadDetail,
-  type LeadListFilter,
-  leadListFilterSchema,
+  type CreateLeadResponse,
+  type Filter,
+  type FilterOptionsQuery,
+  type FilterOptionsResponse,
+  type GetLeadResponse,
   type LeadNote,
   type LeadSummary,
   type ListLeadNotesResponse,
@@ -13,12 +17,17 @@ import {
   type ListNextActionsResponse,
   liveStageSchema,
   type UpdateLeadNoteRequest,
+  type UpdateLeadNoteResponse,
   type UpdateLeadRequest,
   type UpdateLeadStageRequest,
+  type UpdateLeadStageResponse,
 } from "@vetra/contracts";
 
+import { normalizeText } from "@/shared/utils/text";
+
+import { distinctOptions, type FilterAccessors, matchesFilters } from "./filterEngine";
 import { addMockLead, lastContactFor, leadContactFor, mockLeads, updateMockLead } from "./fixtures";
-import { mockStore, normalizeText, openWonDeal, paginate, respond } from "./store";
+import { mockStore, openWonDeal, paginate, respond } from "./store";
 
 
 const isLive = (lead: LeadSummary) => liveStageSchema.safeParse(lead.stage).success;
@@ -28,18 +37,23 @@ const nextActionOf = (leadId: string) =>
     .filter((action) => action.lead.id === leadId)
     .sort((a, b) => a.dueAt.localeCompare(b.dueAt))[0];
 
-const matchesFilter = (lead: LeadSummary, filter: LeadListFilter) => {
-  switch (filter) {
-    case "all":
-      return isLive(lead);
-    case "without_next_action":
-      return isLive(lead) && !nextActionOf(lead.id);
-    case "archived":
-      return lead.stage === "lost" || lead.stage === "no_response";
-    default:
-      return lead.stage === filter;
-  }
+const leadFilterAccessors: FilterAccessors<LeadSummary> = {
+  stage: (lead) => lead.stage,
+  niche: (lead) => lead.niche,
+  city: (lead) => lead.city,
+  next_action: (lead) => Boolean(nextActionOf(lead.id)),
+  last_contact: (lead) => lastContactFor(lead),
+  prospected_at: (lead) => lead.prospectedAt,
 };
+
+// Archived leads stay out of every list unless the user asks for them with Etapa "é".
+const showsArchived = (filters: Filter[]) =>
+  filters.some(
+    ({ field, operator, values }) =>
+      field === "stage" &&
+      (operator === "is" || operator === "is_any_of") &&
+      values.some((value) => value === "lost" || value === "no_response")
+  );
 
 const matchesSearch = (lead: LeadSummary, query: string) => {
   const search = normalizeText(query);
@@ -72,9 +86,15 @@ const moveLead = (lead: LeadSummary, stage: UpdateLeadStageRequest["stage"]): Le
 };
 
 export const leadsMockApi = {
-  listLeads({ q, filter, page, pageSize }: ListLeadsQuery): Promise<ListLeadsResponse> {
+  listLeads({ q, filters, page, pageSize }: ListLeadsQuery): Promise<ListLeadsResponse> {
+    const archivedVisible = showsArchived(filters);
     const items = mockLeads
-      .filter((lead) => matchesFilter(lead, filter) && matchesSearch(lead, q))
+      .filter(
+        (lead) =>
+          (isLive(lead) || (archivedVisible && isArchivedStage(lead.stage))) &&
+          matchesFilters(lead, filters, leadFilterAccessors) &&
+          matchesSearch(lead, q)
+      )
       .map((lead) => {
         const action = nextActionOf(lead.id);
         return {
@@ -89,17 +109,16 @@ export const leadsMockApi = {
         return b.prospectedAt.localeCompare(a.prospectedAt);
       });
 
-    const counts = Object.fromEntries(
-      leadListFilterSchema.options.map((option) => [
-        option,
-        mockLeads.filter((lead) => matchesFilter(lead, option)).length,
-      ])
-    ) as ListLeadsResponse["counts"];
-
-    return respond({ ...paginate(items, page, pageSize), counts });
+    return respond(paginate(items, page, pageSize));
   },
 
-  getLead(id: string): Promise<LeadDetail> {
+  getLeadFilterOptions({ field }: FilterOptionsQuery): Promise<FilterOptionsResponse> {
+    return respond({
+      items: distinctOptions(mockLeads.filter(isLive).map((lead) => lead[field])),
+    });
+  },
+
+  getLead(id: string): Promise<GetLeadResponse> {
     const lead = findLead(id);
     return respond({ ...lead, ...leadContactFor(lead) });
   },
@@ -122,7 +141,7 @@ export const leadsMockApi = {
     });
   },
 
-  createLeadNote(leadId: string, { content }: CreateLeadNoteRequest): Promise<LeadNote> {
+  createLeadNote(leadId: string, { content }: CreateLeadNoteRequest): Promise<CreateLeadNoteResponse> {
     findLead(leadId);
     const note: LeadNote = {
       id: crypto.randomUUID(),
@@ -134,7 +153,7 @@ export const leadsMockApi = {
     return respond(note);
   },
 
-  updateLeadNote(noteId: string, { content }: UpdateLeadNoteRequest): Promise<LeadNote> {
+  updateLeadNote(noteId: string, { content }: UpdateLeadNoteRequest): Promise<UpdateLeadNoteResponse> {
     const note = mockStore.notes.find((item) => item.id === noteId);
     if (!note) throw new Error(`Note ${noteId} not found`);
     const updated: LeadNote = { ...note, content };
@@ -152,7 +171,7 @@ export const leadsMockApi = {
     return respond(undefined);
   },
 
-  updateLeadStage(id: string, { stage }: UpdateLeadStageRequest): Promise<LeadSummary> {
+  updateLeadStage(id: string, { stage }: UpdateLeadStageRequest): Promise<UpdateLeadStageResponse> {
     return respond(moveLead(findLead(id), stage));
   },
 
@@ -169,7 +188,7 @@ export const leadsMockApi = {
     return respond(undefined);
   },
 
-  closeLead(id: string, { closedValueInCents, firstInstallmentDueAt }: CloseLeadRequest): Promise<LeadSummary> {
+  closeLead(id: string, { closedValueInCents, firstInstallmentDueAt }: CloseLeadRequest): Promise<CloseLeadResponse> {
     const lead = findLead(id);
     openWonDeal(id, closedValueInCents, firstInstallmentDueAt);
     mockStore.nextActions = mockStore.nextActions.filter((action) => action.lead.id !== id);
@@ -178,7 +197,7 @@ export const leadsMockApi = {
     return respond(closed);
   },
 
-  createLead(request: CreateLeadRequest): Promise<LeadSummary> {
+  createLead(request: CreateLeadRequest): Promise<CreateLeadResponse> {
     return respond(addMockLead(request, "prospected"));
   },
 
