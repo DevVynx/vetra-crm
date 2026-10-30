@@ -9,7 +9,7 @@ import {
   emptyContactValues,
   toLeadRequest,
 } from "@/shared/utils/contactForm";
-import { formatPhone } from "@/shared/utils/format";
+import { maskPhone } from "@/shared/utils/masks";
 
 import { useUpdateLead } from "../mutations/useUpdateLead";
 
@@ -25,7 +25,7 @@ export function EditLeadSheet({ lead, open, onOpenChange }: EditLeadSheetProps) 
       ...emptyContactValues,
       businessName: lead.businessName,
       contactName: lead.contactName ?? "",
-      phone: formatPhone(lead.phone),
+      phone: maskPhone(lead.phone),
       email: lead.email ?? "",
       niche: lead.niche,
       city: lead.city,

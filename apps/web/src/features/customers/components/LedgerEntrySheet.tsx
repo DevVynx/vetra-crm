@@ -8,6 +8,7 @@ import { SegmentedChoice } from "@/shared/components/SegmentedChoice";
 import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { centsToInput, parseCurrencyToCents } from "@/shared/utils/format";
+import { maskCurrency,masked } from "@/shared/utils/masks";
 
 import { useLedgerEntryActions } from "../mutations/useLedgerEntryActions";
 
@@ -120,6 +121,7 @@ export function LedgerEntrySheet({
         <Input
           id="entry-description"
           autoFocus
+          placeholder="Ex.: Mensalidade de novembro"
           aria-invalid={Boolean(errors.description)}
           {...register("description", {
             validate: (text) => text.trim().length > 0 || "Descreva o registro.",
@@ -135,9 +137,12 @@ export function LedgerEntrySheet({
           inputMode="decimal"
           placeholder="R$ 0,00"
           aria-invalid={Boolean(errors.value)}
-          {...register("value", {
-            validate: (text) => parseCurrencyToCents(text) !== null || "Informe o valor.",
-          })}
+          {...masked(
+            register("value", {
+              validate: (text) => parseCurrencyToCents(text) !== null || "Informe o valor.",
+            }),
+            maskCurrency
+          )}
         />
         <FieldError errors={[errors.value]} />
       </Field>

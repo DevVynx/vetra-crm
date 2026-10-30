@@ -6,6 +6,7 @@ import { Input } from "@/shared/components/ui/input";
 import { formatDayLabel } from "@/shared/utils/date";
 import { inDays } from "@/shared/utils/dueDates";
 import { parseCurrencyToCents } from "@/shared/utils/format";
+import { maskCurrency,masked } from "@/shared/utils/masks";
 
 export type DealFormValues = {
   value: string;
@@ -30,9 +31,13 @@ export function DealFields({ autoFocus = false }: { autoFocus?: boolean }) {
           inputMode="decimal"
           placeholder="R$ 0,00"
           aria-invalid={Boolean(errors.value)}
-          {...register("value", {
-            validate: (text) => parseCurrencyToCents(text) !== null || "Informe o valor fechado.",
-          })}
+          {...masked(
+            register("value", {
+              validate: (text) =>
+                parseCurrencyToCents(text) !== null || "Informe o valor fechado.",
+            }),
+            maskCurrency
+          )}
         />
         <FieldError errors={[errors.value]} />
       </Field>

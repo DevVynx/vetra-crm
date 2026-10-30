@@ -9,6 +9,7 @@ import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { atDefaultHour } from "@/shared/utils/dueDates";
 import { parseCurrencyToCents } from "@/shared/utils/format";
+import { maskCurrency,masked } from "@/shared/utils/masks";
 
 import { useCreateCustomerProject } from "../mutations/useCreateCustomerProject";
 
@@ -73,6 +74,7 @@ export function CreateProjectSheet({ customerId, open, onOpenChange }: CreatePro
         <Input
           id="project-name"
           autoFocus
+          placeholder="Ex.: Site institucional"
           aria-invalid={Boolean(errors.name)}
           {...register("name", { validate: (text) => text.trim().length > 0 || "Informe o nome." })}
         />
@@ -86,9 +88,12 @@ export function CreateProjectSheet({ customerId, open, onOpenChange }: CreatePro
           inputMode="decimal"
           placeholder="R$ 0,00"
           aria-invalid={Boolean(errors.value)}
-          {...register("value", {
-            validate: (text) => parseCurrencyToCents(text) !== null || "Informe o valor.",
-          })}
+          {...masked(
+            register("value", {
+              validate: (text) => parseCurrencyToCents(text) !== null || "Informe o valor.",
+            }),
+            maskCurrency
+          )}
         />
         <FieldError errors={[errors.value]} />
       </Field>

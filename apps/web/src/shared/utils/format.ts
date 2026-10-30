@@ -1,3 +1,5 @@
+import { maskCurrency } from "./masks";
+
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
@@ -54,5 +56,5 @@ export function parseCurrencyToCents(text: string): number | null {
 }
 
 export function centsToInput(valueInCents: number): string {
-  return (valueInCents / 100).toFixed(2).replace(".", ",");
+  return maskCurrency(String(valueInCents));
 }
