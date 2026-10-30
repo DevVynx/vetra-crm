@@ -25,7 +25,7 @@ export function PeriodSelect({ value, onChange }: PeriodSelectProps) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" className="dark:bg-background" />}>
+      <DropdownMenuTrigger render={<Button variant="outline" className="dark:bg-background font-semibold" />}>
         <CalendarIcon />
         {dashboardPeriodLabels[value]}
         <ChevronDownIcon className="text-muted-foreground" />

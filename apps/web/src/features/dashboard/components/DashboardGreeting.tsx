@@ -1,5 +1,5 @@
 import type { DashboardPeriod } from "@vetra/contracts";
-import { BoxIcon, UserPlusIcon } from "lucide-react";
+import { UserPlusIcon } from "lucide-react";
 import { useState } from "react";
 
 import { CreateLeadSheet } from "@/features/leads/components/CreateLeadSheet";
@@ -38,15 +38,11 @@ export function DashboardGreeting({ period, onPeriodChange }: DashboardGreetingP
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" className="font-semibold" title="Novo lead (N)" onClick={() => setIsCreatingLead(true)}>
+        <Button variant="outline" className="dark:bg-background font-semibold" title="Novo lead (N)" onClick={() => setIsCreatingLead(true)}>
           <UserPlusIcon />
           Novo lead
         </Button>
         <CreateLeadSheet open={isCreatingLead} onOpenChange={setIsCreatingLead} />
-        <Button className="bg-info text-info-foreground hover:bg-info/85 font-semibold">
-          <BoxIcon />
-          Novo projeto
-        </Button>
         <PeriodSelect value={period} onChange={onPeriodChange} />
       </div>
     </div>
