@@ -221,6 +221,8 @@ export function updateMockLead(
 
 export function lastContactFor(item: LeadSummary): string | null {
   if (item.stage === "prospected" || item.stage === "demo_published") return null;
+  const awaiting = awaitingConversationOf(item.id);
+  if (awaiting) return awaiting.lastMessageAt;
   const index = mockLeads.findIndex((candidate) => candidate.id === item.id);
   const daysSinceProspected = Math.max(
     0,
@@ -307,7 +309,17 @@ function buildExtraNextActions(): NextAction[] {
     });
 }
 
+let awaitingConversations: ConversationSummary[] | undefined;
+
 export function buildMockAwaitingConversations(): ConversationSummary[] {
+  awaitingConversations ??= createAwaitingConversations();
+  return awaitingConversations;
+}
+
+export const awaitingConversationOf = (leadId: string) =>
+  buildMockAwaitingConversations().find((conversation) => conversation.lead?.id === leadId);
+
+function createAwaitingConversations(): ConversationSummary[] {
   const now = new Date();
 
   return [

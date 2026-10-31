@@ -2,6 +2,7 @@ import { PlusIcon, StickyNoteIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Section } from "@/shared/components/Section";
+import { SectionEmptyRow } from "@/shared/components/SectionEmptyRow";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import { Button } from "@/shared/components/ui/button";
 
@@ -64,13 +65,12 @@ export function LeadNotes({ leadId }: { leadId: string }) {
         {isPending ? (
           <SectionSkeleton rows={2} />
         ) : notes.length === 0 && !isAdding ? (
-          <div className="flex items-center justify-between gap-2 rounded-lg border border-dashed py-1.5 pr-1.5 pl-3">
-            <p className="text-muted-foreground text-sm">Nenhuma nota ainda.</p>
+          <SectionEmptyRow text="Nenhuma nota ainda.">
             <Button size="sm" variant="ghost" onClick={startAdding}>
               <PlusIcon />
               Adicionar
             </Button>
-          </div>
+          </SectionEmptyRow>
         ) : (
           <ul className="flex flex-col gap-2">
             {notes.map((note) => (

@@ -16,8 +16,11 @@ import { useHotkey } from "@/shared/hooks/useHotkey";
 import { useLead } from "@/shared/queries/leads/useLead";
 import { formatLastContact } from "@/shared/utils/date";
 
+import { useLeadConversation } from "../queries/useLeadConversation";
+import { conversationStateOf } from "../utils/conversationState";
 import { LeadActionsMenu } from "./LeadActionsMenu";
 import { LeadActivities } from "./LeadActivities";
+import { LeadConversation } from "./LeadConversation";
 import { LeadNotes } from "./LeadNotes";
 import { LeadStageStepper } from "./LeadStageStepper";
 import { NewActivitySheet } from "./NewActivitySheet";
@@ -27,11 +30,12 @@ const route = getRouteApi("/_app/leads/$leadId");
 export function LeadDetailPage() {
   const { leadId } = route.useParams();
   const { data: lead, isPending } = useLead(leadId);
+  const { data: conversationData, isPending: isConversationPending } = useLeadConversation(leadId);
   usePageCrumb(lead?.businessName);
   const [isAddingActivity, setIsAddingActivity] = useState(false);
   useHotkey("n", () => setIsAddingActivity(true), Boolean(lead) && lead?.stage !== "won");
 
-  if (isPending) return <DetailSkeleton />;
+  if (isPending || isConversationPending) return <DetailSkeleton />;
 
   if (!lead) {
     return (
@@ -48,6 +52,14 @@ export function LeadDetailPage() {
     return <Navigate to="/customers/$customerId" params={{ customerId: lead.id }} replace />;
   }
 
+  const conversation = conversationData?.conversation;
+  const conversationState = conversation ? conversationStateOf(conversation) : null;
+  const contactStatus =
+    conversationState?.statusText ??
+    (lead.lastContactAt
+      ? `Último contato ${formatLastContact(new Date(lead.lastContactAt))}`
+      : "Sem contato ainda");
+
   return (
     <SplitDetailLayout
       storageKey="lead-detail-panel-open"
@@ -61,9 +73,7 @@ export function LeadDetailPage() {
               <>
                 {leadStageLabels[lead.stage]} {formatLastContact(new Date(lead.stageChangedAt))}
                 {" · "}
-                {lead.lastContactAt
-                  ? `Último contato ${formatLastContact(new Date(lead.lastContactAt))}`
-                  : "Sem contato ainda"}
+                {contactStatus}
               </>
             }
             actions={<LeadActionsMenu lead={lead} />}
@@ -104,6 +114,7 @@ export function LeadDetailPage() {
       />
       <LeadStageStepper lead={lead} />
       <LeadActivities lead={lead} />
+      <LeadConversation leadId={lead.id} />
     </SplitDetailLayout>
   );
 }

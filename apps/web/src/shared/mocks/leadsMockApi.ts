@@ -10,6 +10,7 @@ import {
   type Filter,
   type FilterOptionsQuery,
   type FilterOptionsResponse,
+  type GetLeadConversationResponse,
   type GetLeadResponse,
   type LeadNote,
   type LeadSummary,
@@ -28,6 +29,7 @@ import {
 
 import { normalizeText } from "@/shared/utils/text";
 
+import { buildMockConversation } from "./conversations";
 import { distinctOptions, type FilterAccessors, matchesFilters } from "./filterEngine";
 import {
   addMockLead,
@@ -38,6 +40,8 @@ import {
   updateMockLead,
 } from "./fixtures";
 import { mockStore, openWonDeal, paginate, respond } from "./store";
+
+const LATEST_MESSAGES = 4;
 
 const isLive = (lead: LeadSummary) => liveStageSchema.safeParse(lead.stage).success;
 
@@ -136,6 +140,16 @@ export const leadsMockApi = {
   getLead(id: string): Promise<GetLeadResponse> {
     const lead = findLead(id);
     return respond({ ...lead, ...leadContactFor(lead) });
+  },
+
+  getLeadConversation(leadId: string): Promise<GetLeadConversationResponse> {
+    const conversation = buildMockConversation(findLead(leadId));
+    return respond({
+      conversation: conversation && {
+        ...conversation,
+        messages: conversation.messages.slice(-LATEST_MESSAGES),
+      },
+    });
   },
 
   listLeadNextActions(leadId: string): Promise<ListNextActionsResponse> {
