@@ -76,7 +76,7 @@ export function CustomerDetailPage() {
           />
           <ContactCard
             lead={customer}
-            title="Propriedades"
+            title="Informações"
             document={customer.document}
             showDemo={false}
           />
