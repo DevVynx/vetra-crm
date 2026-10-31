@@ -2,6 +2,7 @@ import type { LeadDetail } from "@vetra/contracts";
 import { ExternalLinkIcon, InfoIcon } from "lucide-react";
 
 import { Section } from "@/shared/components/Section";
+import { Button } from "@/shared/components/ui/button";
 
 import { PhoneProperty } from "./PhoneProperty";
 import { Property, PropertyList } from "./PropertyList";
@@ -38,15 +39,21 @@ export function ContactCard({ lead, title, document, showDemo = true }: ContactC
         <Property label="Cidade">{lead.city}</Property>
         {showDemo && lead.demoUrl && (
           <Property label="Demo">
-            <a
-              href={lead.demoUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 hover:underline"
-            >
-              {new URL(lead.demoUrl).host}
-              <ExternalLinkIcon className="size-3" />
-            </a>
+            <div className="flex items-center gap-1">
+              <a href={lead.demoUrl} target="_blank" rel="noreferrer" className="hover:underline">
+                {new URL(lead.demoUrl).host}
+              </a>
+              <Button
+                size="icon-xs"
+                variant="ghost"
+                aria-label="Abrir demo"
+                title="Abrir demo"
+                nativeButton={false}
+                render={<a href={lead.demoUrl} target="_blank" rel="noreferrer" />}
+              >
+                <ExternalLinkIcon />
+              </Button>
+            </div>
           </Property>
         )}
       </PropertyList>

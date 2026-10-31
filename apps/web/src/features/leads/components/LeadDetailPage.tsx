@@ -8,10 +8,13 @@ import { DetailIdentity } from "@/shared/components/detail/DetailIdentity";
 import { DetailPanelTrigger } from "@/shared/components/detail/DetailPanelTrigger";
 import { DetailNotFound, DetailSkeleton } from "@/shared/components/detail/DetailStates";
 import { SplitDetailLayout } from "@/shared/components/detail/SplitDetailLayout";
+import { WhatsAppButton } from "@/shared/components/detail/WhatsAppButton";
 import { usePageCrumb } from "@/shared/components/layout/PageCrumb";
 import { Button } from "@/shared/components/ui/button";
+import { leadStageLabels } from "@/shared/constants/leadStages";
 import { useHotkey } from "@/shared/hooks/useHotkey";
 import { useLead } from "@/shared/queries/leads/useLead";
+import { formatLastContact } from "@/shared/utils/date";
 
 import { LeadActionsMenu } from "./LeadActionsMenu";
 import { LeadActivities } from "./LeadActivities";
@@ -54,6 +57,15 @@ export function LeadDetailPage() {
             kind="Lead"
             name={lead.businessName}
             contactName={lead.contactName}
+            status={
+              <>
+                {leadStageLabels[lead.stage]} {formatLastContact(new Date(lead.stageChangedAt))}
+                {" · "}
+                {lead.lastContactAt
+                  ? `Último contato ${formatLastContact(new Date(lead.lastContactAt))}`
+                  : "Sem contato ainda"}
+              </>
+            }
             actions={<LeadActionsMenu lead={lead} />}
           />
           <ContactCard lead={lead} title="Informações" />
@@ -72,10 +84,17 @@ export function LeadDetailPage() {
     >
       <div className="-mb-2 flex items-center gap-2">
         <DetailPanelTrigger label="dados do lead" />
-        <Button className="ml-auto font-semibold" title="Nova atividade (N)" onClick={() => setIsAddingActivity(true)}>
-          <PlusIcon />
-          Nova atividade
-        </Button>
+        <div className="ml-auto flex gap-2">
+          <WhatsAppButton />
+          <Button
+            className="font-semibold"
+            title="Nova atividade (N)"
+            onClick={() => setIsAddingActivity(true)}
+          >
+            <PlusIcon />
+            Nova atividade
+          </Button>
+        </div>
       </div>
       <NewActivitySheet
         leadId={lead.id}

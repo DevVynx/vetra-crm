@@ -64,7 +64,13 @@ export function LeadNotes({ leadId }: { leadId: string }) {
         {isPending ? (
           <SectionSkeleton rows={2} />
         ) : notes.length === 0 && !isAdding ? (
-          <p className="text-muted-foreground text-sm">Nenhuma nota ainda.</p>
+          <div className="flex items-center justify-between gap-2 rounded-lg border border-dashed py-1.5 pr-1.5 pl-3">
+            <p className="text-muted-foreground text-sm">Nenhuma nota ainda.</p>
+            <Button size="sm" variant="ghost" onClick={startAdding}>
+              <PlusIcon />
+              Adicionar
+            </Button>
+          </div>
         ) : (
           <ul className="flex flex-col gap-2">
             {notes.map((note) => (

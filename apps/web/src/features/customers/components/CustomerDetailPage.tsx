@@ -8,6 +8,7 @@ import { DetailIdentity } from "@/shared/components/detail/DetailIdentity";
 import { DetailPanelTrigger } from "@/shared/components/detail/DetailPanelTrigger";
 import { DetailNotFound, DetailSkeleton } from "@/shared/components/detail/DetailStates";
 import { SplitDetailLayout } from "@/shared/components/detail/SplitDetailLayout";
+import { WhatsAppButton } from "@/shared/components/detail/WhatsAppButton";
 import { usePageCrumb } from "@/shared/components/layout/PageCrumb";
 import { Button } from "@/shared/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
@@ -110,14 +111,17 @@ export function CustomerDetailPage() {
               Projetos
             </TabsTrigger>
           </TabsList>
-          <Button
-            className="ml-auto font-semibold"
-            title={`${tab === "financial" ? "Novo registro" : "Novo projeto"} (N)`}
-            onClick={() => setIsCreating(true)}
-          >
-            <PlusIcon />
-            {tab === "financial" ? "Novo registro" : "Novo projeto"}
-          </Button>
+          <div className="ml-auto flex gap-2">
+            <WhatsAppButton />
+            <Button
+              className="font-semibold"
+              title={`${tab === "financial" ? "Novo registro" : "Novo projeto"} (N)`}
+              onClick={() => setIsCreating(true)}
+            >
+              <PlusIcon />
+              {tab === "financial" ? "Novo registro" : "Novo projeto"}
+            </Button>
+          </div>
         </div>
         <LedgerEntrySheet
           customerId={customer.id}

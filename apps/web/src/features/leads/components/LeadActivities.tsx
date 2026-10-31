@@ -10,10 +10,12 @@ import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 
 import { isLiveStage } from "../constants/leadFilters";
 import { useLeadNextActions } from "../queries/useLeadNextActions";
+import { NextActionHighlight } from "./NextActionHighlight";
 
 export function LeadActivities({ lead }: { lead: LeadDetail }) {
   const { data, isPending } = useLeadNextActions(lead.id);
   const actions = data?.nextActions ?? [];
+  const [nextAction, ...laterActions] = actions;
   const todayStart = startOfToday();
 
   return (
@@ -25,16 +27,27 @@ export function LeadActivities({ lead }: { lead: LeadDetail }) {
     >
       {isPending ? (
         <SectionSkeleton rows={1} />
-      ) : actions.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          {actions.map((action) => (
-            <NextActionItem
-              key={action.id}
-              action={action}
-              showLead={false}
-              isOverdue={isBefore(new Date(action.dueAt), todayStart)}
-            />
-          ))}
+      ) : nextAction ? (
+        <div className="flex flex-col gap-4">
+          <NextActionHighlight
+            action={nextAction}
+            isOverdue={isBefore(new Date(nextAction.dueAt), todayStart)}
+          />
+          {laterActions.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Depois
+              </p>
+              {laterActions.map((action) => (
+                <NextActionItem
+                  key={action.id}
+                  action={action}
+                  showLead={false}
+                  isOverdue={isBefore(new Date(action.dueAt), todayStart)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       ) : isLiveStage(lead.stage) ? (
         <SectionEmpty
