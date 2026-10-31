@@ -14,7 +14,7 @@ const config = {
   bracketSpacing: true,
   bracketSameLine: false,
   arrowParens: "always",
-  endOfLine: "auto",
+  endOfLine: "lf",
   plugins: ["prettier-plugin-tailwindcss"],
 };
 
