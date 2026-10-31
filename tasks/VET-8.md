@@ -83,23 +83,29 @@ Funnel: Prospectado (entry) → Abordagem enviada → Conversando → Reunião �
 ## UI Elements
 
 **Configurações → Etapas do funil**
+
 - A list of funnel stages: drag handle, color swatch (opens the color picker), name editable in place, lead count, delete button; entry and closing rows show a lock instead of the handle and no delete button
 - "Adicionar etapa" button below the list
 - A second list "Arquivamento" with the same row, and its own "Adicionar etapa" button
 
 **Color picker popover**
+
 - 10 preset swatches and the free picker with hex input
 
 **Delete dialog**
+
 - Lead count, destination stage (the previous one) and confirmation
 
 **Edit notice**
+
 - Inline notice when the stage being edited has leads
 
 **Archive dialog**
+
 - Confirmation only (one archive stage) or confirmation with the archive stage choice (two or more)
 
 **Painel**
+
 - "Leads ativos" card with the last-middle-stage sub line
 
 ---
@@ -147,7 +153,7 @@ Not part of this issue (the backend does not exist yet). The model implies a `st
   - **Sortable** (`@diceui/sortable`) for drag-and-drop reordering.
   - **Color Picker** and **Color Swatch** (`@diceui/color-picker`) for the color field.
   - **Editable** (`@diceui/editable`) for the in-place name edit.
-  The base variants are built on Base UI, like the project; `Sortable` brings `@dnd-kit/*` and `@base-ui/utils` as dependencies.
+    The base variants are built on Base UI, like the project; `Sortable` brings `@dnd-kit/*` and `@base-ui/utils` as dependencies.
 - Replace `leadStageLabels`, `leadStageColor`, `funnelStages` and the `--stage-*` CSS variables with data from the stage query, keeping a stable helper for color and label lookup.
 - Adapt the stepper, stage badge, lead and customer lists, filters, `LeadActionsMenu`, `ArchiveLeadDialog`, `useChangeLeadStage`, and the dashboard components.
 - Loading, error and empty states for the Configurações page; keyboard-accessible reordering.
