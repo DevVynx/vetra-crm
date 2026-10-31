@@ -6,6 +6,8 @@ export const leadDetailSchema = leadSummarySchema.extend({
   phone: z.string().regex(/^\d{10,15}$/),
   email: z.email().nullable(),
   demoUrl: z.url().nullable(),
+  stageChangedAt: z.iso.datetime(),
+  lastContactAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -38,3 +40,6 @@ export type UpdateLeadNoteRequest = CreateLeadNoteRequest;
 
 export const updateLeadNoteResponseSchema = leadNoteSchema;
 export type UpdateLeadNoteResponse = z.infer<typeof updateLeadNoteResponseSchema>;
+
+export const deleteLeadNoteResponseSchema = z.void();
+export type DeleteLeadNoteResponse = z.infer<typeof deleteLeadNoteResponseSchema>;

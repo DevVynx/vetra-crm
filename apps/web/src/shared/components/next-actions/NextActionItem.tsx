@@ -4,7 +4,7 @@ import type { NextAction } from "@vetra/contracts";
 import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
 import { LeadStageBadge } from "@/shared/components/LeadStageBadge";
 import { CompleteActionPopover } from "@/shared/components/next-actions/CompleteActionPopover";
-import { ReschedulePopover } from "@/shared/components/next-actions/ReschedulePopover";
+import { EditNextActionButton } from "@/shared/components/next-actions/EditNextActionButton";
 import { Button } from "@/shared/components/ui/button";
 import {
   Item,
@@ -79,7 +79,7 @@ export function NextActionItem({
             <WhatsAppIcon />
           </Button>
         )}
-        <ReschedulePopover action={action} />
+        <EditNextActionButton action={action} />
         <CompleteActionPopover action={action} />
       </ItemActions>
     </Item>

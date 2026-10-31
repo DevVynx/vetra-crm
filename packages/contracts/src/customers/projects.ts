@@ -26,6 +26,7 @@ export const createCustomerProjectRequestSchema = z.object({
 export type CreateCustomerProjectRequest = z.infer<typeof createCustomerProjectRequestSchema>;
 
 export const createCustomerProjectResponseSchema = customerProjectSchema;
-export type CreateCustomerProjectResponse = z.infer<
-  typeof createCustomerProjectResponseSchema
->;
+export type CreateCustomerProjectResponse = z.infer<typeof createCustomerProjectResponseSchema>;
+
+export const deleteCustomerProjectResponseSchema = z.void();
+export type DeleteCustomerProjectResponse = z.infer<typeof deleteCustomerProjectResponseSchema>;

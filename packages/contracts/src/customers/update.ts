@@ -8,6 +8,12 @@ export const updateCustomerRequestSchema = leadContactFieldsSchema.extend({
 });
 export type UpdateCustomerRequest = z.infer<typeof updateCustomerRequestSchema>;
 
+export const updateCustomerResponseSchema = leadSummarySchema;
+export type UpdateCustomerResponse = z.infer<typeof updateCustomerResponseSchema>;
+
+export const deleteCustomerResponseSchema = z.void();
+export type DeleteCustomerResponse = z.infer<typeof deleteCustomerResponseSchema>;
+
 export const createCustomerRequestSchema = updateCustomerRequestSchema.extend({
   closedValueInCents: z.number().int().positive(),
   firstInstallmentDueAt: z.iso.datetime(),

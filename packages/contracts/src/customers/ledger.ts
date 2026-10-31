@@ -40,3 +40,9 @@ export type CreateLedgerEntryResponse = z.infer<typeof createLedgerEntryResponse
 
 export const updateLedgerEntryRequestSchema = ledgerEntryInputSchema;
 export type UpdateLedgerEntryRequest = z.infer<typeof updateLedgerEntryRequestSchema>;
+
+export const updateLedgerEntryResponseSchema = ledgerEntrySchema;
+export type UpdateLedgerEntryResponse = z.infer<typeof updateLedgerEntryResponseSchema>;
+
+export const deleteLedgerEntryResponseSchema = z.void();
+export type DeleteLedgerEntryResponse = z.infer<typeof deleteLedgerEntryResponseSchema>;

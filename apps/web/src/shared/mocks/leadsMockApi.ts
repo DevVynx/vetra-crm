@@ -5,6 +5,8 @@ import {
   type CreateLeadNoteResponse,
   type CreateLeadRequest,
   type CreateLeadResponse,
+  type DeleteLeadNoteResponse,
+  type DeleteLeadResponse,
   type Filter,
   type FilterOptionsQuery,
   type FilterOptionsResponse,
@@ -19,6 +21,7 @@ import {
   type UpdateLeadNoteRequest,
   type UpdateLeadNoteResponse,
   type UpdateLeadRequest,
+  type UpdateLeadResponse,
   type UpdateLeadStageRequest,
   type UpdateLeadStageResponse,
 } from "@vetra/contracts";
@@ -26,9 +29,15 @@ import {
 import { normalizeText } from "@/shared/utils/text";
 
 import { distinctOptions, type FilterAccessors, matchesFilters } from "./filterEngine";
-import { addMockLead, lastContactFor, leadContactFor, mockLeads, updateMockLead } from "./fixtures";
+import {
+  addMockLead,
+  lastContactFor,
+  leadContactFor,
+  mockContactOverrides,
+  mockLeads,
+  updateMockLead,
+} from "./fixtures";
 import { mockStore, openWonDeal, paginate, respond } from "./store";
-
 
 const isLive = (lead: LeadSummary) => liveStageSchema.safeParse(lead.stage).success;
 
@@ -68,7 +77,8 @@ const findLead = (id: string): LeadSummary => {
   return found;
 };
 
-const isArchivedStage = (stage: LeadSummary["stage"]) => stage === "lost" || stage === "no_response";
+const isArchivedStage = (stage: LeadSummary["stage"]) =>
+  stage === "lost" || stage === "no_response";
 
 const stoppedAtAfter = (lead: LeadSummary, stage: LeadSummary["stage"]) => {
   if (!isArchivedStage(stage)) return null;
@@ -79,6 +89,10 @@ const stoppedAtAfter = (lead: LeadSummary, stage: LeadSummary["stage"]) => {
 const moveLead = (lead: LeadSummary, stage: UpdateLeadStageRequest["stage"]): LeadSummary => {
   const updated: LeadSummary = { ...lead, stage, stoppedAtStage: stoppedAtAfter(lead, stage) };
   mockLeads[mockLeads.indexOf(lead)] = updated;
+  mockContactOverrides[lead.id] = {
+    ...mockContactOverrides[lead.id],
+    stageChangedAt: new Date().toISOString(),
+  };
   if (isArchivedStage(stage)) {
     mockStore.nextActions = mockStore.nextActions.filter((action) => action.lead.id !== lead.id);
   }
@@ -104,7 +118,8 @@ export const leadsMockApi = {
         };
       })
       .sort((a, b) => {
-        if (a.nextAction && b.nextAction) return a.nextAction.dueAt.localeCompare(b.nextAction.dueAt);
+        if (a.nextAction && b.nextAction)
+          return a.nextAction.dueAt.localeCompare(b.nextAction.dueAt);
         if (a.nextAction || b.nextAction) return a.nextAction ? -1 : 1;
         return b.prospectedAt.localeCompare(a.prospectedAt);
       });
@@ -141,7 +156,10 @@ export const leadsMockApi = {
     });
   },
 
-  createLeadNote(leadId: string, { content }: CreateLeadNoteRequest): Promise<CreateLeadNoteResponse> {
+  createLeadNote(
+    leadId: string,
+    { content }: CreateLeadNoteRequest
+  ): Promise<CreateLeadNoteResponse> {
     findLead(leadId);
     const note: LeadNote = {
       id: crypto.randomUUID(),
@@ -153,7 +171,10 @@ export const leadsMockApi = {
     return respond(note);
   },
 
-  updateLeadNote(noteId: string, { content }: UpdateLeadNoteRequest): Promise<UpdateLeadNoteResponse> {
+  updateLeadNote(
+    noteId: string,
+    { content }: UpdateLeadNoteRequest
+  ): Promise<UpdateLeadNoteResponse> {
     const note = mockStore.notes.find((item) => item.id === noteId);
     if (!note) throw new Error(`Note ${noteId} not found`);
     const updated: LeadNote = { ...note, content };
@@ -166,7 +187,7 @@ export const leadsMockApi = {
     return respond(undefined);
   },
 
-  deleteLeadNote(noteId: string): Promise<void> {
+  deleteLeadNote(noteId: string): Promise<DeleteLeadNoteResponse> {
     mockStore.notes = mockStore.notes.filter((item) => item.id !== noteId);
     return respond(undefined);
   },
@@ -184,11 +205,15 @@ export const leadsMockApi = {
   restoreLeads(leads: LeadSummary[]): Promise<void> {
     leads.forEach((lead) => {
       mockLeads[mockLeads.findIndex((item) => item.id === lead.id)] = lead;
+      delete mockContactOverrides[lead.id]?.stageChangedAt;
     });
     return respond(undefined);
   },
 
-  closeLead(id: string, { closedValueInCents, firstInstallmentDueAt }: CloseLeadRequest): Promise<CloseLeadResponse> {
+  closeLead(
+    id: string,
+    { closedValueInCents, firstInstallmentDueAt }: CloseLeadRequest
+  ): Promise<CloseLeadResponse> {
     const lead = findLead(id);
     openWonDeal(id, closedValueInCents, firstInstallmentDueAt);
     mockStore.nextActions = mockStore.nextActions.filter((action) => action.lead.id !== id);
@@ -201,13 +226,12 @@ export const leadsMockApi = {
     return respond(addMockLead(request, "prospected"));
   },
 
-  updateLead(id: string, request: UpdateLeadRequest): Promise<void> {
+  updateLead(id: string, request: UpdateLeadRequest): Promise<UpdateLeadResponse> {
     findLead(id);
-    updateMockLead(id, request);
-    return respond(undefined);
+    return respond(updateMockLead(id, request));
   },
 
-  deleteLead(id: string): Promise<void> {
+  deleteLead(id: string): Promise<DeleteLeadResponse> {
     const lead = findLead(id);
     mockLeads.splice(mockLeads.indexOf(lead), 1);
     mockStore.nextActions = mockStore.nextActions.filter((action) => action.lead.id !== id);

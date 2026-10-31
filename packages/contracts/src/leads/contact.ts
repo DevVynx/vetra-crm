@@ -19,3 +19,9 @@ export type CreateLeadResponse = z.infer<typeof createLeadResponseSchema>;
 
 export const updateLeadRequestSchema = leadContactFieldsSchema;
 export type UpdateLeadRequest = z.infer<typeof updateLeadRequestSchema>;
+
+export const updateLeadResponseSchema = leadSummarySchema;
+export type UpdateLeadResponse = z.infer<typeof updateLeadResponseSchema>;
+
+export const deleteLeadResponseSchema = z.void();
+export type DeleteLeadResponse = z.infer<typeof deleteLeadResponseSchema>;

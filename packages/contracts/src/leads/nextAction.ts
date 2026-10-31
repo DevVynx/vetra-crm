@@ -39,15 +39,22 @@ export const completeNextActionRequestSchema = z.object({
 });
 export type CompleteNextActionRequest = z.infer<typeof completeNextActionRequestSchema>;
 
-export const rescheduleNextActionRequestSchema = z.object({
-  dueAt: z.iso.datetime(),
-});
-export type RescheduleNextActionRequest = z.infer<typeof rescheduleNextActionRequestSchema>;
+export const completeNextActionResponseSchema = nextActionSchema;
+export type CompleteNextActionResponse = z.infer<typeof completeNextActionResponseSchema>;
+
+export const updateNextActionRequestSchema = nextActionInputSchema;
+export type UpdateNextActionRequest = z.infer<typeof updateNextActionRequestSchema>;
+
+export const updateNextActionResponseSchema = nextActionSchema;
+export type UpdateNextActionResponse = z.infer<typeof updateNextActionResponseSchema>;
 
 export const createNextActionRequestSchema = nextActionInputSchema.extend({
   leadId: z.string(),
 });
 export type CreateNextActionRequest = z.infer<typeof createNextActionRequestSchema>;
+
+export const createNextActionResponseSchema = nextActionSchema;
+export type CreateNextActionResponse = z.infer<typeof createNextActionResponseSchema>;
 
 export const listLeadsWithoutNextActionResponseSchema = z.object({
   leads: z.array(leadSummarySchema),

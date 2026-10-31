@@ -7,6 +7,9 @@ import type {
   CreateLedgerEntryResponse,
   CustomerListItem,
   CustomerProject,
+  DeleteCustomerProjectResponse,
+  DeleteCustomerResponse,
+  DeleteLedgerEntryResponse,
   FilterOptionsQuery,
   FilterOptionsResponse,
   GetCustomerResponse,
@@ -16,16 +19,23 @@ import type {
   ListCustomersResponse,
   ListLedgerEntriesResponse,
   UpdateCustomerRequest,
+  UpdateCustomerResponse,
   UpdateLedgerEntryRequest,
+  UpdateLedgerEntryResponse,
   WonDeal,
 } from "@vetra/contracts";
 
 import { normalizeText } from "@/shared/utils/text";
 
 import { distinctOptions, type FilterAccessors, matchesFilters } from "./filterEngine";
-import { addMockLead, leadContactFor, mockCustomerDocuments, mockLeads, updateMockLead } from "./fixtures";
+import {
+  addMockLead,
+  leadContactFor,
+  mockCustomerDocuments,
+  mockLeads,
+  updateMockLead,
+} from "./fixtures";
 import { mockStore, openWonDeal, paginate, respond, sumBy } from "./store";
-
 
 const findDeal = (id: string): WonDeal => {
   const found = mockStore.wonDeals.find((deal) => deal.leadId === id);
@@ -89,7 +99,12 @@ const customerFilterAccessors: FilterAccessors<CustomerListItem> = {
 };
 
 export const customersMockApi = {
-  listCustomers({ q, filters, page, pageSize }: ListCustomersQuery): Promise<ListCustomersResponse> {
+  listCustomers({
+    q,
+    filters,
+    page,
+    pageSize,
+  }: ListCustomersQuery): Promise<ListCustomersResponse> {
     const search = normalizeText(q);
     const items = mockStore.wonDeals
       .map((deal): CustomerListItem => {
@@ -106,8 +121,8 @@ export const customersMockApi = {
       })
       .filter((customer) => matchesFilters(customer, filters, customerFilterAccessors))
       .filter((customer) =>
-        [customer.businessName, customer.contactName ?? "", customer.niche, customer.city].some((field) =>
-          normalizeText(field).includes(search)
+        [customer.businessName, customer.contactName ?? "", customer.niche, customer.city].some(
+          (field) => normalizeText(field).includes(search)
         )
       )
       .sort((a, b) => b.closedAt.localeCompare(a.closedAt));
@@ -176,7 +191,10 @@ export const customersMockApi = {
     return respond({ projects });
   },
 
-  createLedgerEntry(id: string, request: CreateLedgerEntryRequest): Promise<CreateLedgerEntryResponse> {
+  createLedgerEntry(
+    id: string,
+    request: CreateLedgerEntryRequest
+  ): Promise<CreateLedgerEntryResponse> {
     const deal = findDeal(id);
     const createdAt = new Date().toISOString();
     const entryId = crypto.randomUUID();
@@ -193,13 +211,26 @@ export const customersMockApi = {
     } else {
       mockStore.expenses[id] = [
         ...(mockStore.expenses[id] ?? []),
-        { id: entryId, type, description, amountInCents, status, occurredAt, createdAt, projectName: null },
+        {
+          id: entryId,
+          type,
+          description,
+          amountInCents,
+          status,
+          occurredAt,
+          createdAt,
+          projectName: null,
+        },
       ];
     }
     return respond(revenueOrExpenseEntry(id, entryId));
   },
 
-  updateLedgerEntry(id: string, entryId: string, request: UpdateLedgerEntryRequest): Promise<void> {
+  updateLedgerEntry(
+    id: string,
+    entryId: string,
+    request: UpdateLedgerEntryRequest
+  ): Promise<UpdateLedgerEntryResponse> {
     const deal = findDeal(id);
     const { description, amountInCents, status, occurredAt } = request;
     const installment = deal.installments.find((item) => item.id === entryId);
@@ -216,10 +247,10 @@ export const customersMockApi = {
         entry.id === entryId ? { ...entry, description, amountInCents, status, occurredAt } : entry
       );
     }
-    return respond(undefined);
+    return respond(revenueOrExpenseEntry(id, entryId));
   },
 
-  deleteLedgerEntry(id: string, entryId: string): Promise<void> {
+  deleteLedgerEntry(id: string, entryId: string): Promise<DeleteLedgerEntryResponse> {
     const deal = findDeal(id);
     deal.installments = deal.installments.filter((item) => item.id !== entryId);
     mockStore.expenses[id] = (mockStore.expenses[id] ?? []).filter((entry) => entry.id !== entryId);
@@ -243,7 +274,10 @@ export const customersMockApi = {
     return respond(undefined);
   },
 
-  createCustomerProject(id: string, request: CreateCustomerProjectRequest): Promise<CreateCustomerProjectResponse> {
+  createCustomerProject(
+    id: string,
+    request: CreateCustomerProjectRequest
+  ): Promise<CreateCustomerProjectResponse> {
     findDeal(id);
     const project: CustomerProject = {
       id: crypto.randomUUID(),
@@ -254,28 +288,36 @@ export const customersMockApi = {
     return respond(project);
   },
 
-  deleteCustomerProject(id: string, projectId: string): Promise<void> {
+  deleteCustomerProject(id: string, projectId: string): Promise<DeleteCustomerProjectResponse> {
     mockStore.projects = mockStore.projects.filter(
       (project) => !(project.leadId === id && project.id === projectId)
     );
     return respond(undefined);
   },
 
-  createCustomer({ document, closedValueInCents, firstInstallmentDueAt, ...contact }: CreateCustomerRequest): Promise<CreateCustomerResponse> {
+  createCustomer({
+    document,
+    closedValueInCents,
+    firstInstallmentDueAt,
+    ...contact
+  }: CreateCustomerRequest): Promise<CreateCustomerResponse> {
     const created = addMockLead(contact, "won");
     mockCustomerDocuments[created.id] = document;
     openWonDeal(created.id, closedValueInCents, firstInstallmentDueAt);
     return respond(created);
   },
 
-  updateCustomer(id: string, { document, ...contact }: UpdateCustomerRequest): Promise<void> {
+  updateCustomer(
+    id: string,
+    { document, ...contact }: UpdateCustomerRequest
+  ): Promise<UpdateCustomerResponse> {
     findLead(id);
-    updateMockLead(id, contact);
+    const updated = updateMockLead(id, contact);
     mockCustomerDocuments[id] = document;
-    return respond(undefined);
+    return respond(updated);
   },
 
-  deleteCustomer(id: string): Promise<void> {
+  deleteCustomer(id: string): Promise<DeleteCustomerResponse> {
     const deal = findDeal(id);
     const lead = findLead(id);
     mockStore.wonDeals.splice(mockStore.wonDeals.indexOf(deal), 1);

@@ -41,7 +41,16 @@ export type CreateLeadResponse = z.infer<typeof createLeadResponseSchema>;
 - A read (GET) has only a `...Response`. Its filters and pagination travel in the query
   string and are validated by a `...Query` schema (e.g. `listLeadsQuerySchema`), not a
   request body.
-- An endpoint that returns nothing (204) has no response.
+- POST and PATCH return the entity they created or changed, so the web never has to refetch
+  just to learn the result.
+- An endpoint that returns nothing (DELETE, 204) still has a `...Response`, defined as
+  `z.void()`, so every endpoint follows the same pairing:
+
+  ```ts
+  export const deleteLeadResponseSchema = z.void();
+  export type DeleteLeadResponse = z.infer<typeof deleteLeadResponseSchema>;
+  ```
+
 - Entity schemas (`leadSummarySchema`, `leadNoteSchema`...) are building blocks and stay
   reusable; the endpoint-named responses point at them.
 

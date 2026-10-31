@@ -153,20 +153,35 @@ const slug = (text: string, separator = "") =>
     .replace(/[^a-z0-9]+/g, separator)
     .replace(new RegExp(`^${separator}|${separator}$`, "g"), "");
 
-export const mockContactOverrides: Record<string, Partial<Pick<LeadDetail, "phone" | "email">>> = {};
+export const mockContactOverrides: Record<
+  string,
+  Partial<Pick<LeadDetail, "phone" | "email" | "stageChangedAt">>
+> = {};
+
+const createdAtFor = (item: LeadSummary, index: number) =>
+  addMinutes(new Date(item.prospectedAt), (index * 37) % 480);
+
+const stageChangedAtFor = (item: LeadSummary, index: number): Date => {
+  const createdAt = createdAtFor(item, index);
+  return item.stage === "prospected" ? createdAt : max([createdAt, inDays(-((index * 5) % 14))]);
+};
 
 export function leadContactFor(item: LeadSummary) {
   const index = mockLeads.findIndex((candidate) => candidate.id === item.id);
   const firstName = slug(item.contactName?.split(" ").at(-1) ?? "");
-  const createdAt = addMinutes(new Date(item.prospectedAt), (index * 37) % 480);
-  const detail: Pick<LeadDetail, "phone" | "email" | "demoUrl" | "createdAt" | "updatedAt"> = {
+  const createdAt = createdAtFor(item, index);
+  const detail: Pick<
+    LeadDetail,
+    "phone" | "email" | "demoUrl" | "createdAt" | "updatedAt" | "stageChangedAt" | "lastContactAt"
+  > = {
     phone: `55319${String((88880000 + index * 7919) % 100000000).padStart(8, "0")}`,
-    email:
-      index % 2 === 0 && firstName ? `${firstName}@${slug(item.businessName)}.com.br` : null,
+    email: index % 2 === 0 && firstName ? `${firstName}@${slug(item.businessName)}.com.br` : null,
     demoUrl:
       item.stage === "prospected" ? null : `https://${slug(item.businessName, "-")}.vercel.app`,
     createdAt: createdAt.toISOString(),
     updatedAt: max([createdAt, addHours(inDays(-(index % 9)), index % 7)]).toISOString(),
+    stageChangedAt: stageChangedAtFor(item, index).toISOString(),
+    lastContactAt: lastContactFor(item),
     ...mockContactOverrides[item.id],
   };
   return detail;
@@ -191,12 +206,17 @@ export function addMockLead(
   return created;
 }
 
-export function updateMockLead(id: string, { phone, email, ...profile }: LeadProfile & LeadContact) {
+export function updateMockLead(
+  id: string,
+  { phone, email, ...profile }: LeadProfile & LeadContact
+): LeadSummary {
   const index = mockLeads.findIndex((item) => item.id === id);
   const current = mockLeads[index];
   if (!current) throw new Error(`Mock lead ${id} not found`);
-  mockLeads[index] = { ...current, ...profile };
-  mockContactOverrides[id] = { phone, email };
+  const updated = { ...current, ...profile };
+  mockLeads[index] = updated;
+  mockContactOverrides[id] = { ...mockContactOverrides[id], phone, email };
+  return updated;
 }
 
 export function lastContactFor(item: LeadSummary): string | null {
@@ -206,7 +226,8 @@ export function lastContactFor(item: LeadSummary): string | null {
     0,
     Math.floor((Date.now() - new Date(item.prospectedAt).getTime()) / 86_400_000)
   );
-  return inDays(-Math.min((index * 11) % 400, daysSinceProspected)).toISOString();
+  const lastContact = inDays(-Math.min((index * 11) % 400, daysSinceProspected));
+  return max([lastContact, stageChangedAtFor(item, index)]).toISOString();
 }
 
 const leadById = (id: string): LeadSummary => {
@@ -250,7 +271,11 @@ export function buildMockNextActions(): NextAction[] {
 const extraActionByStage: Partial<
   Record<LeadSummary["stage"], Pick<NextAction, "type" | "description" | "followUpStep">>
 > = {
-  prospected: { type: "first_approach", description: "Enviar primeira abordagem", followUpStep: null },
+  prospected: {
+    type: "first_approach",
+    description: "Enviar primeira abordagem",
+    followUpStep: null,
+  },
   demo_published: {
     type: "first_approach",
     description: "Enviar primeira abordagem",
@@ -402,13 +427,49 @@ const note = (id: string, leadId: string, content: string, daysAgo: number, hour
 
 export function buildMockNotes(): LeadNote[] {
   return [
-    note("note-1", "lead-2", "Pediu orçamento de site com agendamento online. Prefere falar à tarde.", 12, 3),
-    note("note-2", "lead-2", "Reunião marcada para sexta, às 15h. Levar o exemplo da clínica de Ipatinga.", 3, 1),
-    note("note-3", "lead-3", "Já tem Instagram forte, mas nenhum site. Foco em horários e localização.", 10, 2),
-    note("note-4", "lead-4", "Quer ver como fica o agendamento online antes de decidir. Mandei a demo.", 8, 4),
-    note("note-5", "lead-4", "Pediu desconto na proposta. Posso baixar até 10% se fechar essa semana.", 1, 2),
+    note(
+      "note-1",
+      "lead-2",
+      "Pediu orçamento de site com agendamento online. Prefere falar à tarde.",
+      12,
+      3
+    ),
+    note(
+      "note-2",
+      "lead-2",
+      "Reunião marcada para sexta, às 15h. Levar o exemplo da clínica de Ipatinga.",
+      3,
+      1
+    ),
+    note(
+      "note-3",
+      "lead-3",
+      "Já tem Instagram forte, mas nenhum site. Foco em horários e localização.",
+      10,
+      2
+    ),
+    note(
+      "note-4",
+      "lead-4",
+      "Quer ver como fica o agendamento online antes de decidir. Mandei a demo.",
+      8,
+      4
+    ),
+    note(
+      "note-5",
+      "lead-4",
+      "Pediu desconto na proposta. Posso baixar até 10% se fechar essa semana.",
+      1,
+      2
+    ),
     note("note-6", "lead-8", "Quer algo sóbrio, com área de contato e artigos.", 6, 1),
-    note("note-7", "lead-1", "O cardápio muda toda semana. Sugerir um painel simples de edição.", 5, 0),
+    note(
+      "note-7",
+      "lead-1",
+      "O cardápio muda toda semana. Sugerir um painel simples de edição.",
+      5,
+      0
+    ),
     note("note-8", "lead-6", "Deixou visualizado. Tentar outro horário no follow-up.", 2, 3),
   ];
 }
@@ -496,6 +557,8 @@ export function buildMockProjects(wonDeals: WonDeal[]): MockProject[] {
     }
 
     const name = projectNameByNiche[leadById(deal.leadId).niche] ?? "Site institucional";
-    return [{ ...base, id: `${deal.leadId}-project-1`, name, valueInCents: deal.closedValueInCents }];
+    return [
+      { ...base, id: `${deal.leadId}-project-1`, name, valueInCents: deal.closedValueInCents },
+    ];
   });
 }

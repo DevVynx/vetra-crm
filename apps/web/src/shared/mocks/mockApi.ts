@@ -1,6 +1,8 @@
 import type {
   CompleteNextActionRequest,
+  CompleteNextActionResponse,
   CreateNextActionRequest,
+  CreateNextActionResponse,
   DashboardConversionByNicheResponse,
   DashboardFunnelResponse,
   DashboardPeriod,
@@ -16,8 +18,9 @@ import type {
   NextAction,
   NicheConversion,
   ProspectingGranularity,
-  RescheduleNextActionRequest,
   RevenueGranularity,
+  UpdateNextActionRequest,
+  UpdateNextActionResponse,
 } from "@vetra/contracts";
 import {
   differenceInMonths,
@@ -40,7 +43,6 @@ import { funnelStages } from "@/shared/constants/leadStages";
 
 import { mockLeads } from "./fixtures";
 import { mockStore, respond, sumBy } from "./store";
-
 
 const TOP_NICHES = 11;
 const MAX_MONTHLY_SPAN_IN_MONTHS = 24;
@@ -159,7 +161,9 @@ export const dashboardMockApi = {
       // no-response leads are left out because their last stage is unknown.
       funnel: funnelStages.map((stage, index) => ({
         stage,
-        reachedCount: cohort.filter((lead) => funnelStages.indexOf(lead.stoppedAtStage ?? lead.stage) >= index).length,
+        reachedCount: cohort.filter(
+          (lead) => funnelStages.indexOf(lead.stoppedAtStage ?? lead.stage) >= index
+        ).length,
       })),
     });
   },
@@ -254,25 +258,33 @@ export const dashboardMockApi = {
     });
   },
 
-  completeNextAction(id: string, { next }: CompleteNextActionRequest): Promise<void> {
+  completeNextAction(
+    id: string,
+    { next }: CompleteNextActionRequest
+  ): Promise<CompleteNextActionResponse> {
     const completed = findNextAction(id);
-    mockStore.nextActions = [
-      ...mockStore.nextActions.filter((item) => item.id !== id),
-      { ...next, id: crypto.randomUUID(), lead: completed.lead },
-    ];
-    return respond(undefined);
+    const scheduled = { ...next, id: crypto.randomUUID(), lead: completed.lead };
+    mockStore.nextActions = [...mockStore.nextActions.filter((item) => item.id !== id), scheduled];
+    return respond(scheduled);
   },
 
-  rescheduleNextAction(id: string, { dueAt }: RescheduleNextActionRequest): Promise<void> {
-    findNextAction(id);
-    mockStore.nextActions = mockStore.nextActions.map((item) => (item.id === id ? { ...item, dueAt } : item));
-    return respond(undefined);
+  updateNextAction(
+    id: string,
+    request: UpdateNextActionRequest
+  ): Promise<UpdateNextActionResponse> {
+    const updated = { ...findNextAction(id), ...request };
+    mockStore.nextActions = mockStore.nextActions.map((item) => (item.id === id ? updated : item));
+    return respond(updated);
   },
 
-  createNextAction({ leadId, ...input }: CreateNextActionRequest): Promise<void> {
+  createNextAction({
+    leadId,
+    ...input
+  }: CreateNextActionRequest): Promise<CreateNextActionResponse> {
     const lead = mockLeads.find((item) => item.id === leadId);
     if (!lead) throw new Error(`Lead ${leadId} not found`);
-    mockStore.nextActions = [...mockStore.nextActions, { ...input, id: crypto.randomUUID(), lead }];
-    return respond(undefined);
+    const created = { ...input, id: crypto.randomUUID(), lead };
+    mockStore.nextActions = [...mockStore.nextActions, created];
+    return respond(created);
   },
 };
