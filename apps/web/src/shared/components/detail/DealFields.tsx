@@ -6,7 +6,7 @@ import { Input } from "@/shared/components/ui/input";
 import { formatDayLabel } from "@/shared/utils/date";
 import { inDays } from "@/shared/utils/dueDates";
 import { parseCurrencyToCents } from "@/shared/utils/format";
-import { maskCurrency,masked } from "@/shared/utils/masks";
+import { maskCurrency, masked } from "@/shared/utils/masks";
 
 export type DealFormValues = {
   value: string;
@@ -33,8 +33,7 @@ export function DealFields({ autoFocus = false }: { autoFocus?: boolean }) {
           aria-invalid={Boolean(errors.value)}
           {...masked(
             register("value", {
-              validate: (text) =>
-                parseCurrencyToCents(text) !== null || "Informe o valor fechado.",
+              validate: (text) => parseCurrencyToCents(text) !== null || "Informe o valor fechado.",
             }),
             maskCurrency
           )}

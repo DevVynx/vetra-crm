@@ -18,13 +18,13 @@ function readSidebarOpen() {
 const AppLayout = () => (
   <SidebarProvider defaultOpen={readSidebarOpen()} className="h-svh">
     <PageCrumbProvider>
-    <AppSidebar />
-    <SidebarInset className="md:border-border min-h-0 overflow-hidden md:border">
-      <AppHeader />
-      <ScrollArea className="min-h-0 flex-1">
-        <Outlet />
-      </ScrollArea>
-    </SidebarInset>
+      <AppSidebar />
+      <SidebarInset className="md:border-border min-h-0 overflow-hidden md:border">
+        <AppHeader />
+        <ScrollArea className="min-h-0 flex-1">
+          <Outlet />
+        </ScrollArea>
+      </SidebarInset>
     </PageCrumbProvider>
   </SidebarProvider>
 );

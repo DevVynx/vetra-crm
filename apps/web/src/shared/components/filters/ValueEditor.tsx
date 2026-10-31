@@ -35,7 +35,10 @@ const toDate = (value: FilterValue | undefined) =>
 export function ValueEditor({ field, initial, autoFocus = false, onSubmit }: ValueEditorProps) {
   const operators = operatorsFor(field);
   const [operator, setOperator] = useState<FilterOperator>(initial?.operator ?? operators[0]!);
-  const [texts, setTexts] = useState([toText(field, initial?.values[0]), toText(field, initial?.values[1])]);
+  const [texts, setTexts] = useState([
+    toText(field, initial?.values[0]),
+    toText(field, initial?.values[1]),
+  ]);
   const [dates, setDates] = useState([toDate(initial?.values[0]), toDate(initial?.values[1])]);
 
   const needsTwo = operator === "between";
@@ -75,7 +78,9 @@ export function ValueEditor({ field, initial, autoFocus = false, onSubmit }: Val
           withTime={false}
           allowPast
           onChange={(date) =>
-            setDates((current) => current.map((item, position) => (position === index ? date : item)))
+            setDates((current) =>
+              current.map((item, position) => (position === index ? date : item))
+            )
           }
         />
       );
@@ -91,7 +96,10 @@ export function ValueEditor({ field, initial, autoFocus = false, onSubmit }: Val
         value={texts[index]}
         onChange={(event) => {
           const raw = event.target.value;
-          setText(index, field.type === "number" ? maskCurrency(raw) : isDays ? raw.replace(/\D/g, "") : raw);
+          setText(
+            index,
+            field.type === "number" ? maskCurrency(raw) : isDays ? raw.replace(/\D/g, "") : raw
+          );
         }}
       />
     );

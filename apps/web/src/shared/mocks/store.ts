@@ -40,13 +40,22 @@ export const mockStore = {
   awaitingConversations: buildMockAwaitingConversations(),
 };
 
-export function openWonDeal(leadId: string, closedValueInCents: number, firstInstallmentDueAt: string) {
+export function openWonDeal(
+  leadId: string,
+  closedValueInCents: number,
+  firstInstallmentDueAt: string
+) {
   const deal: WonDeal = {
     leadId,
     closedValueInCents,
     closedAt: new Date().toISOString(),
     installments: [
-      { id: crypto.randomUUID(), amountInCents: closedValueInCents, dueAt: firstInstallmentDueAt, paidAt: null },
+      {
+        id: crypto.randomUUID(),
+        amountInCents: closedValueInCents,
+        dueAt: firstInstallmentDueAt,
+        paidAt: null,
+      },
     ],
     monthlyFeeInCents: null,
     projectStatus: "in_production",

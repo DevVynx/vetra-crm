@@ -104,9 +104,14 @@ export function CustomersPage() {
         <h2 className="text-2xl font-semibold tracking-tight">Clientes</h2>
         <div className="flex gap-2">
           <FilterButton controller={filtering} />
-          <Button variant="outline" className="dark:bg-background font-semibold" title="Novo cliente (N)" onClick={() => setIsCreating(true)}>
-          <UserPlusIcon />
-          Novo cliente
+          <Button
+            variant="outline"
+            className="dark:bg-background font-semibold"
+            title="Novo cliente (N)"
+            onClick={() => setIsCreating(true)}
+          >
+            <UserPlusIcon />
+            Novo cliente
           </Button>
         </div>
         <CreateCustomerSheet open={isCreating} onOpenChange={setIsCreating} />
@@ -158,10 +163,10 @@ export function CustomersPage() {
             </div>
           ) : (
             <CustomersTable
-            customers={data.items}
-            activeIndex={activeIndex}
-            isFull={data.items.length >= pageSize}
-          />
+              customers={data.items}
+              activeIndex={activeIndex}
+              isFull={data.items.length >= pageSize}
+            />
           )}
         </div>
       </div>

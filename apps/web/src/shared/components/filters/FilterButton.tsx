@@ -18,7 +18,12 @@ export function FilterButton({ controller }: { controller: FilterController }) {
       onOpenChange={(open) => setOpenMenu(open ? "button" : null)}
       onAdd={addFilter}
       trigger={
-        <Button variant="outline" className="dark:bg-background font-semibold" title="Filtrar (F)" disabled={!canAdd}>
+        <Button
+          variant="outline"
+          className="dark:bg-background font-semibold"
+          title="Filtrar (F)"
+          disabled={!canAdd}
+        >
           <ListFilterIcon />
           Filtrar
         </Button>

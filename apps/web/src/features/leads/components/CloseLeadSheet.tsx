@@ -1,7 +1,11 @@
 import { HandshakeIcon } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { DealFields, type DealFormValues, emptyDealValues } from "@/shared/components/detail/DealFields";
+import {
+  DealFields,
+  type DealFormValues,
+  emptyDealValues,
+} from "@/shared/components/detail/DealFields";
 import { FormSheet } from "@/shared/components/FormSheet";
 import { parseCurrencyToCents } from "@/shared/utils/format";
 

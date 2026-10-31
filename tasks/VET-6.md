@@ -27,6 +27,7 @@ Out of scope: saved filters, advanced (nested / OR between fields) filters, drag
 ## Functional Overview
 
 ### Filter model
+
 - A **filter** is `{ field, operator, values }`. A list has an array of filters.
 - **Between filters:** AND (all must match). **Between values of one filter:** OR.
 - A field can be used **once**. A field already in use disappears from the add menu.
@@ -34,18 +35,21 @@ Out of scope: saved filters, advanced (nested / OR between fields) filters, drag
 - Changing any filter resets the page to 1.
 
 ### Operators by field type
-| Type | Operators (UI label) |
-| --- | --- |
-| Select | é, não é, é um de, não é um de |
-| Text | contém, não contém |
-| Number | igual, maior que, menor que, entre |
-| Date | antes de, depois de, entre, nos últimos N dias |
-| Yes/No | é |
+
+| Type   | Operators (UI label)                           |
+| ------ | ---------------------------------------------- |
+| Select | é, não é, é um de, não é um de                 |
+| Text   | contém, não contém                             |
+| Number | igual, maior que, menor que, entre             |
+| Date   | antes de, depois de, entre, nos últimos N dias |
+| Yes/No | é                                              |
 
 With one selected value the operators are "é / não é"; with several they become "é um de / não é um de" automatically.
 
 ### Fields of the first version
+
 **Leads**
+
 - Etapa (select): Prospectado, Demo publicado, Abordagem enviada, Conversando, Reunião, Proposta enviada, Sem resposta, Perdido
 - Nicho (select, options from data)
 - Cidade (select, options from data)
@@ -54,6 +58,7 @@ With one selected value the operators are "é / não é"; with several they beco
 - Prospectado em (date)
 
 **Customers**
+
 - Nicho, Cidade (select, options from data)
 - Valor fechado (number, BRL)
 - Mensalidade (yes/no: has or has not a monthly fee)
@@ -61,12 +66,15 @@ With one selected value the operators are "é / não é"; with several they beco
 - Fechado em (date)
 
 ### Leads without a value
+
 A lead that was never contacted (no `lastContactAt`) never matches a date operator of "Último contato".
 
 ### Archived leads (business rule)
+
 "Sem resposta" and "Perdido" are archived stages and are **out of every result by default**. They appear only when an Etapa filter with **é** or **é um de** explicitly includes them. A "não é" or "não é um de" never brings archived leads in (so "Etapa não é Prospectado" means "the other active stages"). No other filter reveals archived leads. The separate "Arquivados" chip disappears: it is just Etapa é Perdido / Sem resposta.
 
 ### Counts
+
 The per-chip counts ("Prospectado 9") disappear with the chips, and the `counts` field of the list responses is removed because only the chips used it. The total shown at the bottom left of the lists ("44 leads") is a different value (`total`) and stays: it now reflects the filtered set.
 
 ---
@@ -74,23 +82,27 @@ The per-chip counts ("Prospectado 9") disappear with the chips, and the `counts`
 ## UI Elements
 
 **Filter bar** (in the row where the chips are today; the search field stays below it)
+
 - Funnel icon button at the right end of the row. It shows or hides the bar. The bar is always visible while at least one filter is active.
 - Filter chips on the left, in order of creation, each: field icon + field name, operator (muted, clickable), value(s) (clickable), and an X that removes that filter.
 - A "+" button right after the last chip, labelled "Filtro" while there are no chips, opens the add menu.
 - "Limpar" button at the right end, visible only while filters are active.
 
 **Add-filter menu**
+
 - Search input ("Filtrar...") with the `F` hint, focused when the menu opens.
 - List of the fields not yet used, each with its icon and a submenu arrow.
 - Selecting a field opens its value picker; selecting the value(s) creates the filter.
 
 **Value picker**
+
 - Select: searchable list; multiple values can be toggled (checkbox style). Shows a loading state while options load and an empty state when nothing matches.
 - Text: input. Number: BRL-masked input (one or two for "entre"). Date: the existing `DateTimePicker` in date-only mode, or a number input for "nos últimos N dias". Yes/No: two options.
 
 **Operator menu:** clicking the operator of a chip lists the operators allowed for that field type.
 
 **Keyboard**
+
 - `F` opens the add menu (ignored while typing or with another overlay open, like the other hotkeys).
 - `↑` `↓` move through the list, `→` or `Enter` opens the field's values, `←` goes back, `Esc` closes.
 - Typing filters the list. `Enter` confirms the highlighted option; in multi-select, `Enter` toggles and `Esc` closes.
@@ -115,17 +127,20 @@ The per-chip counts ("Prospectado 9") disappear with the chips, and the `counts`
 The backend does not exist yet; the mock layer (`shared/mocks`) implements the same contract so the swap is mechanical.
 
 ### Contracts (`packages/contracts`)
+
 - `filterExpressionSchema`: discriminated union by field type, with the operators and value shape of each, plus the allowed `field` ids per list.
 - `listLeadsQuerySchema` and `listCustomersQuerySchema`: remove `filter`, add `filters` (JSON string parsed and validated into an array, default empty). Remove `counts` from both responses and the `leadListFilterSchema` / `customerListFilterSchema` enums.
 - New schemas for the option endpoints (`{ items: { value, label }[] }`).
 
 ### API
+
 - `GET /leads` and `GET /customers` accept `filters` and apply it server-side before pagination, so `total` and pages reflect the filtered set.
 - `GET /leads/filter-options` and `GET /customers/filter-options`: distinct existing values for Nicho and Cidade, sorted alphabetically.
 - Archived rule is enforced by the API, not only by the UI.
 - Unknown field or operator for the list is a validation error handled by the existing error mapping.
 
 ### Database
+
 No change now. The future real implementation should translate each operator into a query condition; the "yes/no" fields are derived (next action exists, monthly fee exists, active project exists), not stored.
 
 ---
@@ -181,6 +196,7 @@ Keep the pure logic (expression parsing and serialization, operator availability
 ## Project References
 
 The executing agent must read these before starting:
+
 - `docs/guides/WEB-COMPONENTS.md`
 - `docs/guides/DESIGN-TOKENS.md`
 - `docs/guides/WEB-VITE-DATA-LAYER.md` (including "Shared queries and mutations")
@@ -188,6 +204,7 @@ The executing agent must read these before starting:
 - `docs/guides/API-VALIDATION.md`
 
 Project-specific decisions that apply to this issue:
+
 - UI text is Portuguese and hardcoded; contract identifiers are English.
 - No `any`; prefer `type` over `interface`; no comments that restate the code.
 - Queries and mutations live in `features/<name>/queries`; they move to `shared/` only when a second feature needs them.

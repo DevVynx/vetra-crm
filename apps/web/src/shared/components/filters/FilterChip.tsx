@@ -47,9 +47,7 @@ function Segment({
 export function FilterChip({ field, filter, onChange, onRemove }: FilterChipProps) {
   const Icon = field.icon;
   const isSelect = field.type === "select";
-  const operators = isSelect
-    ? (["is", "is_not"] as FilterOperator[])
-    : operatorsFor(field);
+  const operators = isSelect ? (["is", "is_not"] as FilterOperator[]) : operatorsFor(field);
   const isNegative = filter.operator === "is_not" || filter.operator === "is_none_of";
 
   const changeOperator = (operator: FilterOperator) =>

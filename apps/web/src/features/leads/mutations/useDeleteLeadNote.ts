@@ -9,7 +9,8 @@ import { toastWithUndo } from "@/shared/utils/toastWithUndo";
 
 export function useDeleteLeadNote(leadId: string) {
   const queryClient = useQueryClient();
-  const refreshNotes = () => queryClient.invalidateQueries({ queryKey: leadsQueryKeys.notes(leadId) });
+  const refreshNotes = () =>
+    queryClient.invalidateQueries({ queryKey: leadsQueryKeys.notes(leadId) });
 
   const restore = useMutation({
     mutationFn: (note: LeadNote) => leadsMockApi.restoreLeadNote(note),

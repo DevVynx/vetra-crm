@@ -83,7 +83,10 @@ function MenuBody({ fields, filters, onAdd }: MenuBodyProps) {
   }, [field, highlight]);
 
   useEffect(() => {
-    if (focusRequest > 0) flyoutRef.current?.querySelector<HTMLElement>("input, button")?.focus({ preventScroll: true });
+    if (focusRequest > 0)
+      flyoutRef.current
+        ?.querySelector<HTMLElement>("input, button")
+        ?.focus({ preventScroll: true });
   }, [focusRequest]);
 
   const highlightField = (id: string | undefined, element: HTMLElement | null) => {

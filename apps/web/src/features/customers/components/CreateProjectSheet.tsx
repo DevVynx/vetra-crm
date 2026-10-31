@@ -9,7 +9,7 @@ import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { atDefaultHour } from "@/shared/utils/dueDates";
 import { parseCurrencyToCents } from "@/shared/utils/format";
-import { maskCurrency,masked } from "@/shared/utils/masks";
+import { maskCurrency, masked } from "@/shared/utils/masks";
 
 import { useCreateCustomerProject } from "../mutations/useCreateCustomerProject";
 
@@ -120,7 +120,12 @@ export function CreateProjectSheet({ customerId, open, onOpenChange }: CreatePro
           control={control}
           name="startedAt"
           render={({ field }) => (
-            <DateTimePicker value={field.value} onChange={field.onChange} withTime={false} allowPast />
+            <DateTimePicker
+              value={field.value}
+              onChange={field.onChange}
+              withTime={false}
+              allowPast
+            />
           )}
         />
       </Field>

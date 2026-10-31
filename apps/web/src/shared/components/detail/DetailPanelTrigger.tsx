@@ -17,7 +17,7 @@ export function DetailPanelTrigger({ label }: { label: string }) {
       aria-label={`${open ? "Recolher" : "Expandir"} ${label}`}
       title={`${open ? "Recolher" : "Expandir"} ${label}`}
       onClick={toggle}
-      className="aria-expanded:bg-transparent aria-expanded:hover:bg-muted dark:aria-expanded:hover:bg-muted/50"
+      className="aria-expanded:hover:bg-muted dark:aria-expanded:hover:bg-muted/50 aria-expanded:bg-transparent"
     >
       {open ? <PanelLeftCloseIcon /> : <PanelLeftOpenIcon />}
     </Button>

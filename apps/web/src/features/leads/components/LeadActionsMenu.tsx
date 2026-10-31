@@ -36,7 +36,11 @@ export function LeadActionsMenu({ lead }: { lead: LeadDetail }) {
   return (
     <>
       <ActionsMenu label="Ações do lead" items={items} />
-      <EditLeadSheet lead={lead} open={dialog === "edit"} onOpenChange={(open) => !open && close()} />
+      <EditLeadSheet
+        lead={lead}
+        open={dialog === "edit"}
+        onOpenChange={(open) => !open && close()}
+      />
       <ArchiveLeadDialog
         open={dialog === "archive"}
         onOpenChange={(open) => !open && close()}

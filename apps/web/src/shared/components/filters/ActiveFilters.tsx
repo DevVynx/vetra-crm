@@ -56,7 +56,9 @@ export function ActiveFilters({ controller }: { controller: FilterController }) 
                 aria-label="Adicionar filtro"
                 title="Adicionar filtro (F)"
               >
-                <PlusIcon className={cn("transition-transform", openMenu === "chips" && "rotate-45")} />
+                <PlusIcon
+                  className={cn("transition-transform", openMenu === "chips" && "rotate-45")}
+                />
               </Button>
             }
           />

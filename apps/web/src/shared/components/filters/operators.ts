@@ -46,7 +46,9 @@ export function describeValues(field: FilterField, { operator, values }: Filter)
   switch (field.type) {
     case "select":
       return values
-        .map((value) => field.options.find((option) => option.value === value)?.label ?? String(value))
+        .map(
+          (value) => field.options.find((option) => option.value === value)?.label ?? String(value)
+        )
         .join(", ");
     case "boolean":
       return field.labels[String(values[0]) === "true" ? "true" : "false"];

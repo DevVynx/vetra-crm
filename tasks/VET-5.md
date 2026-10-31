@@ -9,6 +9,7 @@ Tirar o CRM do modo "só leitura": mudar a etapa do lead, arquivar, excluir, cri
 ## Decisões
 
 ### Etapa, arquivar e excluir
+
 - **Etapa clicável no stepper.** Clicar em qualquer etapa muda direto, para frente ou para trás, pulando etapas se preciso. Sem diálogo, com toast "Etapa alterada para X" e **Desfazer**
 - **Fechado abre uma sheet** com valor fechado e vencimento da primeira parcela. O lead só vira cliente com isso preenchido (parcela única pendente; parcelas e mensalidade se ajustam depois)
 - **Arquivar é uma ação só**, no menu do lead (substitui "Marcar como Sem resposta" e "Marcar como Perdido"). O diálogo de confirmação deixa escolher entre Sem resposta (padrão) e Perdido
@@ -18,6 +19,7 @@ Tirar o CRM do modo "só leitura": mudar a etapa do lead, arquivar, excluir, cri
 - **Arquivar automático após 14 dias sem resposta fica para o backend.** O custo operacional ainda não está decidido
 
 ### Criar e editar
+
 - **Criar lead e criar cliente de verdade**, com formulário em sheet. O cliente nasce de um lead fechado, então "Novo cliente" cria o registro já fechado (com valor e vencimento)
 - **Editar lead e editar cliente** usam a mesma sheet; só o cliente tem documento
 - **Nova atividade** no detalhe do lead abre uma sheet e reaproveita o formulário de próxima ação
@@ -25,18 +27,22 @@ Tirar o CRM do modo "só leitura": mudar a etapa do lead, arquivar, excluir, cri
 - **Notas** ficam no painel esquerdo do lead, com adicionar, editar e excluir; Enter salva, Esc cancela e sair do campo só fecha quando não há nada a perder
 
 ### Lista de leads
+
 - **Ações em lote sem checkbox fixa.** Um botão **Selecionar** liga o modo de seleção; só então aparecem as caixas e uma barra de ações (Arquivar, Mudar etapa). Fechado fica de fora do lote
 - **Coluna "Último contato"** com o tempo relativo: dias até uma semana, depois semanas, meses e anos
 
 ### Teclado
+
 - **N** abre o "novo" da tela: lead (Painel e Leads), cliente (Clientes), atividade (detalhe do lead), registro ou projeto (detalhe do cliente, conforme a aba)
 - **/** foca a busca da lista; **↑ ↓** navegam pelas linhas e **Enter** abre
 - Os atalhos não disparam enquanto se digita num campo ou há um diálogo aberto
 
 ### Menus
+
 - Todos os menus "..." têm ícones, e os itens mostram cursor de clique
 
 ### Painel
+
 - O botão **Registrar interação** sai. Registrar interação é adicionar atividade no detalhe do lead; a IA fará o resto
 
 ---

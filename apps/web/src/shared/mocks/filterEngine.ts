@@ -36,8 +36,7 @@ function matchesFilter(actual: FilterValue | null, { operator, values }: Filter)
     case "between":
       return typeof first === "number"
         ? Number(actual) >= first && Number(actual) <= Number(second)
-        : !isBefore(dayOf(actual), dayOf(first)) &&
-            !isAfter(dayOf(actual), dayOf(second ?? first));
+        : !isBefore(dayOf(actual), dayOf(first)) && !isAfter(dayOf(actual), dayOf(second ?? first));
     case "before":
       return isBefore(dayOf(actual), dayOf(first));
     case "after":

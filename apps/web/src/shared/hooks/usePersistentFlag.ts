@@ -17,8 +17,7 @@ export function usePersistentFlag(storageKey: string, defaultValue: boolean) {
       const next = !current;
       try {
         localStorage.setItem(storageKey, String(next));
-      } catch {
-      }
+      } catch {}
       return next;
     });
   }, [storageKey]);

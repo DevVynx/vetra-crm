@@ -38,7 +38,12 @@ export function DashboardGreeting({ period, onPeriodChange }: DashboardGreetingP
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" className="dark:bg-background font-semibold" title="Novo lead (N)" onClick={() => setIsCreatingLead(true)}>
+        <Button
+          variant="outline"
+          className="dark:bg-background font-semibold"
+          title="Novo lead (N)"
+          onClick={() => setIsCreatingLead(true)}
+        >
           <UserPlusIcon />
           Novo lead
         </Button>

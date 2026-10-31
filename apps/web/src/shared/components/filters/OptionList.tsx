@@ -107,7 +107,9 @@ export function OptionList({
           onKeyDown={handleKeyDown}
         />
         {hint && (
-          <kbd className="text-muted-foreground rounded border px-1.5 text-xs font-medium">{hint}</kbd>
+          <kbd className="text-muted-foreground rounded border px-1.5 text-xs font-medium">
+            {hint}
+          </kbd>
         )}
       </div>
 
@@ -137,7 +139,9 @@ export function OptionList({
               }}
               onClick={() => onSelect(item.id)}
             >
-              {multiple && <Checkbox checked={item.checked} tabIndex={-1} className="pointer-events-none" />}
+              {multiple && (
+                <Checkbox checked={item.checked} tabIndex={-1} className="pointer-events-none" />
+              )}
               {Icon && <Icon className="size-4 shrink-0" />}
               {item.color && (
                 <span

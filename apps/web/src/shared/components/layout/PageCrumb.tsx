@@ -6,7 +6,9 @@ const PageCrumbContext = createContext<PageCrumbContextValue | null>(null);
 
 export function PageCrumbProvider({ children }: { children: ReactNode }) {
   const [crumb, setCrumb] = useState<string | null>(null);
-  return <PageCrumbContext.Provider value={{ crumb, setCrumb }}>{children}</PageCrumbContext.Provider>;
+  return (
+    <PageCrumbContext.Provider value={{ crumb, setCrumb }}>{children}</PageCrumbContext.Provider>
+  );
 }
 
 export function useCurrentCrumb() {

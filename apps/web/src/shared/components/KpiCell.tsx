@@ -1,8 +1,4 @@
-import {
-  type LucideIcon,
-  TrendingDownIcon,
-  TrendingUpIcon,
-} from "lucide-react";
+import { type LucideIcon, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/shared/utils/cn";
@@ -75,7 +71,6 @@ export function KpiCell({
     </div>
   );
 }
-
 
 export function KpiGrid({ className, children }: { className?: string; children: ReactNode }) {
   return (

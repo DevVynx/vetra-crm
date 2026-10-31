@@ -122,7 +122,11 @@ export function LeadsPage() {
   useHotkey("n", () => setIsCreating(true));
   useHotkey("/", focusSearch);
   useHotkey("Escape", stopSelecting, isSelecting);
-  useHotkey(" ", () => leads[activeIndex] && toggleLead(leads[activeIndex].id), isSelecting && activeIndex >= 0);
+  useHotkey(
+    " ",
+    () => leads[activeIndex] && toggleLead(leads[activeIndex].id),
+    isSelecting && activeIndex >= 0
+  );
 
   return (
     <div className="relative flex h-full min-h-[32rem] flex-col gap-4 p-6">
@@ -139,7 +143,12 @@ export function LeadsPage() {
             <ListChecksIcon />
             {isSelecting ? "Concluir seleção" : "Selecionar"}
           </Button>
-          <Button variant="outline" className="dark:bg-background font-semibold" title="Novo lead (N)" onClick={() => setIsCreating(true)}>
+          <Button
+            variant="outline"
+            className="dark:bg-background font-semibold"
+            title="Novo lead (N)"
+            onClick={() => setIsCreating(true)}
+          >
             <UserPlusIcon />
             Novo lead
           </Button>

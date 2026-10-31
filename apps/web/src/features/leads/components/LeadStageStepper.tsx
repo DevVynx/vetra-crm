@@ -11,7 +11,13 @@ import { cn } from "@/shared/utils/cn";
 import { useChangeLeadStage } from "../mutations/useChangeLeadStage";
 import { CloseLeadSheet } from "./CloseLeadSheet";
 
-function StepMarker({ stage, state }: { stage: LeadStage; state: "done" | "current" | "upcoming" }) {
+function StepMarker({
+  stage,
+  state,
+}: {
+  stage: LeadStage;
+  state: "done" | "current" | "upcoming";
+}) {
   if (state === "upcoming") {
     return (
       <span className="bg-card border-border group-hover/step:border-foreground/40 size-6 rounded-full border transition-colors" />
@@ -46,30 +52,43 @@ function Stepper({ stage, onSelect }: StepperProps) {
   return (
     <ol className="-mx-1 -mt-1 flex overflow-x-auto px-1 pt-1 pb-1">
       {funnelStages.map((step, index) => {
-        const state = index < currentIndex ? "done" : index === currentIndex ? "current" : "upcoming";
+        const state =
+          index < currentIndex ? "done" : index === currentIndex ? "current" : "upcoming";
         const isFirst = index === 0;
         const isLast = index === funnelStages.length - 1;
 
         return (
-          <li key={step} aria-current={state === "current" ? "step" : undefined} className="min-w-20 flex-1">
+          <li
+            key={step}
+            aria-current={state === "current" ? "step" : undefined}
+            className="min-w-20 flex-1"
+          >
             <button
               type="button"
               disabled={state === "current"}
               onClick={() => onSelect(step)}
-              className="group/step flex w-full cursor-pointer flex-col items-center gap-2 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default"
+              className="group/step focus-visible:ring-ring/50 flex w-full cursor-pointer flex-col items-center gap-2 rounded-md outline-none focus-visible:ring-3 disabled:cursor-default"
             >
               <div className="flex w-full items-center">
                 <span
                   className={cn(
                     "h-px flex-1",
-                    isFirst ? "bg-transparent" : index <= currentIndex ? "bg-foreground/40" : "bg-border"
+                    isFirst
+                      ? "bg-transparent"
+                      : index <= currentIndex
+                        ? "bg-foreground/40"
+                        : "bg-border"
                   )}
                 />
                 <StepMarker stage={step} state={state} />
                 <span
                   className={cn(
                     "h-px flex-1",
-                    isLast ? "bg-transparent" : index < currentIndex ? "bg-foreground/40" : "bg-border"
+                    isLast
+                      ? "bg-transparent"
+                      : index < currentIndex
+                        ? "bg-foreground/40"
+                        : "bg-border"
                   )}
                 />
               </div>
@@ -106,7 +125,13 @@ function ArchivedStage({ lead, onReactivate, isPending }: ArchivedStageProps) {
           ? `Arquivado. Parou em ${leadStageLabels[lead.stoppedAtStage]}.`
           : "Arquivado."}
       </span>
-      <Button size="sm" variant="outline" className="ml-auto" disabled={isPending} onClick={onReactivate}>
+      <Button
+        size="sm"
+        variant="outline"
+        className="ml-auto"
+        disabled={isPending}
+        onClick={onReactivate}
+      >
         <Undo2Icon />
         Reativar
       </Button>

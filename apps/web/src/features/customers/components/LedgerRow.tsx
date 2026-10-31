@@ -77,7 +77,7 @@ export function LedgerRow({ customerId, entry }: { customerId: string; entry: Le
       </div>
 
       <div className="col-start-4 row-start-1 @4xl:col-start-5">
-<ActionsMenu
+        <ActionsMenu
           label="Ações do registro"
           items={[
             { label: "Editar registro", icon: PencilIcon, onSelect: () => setIsEditing(true) },

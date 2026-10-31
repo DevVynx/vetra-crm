@@ -95,7 +95,9 @@ export function CustomersTable({ customers, activeIndex, isFull }: CustomersTabl
             key={customer.id}
             className="data-[active=true]:bg-muted/60 cursor-pointer"
             data-active={index === activeIndex}
-            onClick={() => navigate({ to: "/customers/$customerId", params: { customerId: customer.id } })}
+            onClick={() =>
+              navigate({ to: "/customers/$customerId", params: { customerId: customer.id } })
+            }
           >
             <TableCell className="pl-4">
               <div className="flex items-center gap-3">

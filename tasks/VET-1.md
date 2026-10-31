@@ -40,27 +40,33 @@ Adaptar o monorepo gerado a partir do Mirai Template ao escopo real do Vetra: um
 ## Backend
 
 ### API (`apps/api`)
+
 - Remover `src/features/auth` e `shared/middlewares/adminOnly.ts`
 - Remover cookie-parser e os rate limiters
 - Escutar em `127.0.0.1`
 - CORS aceitando somente `FRONTEND_URL` (remover a origem dupla via `IP_ADDRESS`)
 
 ### Core (`packages/core`)
+
 - Remover `features/auth` e `features/user`
 - Remover erros de auth, incluindo `UnauthenticatedError` (sem uso)
 
 ### Infra (`packages/infra`)
+
 - Remover o módulo `token` (JWT) e a dependência jsonwebtoken
 - Manter o pacote com um `index` vazio, reservado para futuras capacidades técnicas (WAHA, IA)
 
 ### Contracts / Routes
+
 - Remover schemas e rotas de auth
 
 ### Database (`packages/database`)
+
 - Remover tabela `users`, enum `user_role`, migration `0000_*` e `seed.ts` (e o script `db:seed`)
 - Recriar o volume local do Postgres
 
 ### Config
+
 - Remover `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` e `IP_ADDRESS` de `env/server.ts`, `.env.example` e `.env`
 - Remover `client-next.ts` e seu export
 

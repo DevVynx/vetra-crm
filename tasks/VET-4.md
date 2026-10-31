@@ -96,6 +96,7 @@ Construir as duas abas do CRM, **Leads** e **Clientes**, cada uma com sua **list
 **Coluna esquerda:** cartão **Informações** com telefone (com abrir no WhatsApp e copiar), e-mail, nicho, cidade e link da demo quando existir.
 
 **Área direita**, nesta ordem:
+
 1. **Etapa** — indicador de progresso com as etapas do funil de Prospectado até Fechado: as passadas marcadas, a atual em destaque na cor da etapa, as seguintes apagadas. Para Perdido e Sem resposta, um selo no lugar do indicador. Só exibe; mudar a etapa fica para depois
 2. **Atividades** — as ações agendadas do lead (follow-ups), com concluir (que exige definir a próxima) e reagendar, reaproveitando os componentes do Painel. Sem ação: aviso e botão para definir uma
 3. **Notas** — campo para escrever e salvar, e a lista da mais nova para a mais antiga, com data relativa
@@ -103,11 +104,13 @@ Construir as duas abas do CRM, **Leads** e **Clientes**, cada uma com sua **list
 ### Detalhe do cliente
 
 **Coluna esquerda**, três cartões:
+
 - **Propriedades** — telefone (com abrir no WhatsApp e copiar), documento, e-mail, nicho, cidade e link da demo quando existir
 - **Faturamento** — recebido (de quanto), restante a receber e a mensalidade
 - **Métricas** — total de projetos, em andamento e concluídos
 
 **Área direita**, com abas no estilo da referência:
+
 - **Financeiro** — faixa de indicadores (receita confirmada, receita pendente, despesa confirmada, despesa pendente e saldo, no estilo da faixa do Painel) e, abaixo, a lista de **lançamentos**: valor com sinal e cor (receita em verde, despesa em vermelho), descrição, status (confirmado ou pendente) e data. O saldo é a receita confirmada menos a despesa confirmada
 - **Projetos** — a lista de projetos do cliente (nome, status, valor e datas)
 

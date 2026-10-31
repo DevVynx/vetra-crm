@@ -18,7 +18,12 @@ type NewActivitySheetProps = {
 
 const emptyValues = (): NextActionFormValues => ({ description: "", dueAt: inDays(1) });
 
-export function NewActivitySheet({ leadId, businessName, open, onOpenChange }: NewActivitySheetProps) {
+export function NewActivitySheet({
+  leadId,
+  businessName,
+  open,
+  onOpenChange,
+}: NewActivitySheetProps) {
   const createNextAction = useCreateNextAction();
   const form = useForm<NextActionFormValues>({ defaultValues: emptyValues() });
 

@@ -19,8 +19,4 @@ export type BooleanFilterField = FieldBase & {
 
 // What a screen hands to the filter bar: nothing in it is specific to leads or customers.
 export type FilterField =
-  | SelectFilterField
-  | TextFilterField
-  | NumberFilterField
-  | DateFilterField
-  | BooleanFilterField;
+  SelectFilterField | TextFilterField | NumberFilterField | DateFilterField | BooleanFilterField;

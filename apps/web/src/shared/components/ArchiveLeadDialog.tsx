@@ -58,7 +58,11 @@ export function ArchiveLeadDialog({
 
         <AlertDialogFooter>
           <AlertDialogCancel className="h-10">Cancelar</AlertDialogCancel>
-          <AlertDialogAction className="h-10 font-semibold" disabled={isPending} onClick={() => onConfirm(reason)}>
+          <AlertDialogAction
+            className="h-10 font-semibold"
+            disabled={isPending}
+            onClick={() => onConfirm(reason)}
+          >
             Arquivar
           </AlertDialogAction>
         </AlertDialogFooter>

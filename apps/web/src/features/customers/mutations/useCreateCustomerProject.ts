@@ -11,7 +11,8 @@ export function useCreateCustomerProject(customerId: string, onCreated: () => vo
   const invalidate = useInvalidateAfterLeadChange();
 
   const remove = useMutation({
-    mutationFn: (projectId: string) => customersMockApi.deleteCustomerProject(customerId, projectId),
+    mutationFn: (projectId: string) =>
+      customersMockApi.deleteCustomerProject(customerId, projectId),
     onSuccess: invalidate,
   });
 

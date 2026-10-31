@@ -27,7 +27,11 @@ type LeadFilterOptions = {
   isLoading: boolean;
 };
 
-export const buildLeadFilterFields = ({ niches, cities, isLoading }: LeadFilterOptions): FilterField[] => [
+export const buildLeadFilterFields = ({
+  niches,
+  cities,
+  isLoading,
+}: LeadFilterOptions): FilterField[] => [
   { id: "stage", label: "Etapa", icon: FunnelIcon, type: "select", options: stageOptions },
   {
     id: "niche",

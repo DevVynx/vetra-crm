@@ -34,15 +34,15 @@ filters, or the "+" menu when there are chips.
 
 ## Files
 
-| File                              | Role                                                                 |
-| --------------------------------- | -------------------------------------------------------------------- |
-| `useFilterController.ts`          | Shared state: open menu, available fields, add/replace/remove/clear  |
-| `FilterButton.tsx`                | The "Filtrar" button and its menu                                    |
-| `ActiveFilters.tsx`               | Chips row, "+" and "Limpar"                                          |
-| `FilterChip.tsx`                  | One chip: operator menu, value popover, remove                       |
-| `AddFilterMenu.tsx`               | Field list with the values flyout                                    |
-| `OptionList.tsx`, `ValueEditor.tsx` | Searchable keyboard list; text, number and date editors            |
-| `operators.ts`, `types.ts`        | Operator labels per field type; field definitions                    |
+| File                                | Role                                                                |
+| ----------------------------------- | ------------------------------------------------------------------- |
+| `useFilterController.ts`            | Shared state: open menu, available fields, add/replace/remove/clear |
+| `FilterButton.tsx`                  | The "Filtrar" button and its menu                                   |
+| `ActiveFilters.tsx`                 | Chips row, "+" and "Limpar"                                         |
+| `FilterChip.tsx`                    | One chip: operator menu, value popover, remove                      |
+| `AddFilterMenu.tsx`                 | Field list with the values flyout                                   |
+| `OptionList.tsx`, `ValueEditor.tsx` | Searchable keyboard list; text, number and date editors             |
+| `operators.ts`, `types.ts`          | Operator labels per field type; field definitions                   |
 
 ## Dependencies outside this folder
 

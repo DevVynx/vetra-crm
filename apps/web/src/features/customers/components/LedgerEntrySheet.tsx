@@ -8,7 +8,7 @@ import { SegmentedChoice } from "@/shared/components/SegmentedChoice";
 import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { centsToInput, parseCurrencyToCents } from "@/shared/utils/format";
-import { maskCurrency,masked } from "@/shared/utils/masks";
+import { maskCurrency, masked } from "@/shared/utils/masks";
 
 import { useLedgerEntryActions } from "../mutations/useLedgerEntryActions";
 

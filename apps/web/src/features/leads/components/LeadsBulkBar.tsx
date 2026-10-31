@@ -52,7 +52,10 @@ export function LeadsBulkBar({ ids, onDone, onCancel }: LeadsBulkBarProps) {
             <DropdownMenuItem
               key={stage}
               onClick={() =>
-                changeStages({ ids, stage }, `${summary} ${isSingle ? "movido" : "movidos"} para ${leadStageLabels[stage]}`)
+                changeStages(
+                  { ids, stage },
+                  `${summary} ${isSingle ? "movido" : "movidos"} para ${leadStageLabels[stage]}`
+                )
               }
             >
               <span
@@ -81,7 +84,10 @@ export function LeadsBulkBar({ ids, onDone, onCancel }: LeadsBulkBarProps) {
         description={`${isSingle ? "Ele sai" : "Eles saem"} da lista e ${isSingle ? "fica" : "ficam"} em Arquivados, guardando a etapa em que parou. Dá para reativar quando quiser.`}
         isPending={isPending}
         onConfirm={(reason) => {
-          changeStages({ ids, stage: reason }, `${summary} ${isSingle ? "arquivado" : "arquivados"}`);
+          changeStages(
+            { ids, stage: reason },
+            `${summary} ${isSingle ? "arquivado" : "arquivados"}`
+          );
           setIsArchiving(false);
         }}
       />

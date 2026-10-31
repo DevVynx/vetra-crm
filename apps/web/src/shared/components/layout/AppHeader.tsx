@@ -15,7 +15,9 @@ import { useCurrentCrumb } from "./PageCrumb";
 
 function usePageHeader() {
   const matches = useMatches();
-  const staticData = [...matches].reverse().find((match) => match.staticData.title || match.staticData.parent)?.staticData;
+  const staticData = [...matches]
+    .reverse()
+    .find((match) => match.staticData.title || match.staticData.parent)?.staticData;
   return { title: staticData?.title, parent: staticData?.parent };
 }
 
