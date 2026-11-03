@@ -44,7 +44,7 @@ export const filterSchema = z
   .refine(({ operator, values }) => {
     const arity = operatorArity[operator];
     return arity === undefined || values.length === arity;
-  }, "Wrong number of values for the operator");
+  }, "invalidFilterValueCount");
 export type Filter = z.infer<typeof filterSchema>;
 
 function parseJson(value: unknown): unknown {
@@ -66,10 +66,13 @@ export const filtersParamSchema = <const TFields extends readonly [string, ...st
     z
       .array(filterSchema)
       .default([])
-      .refine((filters) => filters.every(({ field }) => fields.includes(field)), "Unknown field")
+      .refine(
+        (filters) => filters.every(({ field }) => fields.includes(field)),
+        "unknownFilterField"
+      )
       .refine(
         (filters) => new Set(filters.map(({ field }) => field)).size === filters.length,
-        "A field can only be filtered once"
+        "duplicateFilterField"
       )
   );
 
