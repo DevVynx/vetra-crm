@@ -5,7 +5,7 @@ import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
 
 export type NavigationItem = {
   title: string;
-  to: "/" | "/leads" | "/customers" | "/whatsapp" | "/configs";
+  to: "/" | "/leads" | "/customers" | "/whatsapp" | "/settings";
   icon: ComponentType<{ className?: string }>;
 };
 
@@ -17,5 +17,5 @@ export const mainNavigation: NavigationItem[] = [
 ];
 
 export const footerNavigation: NavigationItem[] = [
-  { title: "Configurações", to: "/configs", icon: SettingsIcon },
+  { title: "Configurações", to: "/settings", icon: SettingsIcon },
 ];
