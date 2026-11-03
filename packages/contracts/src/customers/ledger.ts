@@ -60,3 +60,16 @@ export type UpdateLedgerEntryResponse = z.infer<typeof updateLedgerEntryResponse
 
 export const deleteLedgerEntryResponseSchema = z.void();
 export type DeleteLedgerEntryResponse = z.infer<typeof deleteLedgerEntryResponseSchema>;
+
+export const ledgerEntryParamsSchema = z.object({
+  id: z.string().min(1),
+  entryId: z.string().min(1),
+});
+export type LedgerEntryParams = z.infer<typeof ledgerEntryParamsSchema>;
+
+// Undo of a deletion: the deleted entry is sent back as it was.
+export const restoreLedgerEntryRequestSchema = ledgerEntrySchema;
+export type RestoreLedgerEntryRequest = z.infer<typeof restoreLedgerEntryRequestSchema>;
+
+export const restoreLedgerEntryResponseSchema = z.void();
+export type RestoreLedgerEntryResponse = z.infer<typeof restoreLedgerEntryResponseSchema>;

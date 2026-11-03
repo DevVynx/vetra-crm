@@ -45,3 +45,9 @@ export type UpdateCustomerProjectResponse = z.infer<typeof updateCustomerProject
 
 export const deleteCustomerProjectResponseSchema = z.void();
 export type DeleteCustomerProjectResponse = z.infer<typeof deleteCustomerProjectResponseSchema>;
+
+export const customerProjectParamsSchema = z.object({
+  id: z.string().min(1),
+  projectId: z.string().min(1),
+});
+export type CustomerProjectParams = z.infer<typeof customerProjectParamsSchema>;
