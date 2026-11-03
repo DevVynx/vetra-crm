@@ -24,14 +24,14 @@ export function checkDealPayment(payment: DealPayment, ctx: z.RefinementCtx) {
     ctx.addIssue({
       code: "custom",
       path: ["receivedInCents"],
-      message: "Received amount exceeds the closed value",
+      message: "receivedExceedsClosedValue",
     });
   }
   if (remaining > 0 && payment.installmentsCount > 0 && !payment.firstInstallmentDueAt) {
     ctx.addIssue({
       code: "custom",
       path: ["firstInstallmentDueAt"],
-      message: "The first installment needs a due date",
+      message: "firstInstallmentDueAtRequired",
     });
   }
 }
