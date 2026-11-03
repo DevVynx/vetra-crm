@@ -14,7 +14,14 @@ type InferProperty<
   Fallback,
 > = P extends keyof S ? (S[P] extends z.ZodTypeAny ? z.output<S[P]> : Fallback) : Fallback;
 
-export type ValidationMiddleware<S extends ValidationSchemas> = RequestHandler & {
+// Untyped on purpose: Express makes every handler of a route share one Request type, so a
+// ParsedQs-typed validator would reject a controller whose query is the parsed schema output.
+export type ValidationMiddleware<S extends ValidationSchemas> = RequestHandler<
+  any,
+  any,
+  any,
+  any
+> & {
   readonly __schemas?: S;
 };
 
