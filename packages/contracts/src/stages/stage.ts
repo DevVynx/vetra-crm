@@ -56,3 +56,6 @@ export const listStageLeadCountsResponseSchema = z.object({
   counts: z.record(z.string(), z.number().int().nonnegative()),
 });
 export type ListStageLeadCountsResponse = z.infer<typeof listStageLeadCountsResponseSchema>;
+
+export const stageParamsSchema = z.object({ id: z.string().min(1) });
+export type StageParams = z.infer<typeof stageParamsSchema>;

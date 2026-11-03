@@ -4,6 +4,7 @@ import express, { Express } from "express";
 import helmet from "helmet";
 
 import { profileRouter } from "@/features/profile/routes";
+import { stagesRouter } from "@/features/stages/routes";
 import { handleGlobalError } from "@/shared/middlewares/handleGlobalError";
 import { notFoundHandler } from "@/shared/middlewares/notFoundHandler";
 
@@ -27,6 +28,7 @@ app.use(
 );
 
 app.use("/api", profileRouter);
+app.use("/api", stagesRouter);
 
 app.use(notFoundHandler);
 app.use(handleGlobalError);
