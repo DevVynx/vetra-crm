@@ -13,11 +13,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-import { leadStageLabels } from "@/shared/constants/leadStages";
-
-export type ArchiveReason = "no_response" | "lost";
-
-const reasons: ArchiveReason[] = ["no_response", "lost"];
+import { useStages } from "@/shared/stages/useStages";
 
 type ArchiveLeadDialogProps = {
   open: boolean;
@@ -25,7 +21,7 @@ type ArchiveLeadDialogProps = {
   title: string;
   description: string;
   isPending?: boolean;
-  onConfirm: (reason: ArchiveReason) => void;
+  onConfirm: (archiveStageId: string) => void;
 };
 
 export function ArchiveLeadDialog({
@@ -36,7 +32,9 @@ export function ArchiveLeadDialog({
   isPending = false,
   onConfirm,
 }: ArchiveLeadDialogProps) {
-  const [reason, setReason] = useState<ArchiveReason>("no_response");
+  const { archive } = useStages();
+  const [chosenId, setChosenId] = useState<string | null>(null);
+  const archiveStageId = archive.find((stage) => stage.id === chosenId)?.id ?? archive[0]?.id ?? "";
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -49,19 +47,21 @@ export function ArchiveLeadDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
 
-        <SegmentedChoice
-          ariaLabel="Motivo"
-          options={reasons.map((value) => ({ value, label: leadStageLabels[value] }))}
-          value={reason}
-          onChange={setReason}
-        />
+        {archive.length > 1 && (
+          <SegmentedChoice
+            ariaLabel="Motivo"
+            options={archive.map((stage) => ({ value: stage.id, label: stage.name }))}
+            value={archiveStageId}
+            onChange={setChosenId}
+          />
+        )}
 
         <AlertDialogFooter>
           <AlertDialogCancel className="h-10">Cancelar</AlertDialogCancel>
           <AlertDialogAction
             className="h-10 font-semibold"
             disabled={isPending}
-            onClick={() => onConfirm(reason)}
+            onClick={() => onConfirm(archiveStageId)}
           >
             Arquivar
           </AlertDialogAction>

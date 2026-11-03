@@ -10,7 +10,6 @@ import type {
   DashboardProspectingResponse,
   DashboardRevenueResponse,
   DashboardSummaryResponse,
-  LeadStage,
   LeadSummary,
   ListAwaitingConversationsResponse,
   ListLeadsWithoutNextActionResponse,
@@ -39,15 +38,19 @@ import {
 } from "date-fns";
 
 import { type DateRange, isWithin, periodRanges } from "@/features/dashboard/utils/periodRanges";
-import { funnelStages } from "@/shared/constants/leadStages";
 
 import { mockLeads } from "./fixtures";
+import {
+  funnelIndexOf,
+  funnelStagesOf,
+  isClosingStageId,
+  isLiveStageId,
+  lastMiddleStageId,
+} from "./stageRules";
 import { mockStore, respond, sumBy } from "./store";
 
 const TOP_NICHES = 11;
 const MAX_MONTHLY_SPAN_IN_MONTHS = 24;
-
-const negotiatingStages = new Set<LeadStage>(["conversing", "meeting", "proposal_sent"]);
 
 const { wonDeals, awaitingConversations } = mockStore;
 
@@ -84,7 +87,7 @@ const prospectingGranularityFor = (
 const allTimeStart = (granularity: RevenueGranularity | ProspectingGranularity, first: Date) =>
   granularity === "year" ? startOfYear(first) : startOfMonth(first);
 
-const isActive = (lead: LeadSummary) => lead.stage !== "won" && lead.stage !== "lost";
+const isActive = (lead: LeadSummary) => isLiveStageId(lead.stage);
 
 const findNextAction = (id: string): NextAction => {
   const found = mockStore.nextActions.find((item) => item.id === id);
@@ -97,7 +100,8 @@ export const dashboardMockApi = {
     const { current, previous } = periodRanges(period);
     const pendingInstallments = installments().filter((item) => item.paidAt === null);
     const recurringDeals = wonDeals.filter((deal) => deal.monthlyFeeInCents !== null);
-    const negotiatingLeads = mockLeads.filter((lead) => negotiatingStages.has(lead.stage));
+    const activeLeads = mockLeads.filter(isActive);
+    const lastStageId = lastMiddleStageId();
 
     return respond({
       received: {
@@ -119,9 +123,9 @@ export const dashboardMockApi = {
         customersCount: recurringDeals.length,
       },
       activeProjectsCount: wonDeals.filter((deal) => deal.projectStatus === "in_production").length,
-      negotiating: {
-        leadsCount: negotiatingLeads.length,
-        proposalsCount: negotiatingLeads.filter((lead) => lead.stage === "proposal_sent").length,
+      activeLeads: {
+        leadsCount: activeLeads.length,
+        lastStageLeadsCount: activeLeads.filter((lead) => lead.stage === lastStageId).length,
       },
     });
   },
@@ -159,10 +163,10 @@ export const dashboardMockApi = {
     return respond({
       // Without stage history, "reached" is approximated by the current stage; lost and
       // no-response leads are left out because their last stage is unknown.
-      funnel: funnelStages.map((stage, index) => ({
-        stage,
+      funnel: funnelStagesOf().map((stage, index) => ({
+        stage: stage.id,
         reachedCount: cohort.filter(
-          (lead) => funnelStages.indexOf(lead.stoppedAtStage ?? lead.stage) >= index
+          (lead) => funnelIndexOf(lead.stoppedAtStage ?? lead.stage) >= index
         ).length,
       })),
     });
@@ -200,7 +204,7 @@ export const dashboardMockApi = {
         return {
           bucketStart: bucketStart.toISOString(),
           prospectedCount: cohort.length,
-          wonCount: cohort.filter((lead) => lead.stage === "won").length,
+          wonCount: cohort.filter((lead) => isClosingStageId(lead.stage)).length,
         };
       }),
     });
@@ -221,7 +225,7 @@ export const dashboardMockApi = {
       byNiche.set(lead.niche, {
         ...entry,
         prospectedCount: entry.prospectedCount + 1,
-        wonCount: entry.wonCount + (lead.stage === "won" ? 1 : 0),
+        wonCount: entry.wonCount + (isClosingStageId(lead.stage) ? 1 : 0),
       });
     }
 

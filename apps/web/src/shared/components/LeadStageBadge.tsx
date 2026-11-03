@@ -1,17 +1,17 @@
-import type { LeadStage } from "@vetra/contracts";
-
 import { Badge } from "@/shared/components/ui/badge";
-import { leadStageColor, leadStageLabels } from "@/shared/constants/leadStages";
+import { useStages } from "@/shared/stages/useStages";
 
-export function LeadStageBadge({ stage }: { stage: LeadStage }) {
+export function LeadStageBadge({ stage }: { stage: string }) {
+  const stages = useStages();
+
   return (
     <Badge variant="outline">
       <span
         aria-hidden
         className="size-1.5 rounded-full"
-        style={{ backgroundColor: leadStageColor(stage) }}
+        style={{ backgroundColor: stages.colorOf(stage) }}
       />
-      {leadStageLabels[stage]}
+      {stages.nameOf(stage)}
     </Badge>
   );
 }

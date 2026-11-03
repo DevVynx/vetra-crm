@@ -15,6 +15,7 @@ import { useDebouncedCallback } from "@/shared/hooks/useDebouncedCallback";
 import { useHotkey } from "@/shared/hooks/useHotkey";
 import { useListNavigation } from "@/shared/hooks/useListNavigation";
 import { TABLE_MIN_HEIGHT, useTablePageSize } from "@/shared/hooks/useTablePageSize";
+import { useStages } from "@/shared/stages/useStages";
 import { cn } from "@/shared/utils/cn";
 
 import { buildLeadFilterFields } from "../constants/leadFilterFields";
@@ -73,7 +74,9 @@ export function LeadsPage() {
 
   const niches = useLeadFilterOptions("niche");
   const cities = useLeadFilterOptions("city");
+  const stages = useStages();
   const filterFields = buildLeadFilterFields({
+    stages: stages.stages,
     niches: niches.data?.items ?? [],
     cities: cities.data?.items ?? [],
     isLoading: niches.isPending || cities.isPending,

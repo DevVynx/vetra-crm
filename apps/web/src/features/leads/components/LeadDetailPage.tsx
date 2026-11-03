@@ -11,9 +11,9 @@ import { SplitDetailLayout } from "@/shared/components/detail/SplitDetailLayout"
 import { WhatsAppButton } from "@/shared/components/detail/WhatsAppButton";
 import { usePageCrumb } from "@/shared/components/layout/PageCrumb";
 import { Button } from "@/shared/components/ui/button";
-import { leadStageLabels } from "@/shared/constants/leadStages";
 import { useHotkey } from "@/shared/hooks/useHotkey";
 import { useLead } from "@/shared/queries/leads/useLead";
+import { useStages } from "@/shared/stages/useStages";
 import { formatLastContact } from "@/shared/utils/date";
 
 import { useLeadConversation } from "../queries/useLeadConversation";
@@ -29,11 +29,16 @@ const route = getRouteApi("/_app/leads/$leadId");
 
 export function LeadDetailPage() {
   const { leadId } = route.useParams();
+  const stages = useStages();
   const { data: lead, isPending } = useLead(leadId);
   const { data: conversationData, isPending: isConversationPending } = useLeadConversation(leadId);
   usePageCrumb(lead?.businessName);
   const [isAddingActivity, setIsAddingActivity] = useState(false);
-  useHotkey("n", () => setIsAddingActivity(true), Boolean(lead) && lead?.stage !== "won");
+  useHotkey(
+    "n",
+    () => setIsAddingActivity(true),
+    Boolean(lead) && lead !== undefined && !stages.isClosing(lead.stage)
+  );
 
   if (isPending || isConversationPending) return <DetailSkeleton />;
 
@@ -48,7 +53,7 @@ export function LeadDetailPage() {
     );
   }
 
-  if (lead.stage === "won") {
+  if (stages.isClosing(lead.stage)) {
     return <Navigate to="/customers/$customerId" params={{ customerId: lead.id }} replace />;
   }
 
@@ -71,7 +76,7 @@ export function LeadDetailPage() {
             contactName={lead.contactName}
             status={
               <>
-                {leadStageLabels[lead.stage]} {formatLastContact(new Date(lead.stageChangedAt))}
+                {stages.nameOf(lead.stage)} {formatLastContact(new Date(lead.stageChangedAt))}
                 {" · "}
                 {contactStatus}
               </>

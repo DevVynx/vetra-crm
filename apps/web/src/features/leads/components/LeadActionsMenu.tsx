@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ActionsMenu, type ActionsMenuItem } from "@/shared/components/ActionsMenu";
 import { ArchiveLeadDialog } from "@/shared/components/ArchiveLeadDialog";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
-import { leadStageLabels } from "@/shared/constants/leadStages";
+import { useStages } from "@/shared/stages/useStages";
 
 import { useChangeLeadStage } from "../mutations/useChangeLeadStage";
 import { useDeleteLead } from "../mutations/useDeleteLead";
@@ -17,7 +17,8 @@ export function LeadActionsMenu({ lead }: { lead: LeadDetail }) {
   const [dialog, setDialog] = useState<Dialog>(null);
   const { changeStage, isPending: isChanging } = useChangeLeadStage(lead.id);
   const deleteLead = useDeleteLead(lead.id);
-  const isArchived = lead.stage === "lost" || lead.stage === "no_response";
+  const stages = useStages();
+  const isArchived = stages.isArchive(lead.stage);
   const close = () => setDialog(null);
 
   const items: ActionsMenuItem[] = [
@@ -47,8 +48,12 @@ export function LeadActionsMenu({ lead }: { lead: LeadDetail }) {
         title={`Arquivar ${lead.businessName}?`}
         description="Ele sai da lista e fica em Arquivados, guardando a etapa em que parou. Dá para reativar quando quiser."
         isPending={isChanging}
-        onConfirm={(reason) => {
-          changeStage(reason, lead.stage, `Lead arquivado como ${leadStageLabels[reason]}`);
+        onConfirm={(archiveStageId) => {
+          changeStage(
+            archiveStageId,
+            lead.stage,
+            `Lead arquivado como ${stages.nameOf(archiveStageId)}`
+          );
           close();
         }}
       />

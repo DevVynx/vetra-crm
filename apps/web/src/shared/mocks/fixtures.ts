@@ -5,7 +5,6 @@ import type {
   LeadNote,
   LeadSummary,
   LedgerEntry,
-  LiveStage,
   NextAction,
   WonDeal,
 } from "@vetra/contracts";
@@ -13,13 +12,15 @@ import { addDays, addHours, addMinutes, max } from "date-fns";
 
 import { inDays } from "@/shared/utils/dueDates";
 
+import { isEntryStageId } from "./stageRules";
+
 const lead = (
   id: string,
   businessName: string,
   contactName: string | null,
   niche: string,
   city: string,
-  stage: LeadSummary["stage"],
+  stage: string,
   prospectedDaysAgo: number,
   stoppedAtStage: LeadSummary["stoppedAtStage"] = null
 ): LeadSummary => ({
@@ -38,7 +39,7 @@ export const mockLeads: LeadSummary[] = [
   lead("lead-2", "Clínica Sorriso", "Dra. Paula", "Dentista", "Coronel Fabriciano", "meeting", 25),
   lead("lead-3", "Barbearia do Zé", "José", "Barbearia", "Timóteo", "conversing", 14),
   lead("lead-4", "Studio Bela Pele", "Maria", "Estética", "Ipatinga", "proposal_sent", 30),
-  lead("lead-5", "Auto Center Vale", null, "Automotivo", "Ipatinga", "demo_published", 4),
+  lead("lead-5", "Auto Center Vale", null, "Automotivo", "Ipatinga", "prospected", 4),
   lead("lead-6", "Academia Corpo Ativo", "Rafael", "Academia", "Timóteo", "approach_sent", 11),
   lead("lead-7", "Hamburgueria Brasa", "Lucas", "Hamburgueria", "Ipaba", "prospected", 1),
   lead(
@@ -61,7 +62,7 @@ export const mockLeads: LeadSummary[] = [
   ),
   lead("lead-10", "Doce Encanto Confeitaria", "Ana", "Confeitaria", "Ipatinga", "prospected", 2),
   lead("lead-11", "Fisio Movimento", "Bruno", "Fisioterapia", "Timóteo", "won", 40),
-  lead("lead-12", "Lava Jato Brilho", null, "Automotivo", "Ipatinga", "demo_published", 5),
+  lead("lead-12", "Lava Jato Brilho", null, "Automotivo", "Ipatinga", "prospected", 5),
   lead("lead-13", "Restaurante Sabor da Terra", "Helena", "Restaurante", "Ipatinga", "won", 45),
   lead("lead-14", "Ótica Visão Clara", "Roberto", "Ótica", "Coronel Fabriciano", "won", 120),
   lead("lead-15", "Mercearia Dona Rosa", "Rosa", "Mercearia", "Timóteo", "won", 60),
@@ -115,15 +116,15 @@ const extraLeadSeeds: [name: string, contact: string | null, niche: string, city
   ["Material de Construção Alicerce", "Valdir", "Construção", "Santana do Paraíso"],
 ];
 
-const extraStagePattern: LiveStage[] = [
+const extraStagePattern = [
   "prospected",
-  "demo_published",
+  "approach_sent",
   "approach_sent",
   "conversing",
   "approach_sent",
   "prospected",
   "meeting",
-  "demo_published",
+  "approach_sent",
   "proposal_sent",
   "approach_sent",
 ];
@@ -163,7 +164,7 @@ const createdAtFor = (item: LeadSummary, index: number) =>
 
 const stageChangedAtFor = (item: LeadSummary, index: number): Date => {
   const createdAt = createdAtFor(item, index);
-  return item.stage === "prospected" ? createdAt : max([createdAt, inDays(-((index * 5) % 14))]);
+  return isEntryStageId(item.stage) ? createdAt : max([createdAt, inDays(-((index * 5) % 14))]);
 };
 
 export function leadContactFor(item: LeadSummary) {
@@ -176,8 +177,9 @@ export function leadContactFor(item: LeadSummary) {
   > = {
     phone: `55319${String((88880000 + index * 7919) % 100000000).padStart(8, "0")}`,
     email: index % 2 === 0 && firstName ? `${firstName}@${slug(item.businessName)}.com.br` : null,
-    demoUrl:
-      item.stage === "prospected" ? null : `https://${slug(item.businessName, "-")}.vercel.app`,
+    demoUrl: isEntryStageId(item.stage)
+      ? null
+      : `https://${slug(item.businessName, "-")}.vercel.app`,
     createdAt: createdAt.toISOString(),
     updatedAt: max([createdAt, addHours(inDays(-(index % 9)), index % 7)]).toISOString(),
     stageChangedAt: stageChangedAtFor(item, index).toISOString(),
@@ -192,7 +194,7 @@ type LeadContact = Pick<LeadDetail, "phone" | "email">;
 
 export function addMockLead(
   { phone, email, ...profile }: LeadProfile & LeadContact,
-  stage: LeadSummary["stage"]
+  stage: string
 ): LeadSummary {
   const created: LeadSummary = {
     id: `lead-${crypto.randomUUID().slice(0, 8)}`,
@@ -220,7 +222,7 @@ export function updateMockLead(
 }
 
 export function lastContactFor(item: LeadSummary): string | null {
-  if (item.stage === "prospected" || item.stage === "demo_published") return null;
+  if (isEntryStageId(item.stage)) return null;
   const awaiting = awaitingConversationOf(item.id);
   if (awaiting) return awaiting.lastMessageAt;
   const index = mockLeads.findIndex((candidate) => candidate.id === item.id);
@@ -271,14 +273,9 @@ export function buildMockNextActions(): NextAction[] {
 }
 
 const extraActionByStage: Partial<
-  Record<LeadSummary["stage"], Pick<NextAction, "type" | "description" | "followUpStep">>
+  Record<string, Pick<NextAction, "type" | "description" | "followUpStep">>
 > = {
   prospected: {
-    type: "first_approach",
-    description: "Enviar primeira abordagem",
-    followUpStep: null,
-  },
-  demo_published: {
     type: "first_approach",
     description: "Enviar primeira abordagem",
     followUpStep: null,

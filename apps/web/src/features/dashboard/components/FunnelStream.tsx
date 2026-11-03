@@ -1,9 +1,9 @@
 import type { FunnelStep } from "@vetra/contracts";
 import { Fragment } from "react";
 
-import { leadStageColor, leadStageLabels } from "@/shared/constants/leadStages";
 import { useElementWidth } from "@/shared/hooks/useElementWidth";
 import { useTweenedNumbers } from "@/shared/hooks/useTweenedNumbers";
+import { useStages } from "@/shared/stages/useStages";
 
 const STAGE_HEIGHT = 34;
 const SIDE_PADDING = 8;
@@ -31,6 +31,7 @@ function streamPath(points: Point[], centerX: number) {
 }
 
 export function FunnelStream({ funnel }: { funnel: FunnelStep[] }) {
+  const stages = useStages();
   const { ref, width } = useElementWidth<HTMLDivElement>();
   const first = funnel[0];
   const height = funnel.length * STAGE_HEIGHT;
@@ -69,11 +70,11 @@ export function FunnelStream({ funnel }: { funnel: FunnelStep[] }) {
                 <Fragment key={step.stage}>
                   <stop
                     offset={`${(index / funnel.length) * 100}%`}
-                    stopColor={leadStageColor(step.stage)}
+                    stopColor={stages.colorOf(step.stage)}
                   />
                   <stop
                     offset={`${((index + 1) / funnel.length) * 100}%`}
-                    stopColor={leadStageColor(step.stage)}
+                    stopColor={stages.colorOf(step.stage)}
                   />
                 </Fragment>
               ))}
@@ -93,7 +94,7 @@ export function FunnelStream({ funnel }: { funnel: FunnelStep[] }) {
                 height={STAGE_HEIGHT}
                 fill="transparent"
               >
-                <title>{`${leadStageLabels[step.stage]}: ${step.reachedCount}`}</title>
+                <title>{`${stages.nameOf(step.stage)}: ${step.reachedCount}`}</title>
               </rect>
               <text
                 x={width / 2}

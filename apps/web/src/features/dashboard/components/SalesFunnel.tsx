@@ -5,7 +5,7 @@ import { FunnelIcon, UsersIcon } from "lucide-react";
 import { Section } from "@/shared/components/Section";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
-import { leadStageColor, leadStageLabels } from "@/shared/constants/leadStages";
+import { useStages } from "@/shared/stages/useStages";
 import { formatPercent } from "@/shared/utils/format";
 
 import { useDashboardFunnel } from "../queries/useDashboardFunnel";
@@ -15,6 +15,7 @@ const conversionRate = (count: number, previousCount: number) =>
   previousCount === 0 ? 0 : count / previousCount;
 
 function FunnelLegend({ funnel }: { funnel: FunnelStep[] }) {
+  const stages = useStages();
   return (
     <ul className="flex flex-col">
       {funnel.map(({ stage, reachedCount }, index) => {
@@ -29,9 +30,9 @@ function FunnelLegend({ funnel }: { funnel: FunnelStep[] }) {
               <span
                 aria-hidden
                 className="size-2 rounded-full"
-                style={{ backgroundColor: leadStageColor(stage) }}
+                style={{ backgroundColor: stages.colorOf(stage) }}
               />
-              <span className="text-muted-foreground">{leadStageLabels[stage]}</span>
+              <span className="text-muted-foreground">{stages.nameOf(stage)}</span>
               <span className="ml-auto font-medium tabular-nums">{reachedCount}</span>
               <span className="text-muted-foreground w-10 text-right text-xs tabular-nums">
                 {previous && formatPercent(conversionRate(reachedCount, previous.reachedCount))}

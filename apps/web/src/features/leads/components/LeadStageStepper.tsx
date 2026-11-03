@@ -1,23 +1,17 @@
-import type { LeadDetail, LeadStage } from "@vetra/contracts";
+import type { LeadDetail, Stage } from "@vetra/contracts";
 import { CheckIcon, MilestoneIcon, Undo2Icon } from "lucide-react";
 import { useState } from "react";
 
 import { LeadStageBadge } from "@/shared/components/LeadStageBadge";
 import { Section } from "@/shared/components/Section";
 import { Button } from "@/shared/components/ui/button";
-import { funnelStages, leadStageColor, leadStageLabels } from "@/shared/constants/leadStages";
+import { useStages } from "@/shared/stages/useStages";
 import { cn } from "@/shared/utils/cn";
 
 import { useChangeLeadStage } from "../mutations/useChangeLeadStage";
 import { CloseLeadSheet } from "./CloseLeadSheet";
 
-function StepMarker({
-  stage,
-  state,
-}: {
-  stage: LeadStage;
-  state: "done" | "current" | "upcoming";
-}) {
+function StepMarker({ stage, state }: { stage: Stage; state: "done" | "current" | "upcoming" }) {
   if (state === "upcoming") {
     return (
       <span className="bg-card border-border group-hover/step:border-foreground/40 size-6 rounded-full border transition-colors" />
@@ -30,7 +24,7 @@ function StepMarker({
         "flex size-6 items-center justify-center rounded-full",
         state === "current" && "ring-foreground/15 ring-4"
       )}
-      style={{ backgroundColor: leadStageColor(stage) }}
+      style={{ backgroundColor: stage.color }}
     >
       {state === "done" ? (
         <CheckIcon className="text-background size-3.5" strokeWidth={3} />
@@ -42,24 +36,25 @@ function StepMarker({
 }
 
 type StepperProps = {
-  stage: LeadStage;
-  onSelect: (stage: LeadStage) => void;
+  stage: string;
+  onSelect: (stage: Stage) => void;
 };
 
 function Stepper({ stage, onSelect }: StepperProps) {
-  const currentIndex = funnelStages.indexOf(stage);
+  const { funnel } = useStages();
+  const currentIndex = funnel.findIndex((step) => step.id === stage);
 
   return (
     <ol className="-mx-1 -mt-1 flex overflow-x-auto px-1 pt-1 pb-1">
-      {funnelStages.map((step, index) => {
+      {funnel.map((step, index) => {
         const state =
           index < currentIndex ? "done" : index === currentIndex ? "current" : "upcoming";
         const isFirst = index === 0;
-        const isLast = index === funnelStages.length - 1;
+        const isLast = index === funnel.length - 1;
 
         return (
           <li
-            key={step}
+            key={step.id}
             aria-current={state === "current" ? "step" : undefined}
             className="min-w-20 flex-1"
           >
@@ -100,7 +95,7 @@ function Stepper({ stage, onSelect }: StepperProps) {
                     : "text-muted-foreground group-hover/step:text-foreground"
                 )}
               >
-                {leadStageLabels[step]}
+                {step.name}
               </span>
             </button>
           </li>
@@ -117,12 +112,13 @@ type ArchivedStageProps = {
 };
 
 function ArchivedStage({ lead, onReactivate, isPending }: ArchivedStageProps) {
+  const stages = useStages();
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
       <LeadStageBadge stage={lead.stage} />
       <span className="text-muted-foreground">
         {lead.stoppedAtStage
-          ? `Arquivado. Parou em ${leadStageLabels[lead.stoppedAtStage]}.`
+          ? `Arquivado. Parou em ${stages.nameOf(lead.stoppedAtStage)}.`
           : "Arquivado."}
       </span>
       <Button
@@ -141,17 +137,18 @@ function ArchivedStage({ lead, onReactivate, isPending }: ArchivedStageProps) {
 
 export function LeadStageStepper({ lead }: { lead: LeadDetail }) {
   const [isClosing, setIsClosing] = useState(false);
+  const stages = useStages();
   const { changeStage, isPending } = useChangeLeadStage(lead.id);
-  const isArchived = lead.stage === "lost" || lead.stage === "no_response";
+  const isArchived = stages.isArchive(lead.stage);
 
-  const select = (stage: LeadStage) => {
-    if (stage === "won") return setIsClosing(true);
-    changeStage(stage, lead.stage, `Etapa alterada para ${leadStageLabels[stage]}`);
+  const select = (stage: Stage) => {
+    if (stage.role === "closing") return setIsClosing(true);
+    changeStage(stage.id, lead.stage, `Etapa alterada para ${stage.name}`);
   };
 
   const reactivate = () => {
-    const target = lead.stoppedAtStage ?? "prospected";
-    changeStage(target, lead.stage, `Lead reativado em ${leadStageLabels[target]}`);
+    const target = lead.stoppedAtStage ?? stages.entry.id;
+    changeStage(target, lead.stage, `Lead reativado em ${stages.nameOf(target)}`);
   };
 
   return (

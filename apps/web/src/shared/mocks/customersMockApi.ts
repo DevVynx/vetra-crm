@@ -35,6 +35,7 @@ import {
   mockLeads,
   updateMockLead,
 } from "./fixtures";
+import { closingStageId } from "./stageRules";
 import { mockStore, openWonDeal, paginate, respond, sumBy } from "./store";
 
 const findDeal = (id: string): WonDeal => {
@@ -301,7 +302,7 @@ export const customersMockApi = {
     firstInstallmentDueAt,
     ...contact
   }: CreateCustomerRequest): Promise<CreateCustomerResponse> {
-    const created = addMockLead(contact, "won");
+    const created = addMockLead(contact, closingStageId());
     mockCustomerDocuments[created.id] = document;
     openWonDeal(created.id, closedValueInCents, firstInstallmentDueAt);
     return respond(created);

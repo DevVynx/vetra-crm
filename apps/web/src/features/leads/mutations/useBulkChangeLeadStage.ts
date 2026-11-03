@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import type { LeadSummary, UpdateLeadStageRequest } from "@vetra/contracts";
+import type { LeadSummary } from "@vetra/contracts";
 import { toast } from "sonner";
 
 import { leadsMockApi } from "@/shared/mocks/leadsMockApi";
@@ -7,7 +7,7 @@ import { useInvalidateAfterLeadChange } from "@/shared/mutations/leads/useInvali
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 import { toastWithUndo } from "@/shared/utils/toastWithUndo";
 
-type BulkChange = { ids: string[]; stage: UpdateLeadStageRequest["stage"] };
+type BulkChange = { ids: string[]; stage: string };
 
 export function useBulkChangeLeadStage(onChanged: () => void) {
   const invalidate = useInvalidateAfterLeadChange();

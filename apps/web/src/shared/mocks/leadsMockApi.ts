@@ -18,7 +18,6 @@ import {
   type ListLeadsQuery,
   type ListLeadsResponse,
   type ListNextActionsResponse,
-  liveStageSchema,
   type UpdateLeadNoteRequest,
   type UpdateLeadNoteResponse,
   type UpdateLeadRequest,
@@ -39,11 +38,12 @@ import {
   mockLeads,
   updateMockLead,
 } from "./fixtures";
+import { closingStageId, isArchiveStageId, isLiveStageId } from "./stageRules";
 import { mockStore, openWonDeal, paginate, respond } from "./store";
 
 const LATEST_MESSAGES = 4;
 
-const isLive = (lead: LeadSummary) => liveStageSchema.safeParse(lead.stage).success;
+const isLive = (lead: LeadSummary) => isLiveStageId(lead.stage);
 
 const nextActionOf = (leadId: string) =>
   mockStore.nextActions
@@ -65,7 +65,7 @@ const showsArchived = (filters: Filter[]) =>
     ({ field, operator, values }) =>
       field === "stage" &&
       (operator === "is" || operator === "is_any_of") &&
-      values.some((value) => value === "lost" || value === "no_response")
+      values.some((value) => typeof value === "string" && isArchiveStageId(value))
   );
 
 const matchesSearch = (lead: LeadSummary, query: string) => {
@@ -81,13 +81,9 @@ const findLead = (id: string): LeadSummary => {
   return found;
 };
 
-const isArchivedStage = (stage: LeadSummary["stage"]) =>
-  stage === "lost" || stage === "no_response";
-
-const stoppedAtAfter = (lead: LeadSummary, stage: LeadSummary["stage"]) => {
-  if (!isArchivedStage(stage)) return null;
-  const live = liveStageSchema.safeParse(lead.stage);
-  return live.success ? live.data : lead.stoppedAtStage;
+const stoppedAtAfter = (lead: LeadSummary, stage: string) => {
+  if (!isArchiveStageId(stage)) return null;
+  return isLiveStageId(lead.stage) ? lead.stage : lead.stoppedAtStage;
 };
 
 const moveLead = (lead: LeadSummary, stage: UpdateLeadStageRequest["stage"]): LeadSummary => {
@@ -97,7 +93,7 @@ const moveLead = (lead: LeadSummary, stage: UpdateLeadStageRequest["stage"]): Le
     ...mockContactOverrides[lead.id],
     stageChangedAt: new Date().toISOString(),
   };
-  if (isArchivedStage(stage)) {
+  if (isArchiveStageId(stage)) {
     mockStore.nextActions = mockStore.nextActions.filter((action) => action.lead.id !== lead.id);
   }
   return updated;
@@ -109,7 +105,7 @@ export const leadsMockApi = {
     const items = mockLeads
       .filter(
         (lead) =>
-          (isLive(lead) || (archivedVisible && isArchivedStage(lead.stage))) &&
+          (isLive(lead) || (archivedVisible && isArchiveStageId(lead.stage))) &&
           matchesFilters(lead, filters, leadFilterAccessors) &&
           matchesSearch(lead, q)
       )
@@ -231,7 +227,7 @@ export const leadsMockApi = {
     const lead = findLead(id);
     openWonDeal(id, closedValueInCents, firstInstallmentDueAt);
     mockStore.nextActions = mockStore.nextActions.filter((action) => action.lead.id !== id);
-    const closed: LeadSummary = { ...lead, stage: "won", stoppedAtStage: null };
+    const closed: LeadSummary = { ...lead, stage: closingStageId(), stoppedAtStage: null };
     mockLeads[mockLeads.indexOf(lead)] = closed;
     return respond(closed);
   },

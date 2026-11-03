@@ -16,12 +16,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
+import { useStages } from "@/shared/stages/useStages";
 import { cn } from "@/shared/utils/cn";
 import { formatDayLabel, formatLastContact, formatRelative } from "@/shared/utils/date";
 
-import { isLiveStage } from "../constants/leadFilters";
-
 function NextActionCell({ lead }: { lead: LeadListItem }) {
+  const stages = useStages();
   if (lead.nextAction) {
     const dueAt = new Date(lead.nextAction.dueAt);
     const isOverdue = isBefore(dueAt, startOfToday());
@@ -36,7 +36,7 @@ function NextActionCell({ lead }: { lead: LeadListItem }) {
     );
   }
 
-  if (!isLiveStage(lead.stage)) return <span className="text-muted-foreground">—</span>;
+  if (!stages.isLive(lead.stage)) return <span className="text-muted-foreground">—</span>;
 
   // The popover renders in a portal, but its events still bubble to the clickable row.
   return (

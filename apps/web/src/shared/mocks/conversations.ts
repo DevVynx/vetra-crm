@@ -7,6 +7,7 @@ import type {
 import { addHours, addMinutes } from "date-fns";
 
 import { awaitingConversationOf, lastContactFor, mockLeads } from "./fixtures";
+import { stageAfterEntryId } from "./stageRules";
 
 const MAX_MESSAGES = 6;
 
@@ -62,9 +63,10 @@ export function buildMockConversation(lead: LeadSummary): LeadConversation | nul
 
   const index = mockLeads.findIndex((item) => item.id === lead.id);
   const awaiting = awaitingConversationOf(lead.id);
+  const isFirstContact = lead.stage === stageAfterEntryId();
   const lastDirection: WhatsappMessageDirection =
-    awaiting || (lead.stage !== "approach_sent" && index % 2 === 0) ? "inbound" : "outbound";
-  const count = lead.stage === "approach_sent" ? 1 : MAX_MESSAGES - (index % 3);
+    awaiting || (!isFirstContact && index % 2 === 0) ? "inbound" : "outbound";
+  const count = isFirstContact ? 1 : MAX_MESSAGES - (index % 3);
 
   let direction = lastDirection;
   let sentAt = new Date(lastContactAt);

@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-import { leadStageSchema, leadSummarySchema } from "./common";
+import { leadSummarySchema } from "./common";
 
-// Closing goes through closeLeadRequestSchema, which carries the deal data.
+// The closing stage goes through closeLeadRequestSchema, which carries the deal data.
 export const updateLeadStageRequestSchema = z.object({
-  stage: leadStageSchema.exclude(["won"]),
+  stage: z.string(),
 });
 export type UpdateLeadStageRequest = z.infer<typeof updateLeadStageRequestSchema>;
 

@@ -5,6 +5,7 @@ import { AppSidebar } from "@/shared/components/layout/AppSidebar";
 import { PageCrumbProvider } from "@/shared/components/layout/PageCrumb";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { SIDEBAR_COOKIE_NAME, SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
+import { StagesProvider } from "@/shared/stages/StagesProvider";
 
 // The sidebar persists its state in a cookie but, outside Next.js, never reads it back.
 function readSidebarOpen() {
@@ -22,7 +23,9 @@ const AppLayout = () => (
       <SidebarInset className="md:border-border min-h-0 overflow-hidden md:border">
         <AppHeader />
         <ScrollArea className="min-h-0 flex-1">
-          <Outlet />
+          <StagesProvider>
+            <Outlet />
+          </StagesProvider>
         </ScrollArea>
       </SidebarInset>
     </PageCrumbProvider>

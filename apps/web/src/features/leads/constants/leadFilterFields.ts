@@ -1,4 +1,4 @@
-import type { LeadStage } from "@vetra/contracts";
+import type { Stage } from "@vetra/contracts";
 import {
   CalendarClockIcon,
   CalendarPlusIcon,
@@ -9,30 +9,27 @@ import {
 } from "lucide-react";
 
 import type { FilterField, FilterOption } from "@/shared/components/filters/types";
-import { leadStageColor, leadStageLabels } from "@/shared/constants/leadStages";
-
-import { liveStages } from "./leadFilters";
-
-const archivedStages: LeadStage[] = ["no_response", "lost"];
-
-const stageOptions: FilterOption[] = [...liveStages, ...archivedStages].map((stage) => ({
-  value: stage,
-  label: leadStageLabels[stage],
-  color: leadStageColor(stage),
-}));
 
 type LeadFilterOptions = {
+  stages: Stage[];
   niches: FilterOption[];
   cities: FilterOption[];
   isLoading: boolean;
 };
 
 export const buildLeadFilterFields = ({
+  stages,
   niches,
   cities,
   isLoading,
 }: LeadFilterOptions): FilterField[] => [
-  { id: "stage", label: "Etapa", icon: FunnelIcon, type: "select", options: stageOptions },
+  {
+    id: "stage",
+    label: "Etapa",
+    icon: FunnelIcon,
+    type: "select",
+    options: stages.map(({ id, name, color }) => ({ value: id, label: name, color })),
+  },
   {
     id: "niche",
     label: "Nicho",

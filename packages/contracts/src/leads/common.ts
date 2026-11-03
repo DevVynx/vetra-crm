@@ -1,29 +1,13 @@
 import { z } from "zod";
 
-export const leadStageSchema = z.enum([
-  "prospected",
-  "demo_published",
-  "approach_sent",
-  "conversing",
-  "meeting",
-  "proposal_sent",
-  "won",
-  "lost",
-  "no_response",
-]);
-export type LeadStage = z.infer<typeof leadStageSchema>;
-
-export const liveStageSchema = leadStageSchema.exclude(["won", "lost", "no_response"]);
-export type LiveStage = z.infer<typeof liveStageSchema>;
-
 export const leadSummarySchema = z.object({
   id: z.string(),
   businessName: z.string(),
   contactName: z.string().nullable(),
   niche: z.string(),
   city: z.string(),
-  stage: leadStageSchema,
+  stage: z.string(),
   prospectedAt: z.iso.datetime(),
-  stoppedAtStage: liveStageSchema.nullable(),
+  stoppedAtStage: z.string().nullable(),
 });
 export type LeadSummary = z.infer<typeof leadSummarySchema>;

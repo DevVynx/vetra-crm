@@ -9,10 +9,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { leadStageColor, leadStageLabels } from "@/shared/constants/leadStages";
+import { useStages } from "@/shared/stages/useStages";
 import { pluralize } from "@/shared/utils/format";
 
-import { liveStages } from "../constants/leadFilters";
 import { useBulkChangeLeadStage } from "../mutations/useBulkChangeLeadStage";
 
 type LeadsBulkBarProps = {
@@ -24,6 +23,7 @@ type LeadsBulkBarProps = {
 // Floats over the list while leads are selected. Closing a lead is left out: it needs the deal data.
 export function LeadsBulkBar({ ids, onDone, onCancel }: LeadsBulkBarProps) {
   const [isArchiving, setIsArchiving] = useState(false);
+  const stages = useStages();
   const { changeStages, isPending } = useBulkChangeLeadStage(onDone);
   const summary = pluralize(ids.length, "lead", "leads");
   const isSingle = ids.length === 1;
@@ -48,23 +48,22 @@ export function LeadsBulkBar({ ids, onDone, onCancel }: LeadsBulkBarProps) {
           }
         />
         <DropdownMenuContent align="center" side="top">
-          {liveStages.map((stage) => (
-            <DropdownMenuItem
-              key={stage}
-              onClick={() =>
-                changeStages(
-                  { ids, stage },
-                  `${summary} ${isSingle ? "movido" : "movidos"} para ${leadStageLabels[stage]}`
-                )
-              }
-            >
-              <span
-                className="size-2 rounded-full"
-                style={{ backgroundColor: leadStageColor(stage) }}
-              />
-              {leadStageLabels[stage]}
-            </DropdownMenuItem>
-          ))}
+          {stages.funnel
+            .filter((stage) => stage.role !== "closing")
+            .map((stage) => (
+              <DropdownMenuItem
+                key={stage.id}
+                onClick={() =>
+                  changeStages(
+                    { ids, stage: stage.id },
+                    `${summary} ${isSingle ? "movido" : "movidos"} para ${stage.name}`
+                  )
+                }
+              >
+                <span className="size-2 rounded-full" style={{ backgroundColor: stage.color }} />
+                {stage.name}
+              </DropdownMenuItem>
+            ))}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -83,9 +82,9 @@ export function LeadsBulkBar({ ids, onDone, onCancel }: LeadsBulkBarProps) {
         title={`Arquivar ${summary}?`}
         description={`${isSingle ? "Ele sai" : "Eles saem"} da lista e ${isSingle ? "fica" : "ficam"} em Arquivados, guardando a etapa em que parou. Dá para reativar quando quiser.`}
         isPending={isPending}
-        onConfirm={(reason) => {
+        onConfirm={(archiveStageId) => {
           changeStages(
-            { ids, stage: reason },
+            { ids, stage: archiveStageId },
             `${summary} ${isSingle ? "arquivado" : "arquivados"}`
           );
           setIsArchiving(false);

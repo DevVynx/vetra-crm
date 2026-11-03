@@ -7,12 +7,13 @@ import { NextActionItem } from "@/shared/components/next-actions/NextActionItem"
 import { Section } from "@/shared/components/Section";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
+import { useStages } from "@/shared/stages/useStages";
 
-import { isLiveStage } from "../constants/leadFilters";
 import { useLeadNextActions } from "../queries/useLeadNextActions";
 import { NextActionHighlight } from "./NextActionHighlight";
 
 export function LeadActivities({ lead }: { lead: LeadDetail }) {
+  const stages = useStages();
   const { data, isPending } = useLeadNextActions(lead.id);
   const actions = data?.nextActions ?? [];
   const [nextAction, ...laterActions] = actions;
@@ -49,7 +50,7 @@ export function LeadActivities({ lead }: { lead: LeadDetail }) {
             </div>
           )}
         </div>
-      ) : isLiveStage(lead.stage) ? (
+      ) : stages.isLive(lead.stage) ? (
         <SectionEmpty
           icon={CircleAlertIcon}
           title="Sem próxima ação"

@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { leadStageSchema } from "../leads/common";
-
 const amountInCentsSchema = z.number().int().nonnegative();
 const countSchema = z.number().int().nonnegative();
 // Relative change against the previous period of the same length (0.35 = +35%). Null when
@@ -33,12 +31,12 @@ export const dashboardSummaryResponseSchema = z.object({
   }),
   recurring: z.object({ monthlyAmountInCents: amountInCentsSchema, customersCount: countSchema }),
   activeProjectsCount: countSchema,
-  negotiating: z.object({ leadsCount: countSchema, proposalsCount: countSchema }),
+  activeLeads: z.object({ leadsCount: countSchema, lastStageLeadsCount: countSchema }),
 });
 export type DashboardSummaryResponse = z.infer<typeof dashboardSummaryResponseSchema>;
 
 export const funnelStepSchema = z.object({
-  stage: leadStageSchema,
+  stage: z.string(),
   // Cohort count: leads prospected in the period that reached this stage at some point,
   // not the ones currently in it.
   reachedCount: countSchema,
