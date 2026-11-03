@@ -9,7 +9,8 @@
     "db:generate": "pnpm env:load drizzle-kit generate",
     "db:migrate": "pnpm env:load drizzle-kit migrate",
     "db:studio": "pnpm env:load drizzle-kit studio",
-    "env:load": "dotenv -e ../../.env --"
+    "env:load": "dotenv -e ../../.env --",
+    "db:seed": "pnpm env:load tsx src/seed.ts"
   },
   "dependencies": {
     "@vetra/env": "workspace:*",
@@ -20,6 +21,7 @@
     "@vetra/tsconfig": "workspace:*",
     "dotenv-cli": "11.0.0",
     "drizzle-kit": "0.31.11",
-    "tsx": "^4.7.2"
+    "tsx": "^4.7.2",
+    "uuid": "14.0.3"
   }
 }

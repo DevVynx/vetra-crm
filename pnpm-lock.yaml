@@ -323,6 +323,9 @@ importers:
       tsx:
         specifier: ^4.7.2
         version: 4.23.15
+      uuid:
+        specifier: 14.0.3
+        version: 14.0.3
 
   packages/infra:
     devDependencies:
