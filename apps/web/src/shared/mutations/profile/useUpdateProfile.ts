@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Profile, UpdateProfileRequest, UpdateProfileResponse } from "@vetra/contracts";
 import { profileRoutes } from "@vetra/routes";
 import { toast } from "sonner";
@@ -9,12 +9,18 @@ import { profileQueryKeys } from "@/shared/queries/profile/keys";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 export function useUpdateProfile() {
+  const queryClient = useQueryClient();
   const profileQuery = useQueryUtils<Profile>(profileQueryKeys.all);
 
   return useMutation({
     mutationFn: async (request: UpdateProfileRequest) =>
       (await api.patch<UpdateProfileResponse>(profileRoutes.base, request)).data,
-    onSuccess: (profile) => profileQuery.setData(profile),
+    onSuccess: (profile, request) => {
+      profileQuery.setData(profile);
+      // The server draws "today", periods and chart buckets in the profile time zone, so every
+      // date-based answer changes with it.
+      if (request.timeZone) return queryClient.invalidateQueries();
+    },
     onError: (error) => toast.error(getErrorMessage(error, "Não foi possível salvar o perfil.")),
   });
 }
