@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { buildPath, customersRoutes } from "@vetra/routes";
 import { toast } from "sonner";
 
-import { customersMockApi } from "@/shared/mocks/customersMockApi";
+import api from "@/shared/lib/axios/api";
 import { useInvalidateAfterLeadChange } from "@/shared/mutations/leads/useInvalidateAfterLeadChange";
 import { leadsQueryKeys } from "@/shared/queries/leads/keys";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
@@ -15,7 +16,7 @@ export function useDeleteCustomer(customerId: string) {
   const invalidate = useInvalidateAfterLeadChange();
 
   return useMutation({
-    mutationFn: () => customersMockApi.deleteCustomer(customerId),
+    mutationFn: () => api.delete(buildPath(customersRoutes.byId, { id: customerId })),
     onSuccess: async () => {
       // Drop the details first: refetching a deleted customer would flash "not found".
       queryClient.removeQueries({ queryKey: customersQueryKeys.detail(customerId) });

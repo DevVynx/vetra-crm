@@ -1,14 +1,17 @@
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
-import type { DashboardPeriod } from "@vetra/contracts";
+import type { DashboardPeriod, DashboardRevenueResponse } from "@vetra/contracts";
+import { dashboardRoutes } from "@vetra/routes";
 
-import { dashboardMockApi } from "@/shared/mocks/mockApi";
+import api from "@/shared/lib/axios/api";
 
 import { dashboardQueryKeys } from "./keys";
 
 export const dashboardRevenueQueryOptions = (period: DashboardPeriod) =>
   queryOptions({
     queryKey: dashboardQueryKeys.revenue(period),
-    queryFn: () => dashboardMockApi.getRevenue({ period }),
+    queryFn: async () =>
+      (await api.get<DashboardRevenueResponse>(dashboardRoutes.revenue, { params: { period } }))
+        .data,
     placeholderData: keepPreviousData,
   });
 

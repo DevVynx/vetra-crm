@@ -1,12 +1,16 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
+import type { ListNextActionsResponse } from "@vetra/contracts";
+import { buildPath, nextActionsRoutes } from "@vetra/routes";
 
-import { leadsMockApi } from "@/shared/mocks/leadsMockApi";
+import api from "@/shared/lib/axios/api";
 import { leadsQueryKeys } from "@/shared/queries/leads/keys";
 
 export const leadNextActionsQueryOptions = (leadId: string) =>
   queryOptions({
     queryKey: leadsQueryKeys.nextActions(leadId),
-    queryFn: () => leadsMockApi.listLeadNextActions(leadId),
+    queryFn: async () =>
+      (await api.get<ListNextActionsResponse>(buildPath(nextActionsRoutes.byLead, { id: leadId })))
+        .data,
   });
 
 export function useLeadNextActions(leadId: string) {

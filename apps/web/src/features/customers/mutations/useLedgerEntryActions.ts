@@ -1,12 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
 import type {
   CreateLedgerEntryRequest,
+  CreateLedgerEntryResponse,
   LedgerEntry,
   UpdateLedgerEntryRequest,
+  UpdateLedgerEntryResponse,
 } from "@vetra/contracts";
+import { buildPath, ledgerRoutes } from "@vetra/routes";
 import { toast } from "sonner";
 
-import { customersMockApi } from "@/shared/mocks/customersMockApi";
+import api from "@/shared/lib/axios/api";
 import { useInvalidateAfterLeadChange } from "@/shared/mutations/leads/useInvalidateAfterLeadChange";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 import { toastWithUndo } from "@/shared/utils/toastWithUndo";
@@ -31,14 +34,16 @@ export function useLedgerEntryActions(customerId: string) {
     toast.error(getErrorMessage(error, "Não foi possível salvar o registro."));
 
   const restoreEntry = useMutation({
-    mutationFn: (entry: LedgerEntry) => customersMockApi.restoreLedgerEntry(customerId, entry),
+    mutationFn: (entry: LedgerEntry) =>
+      api.post(buildPath(ledgerRoutes.restore, { id: customerId }), entry),
     onSuccess: invalidate,
     onError,
   });
 
   // Undoing a creation: the entry just goes away, no toast.
   const discardEntry = useMutation({
-    mutationFn: (entryId: string) => customersMockApi.deleteLedgerEntry(customerId, entryId),
+    mutationFn: (entryId: string) =>
+      api.delete(buildPath(ledgerRoutes.byId, { id: customerId, entryId })),
     onSuccess: invalidate,
     onError,
   });
@@ -46,7 +51,8 @@ export function useLedgerEntryActions(customerId: string) {
   // The undo toast is shown here and not in the caller: the row that started the deletion is
   // gone once the ledger refetches, and its callbacks would never run.
   const deleteEntry = useMutation({
-    mutationFn: (entry: LedgerEntry) => customersMockApi.deleteLedgerEntry(customerId, entry.id),
+    mutationFn: (entry: LedgerEntry) =>
+      api.delete(buildPath(ledgerRoutes.byId, { id: customerId, entryId: entry.id })),
     onSuccess: (_, entry) => {
       toastWithUndo("Registro excluído.", () => restoreEntry.mutate(entry));
       return invalidate();
@@ -55,15 +61,31 @@ export function useLedgerEntryActions(customerId: string) {
   });
 
   const createEntry = useMutation({
-    mutationFn: (request: CreateLedgerEntryRequest) =>
-      customersMockApi.createLedgerEntry(customerId, request),
+    mutationFn: async (request: CreateLedgerEntryRequest) =>
+      (
+        await api.post<CreateLedgerEntryResponse>(
+          buildPath(ledgerRoutes.byCustomer, { id: customerId }),
+          request
+        )
+      ).data,
     onSuccess: invalidate,
     onError,
   });
 
   const updateEntry = useMutation({
-    mutationFn: ({ entryId, request }: { entryId: string; request: UpdateLedgerEntryRequest }) =>
-      customersMockApi.updateLedgerEntry(customerId, entryId, request),
+    mutationFn: async ({
+      entryId,
+      request,
+    }: {
+      entryId: string;
+      request: UpdateLedgerEntryRequest;
+    }) =>
+      (
+        await api.patch<UpdateLedgerEntryResponse>(
+          buildPath(ledgerRoutes.byId, { id: customerId, entryId }),
+          request
+        )
+      ).data,
     onSuccess: invalidate,
     onError,
   });

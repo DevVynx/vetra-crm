@@ -1,12 +1,16 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
+import type { ListLeadsWithoutNextActionResponse } from "@vetra/contracts";
+import { dashboardRoutes } from "@vetra/routes";
 
-import { dashboardMockApi } from "@/shared/mocks/mockApi";
+import api from "@/shared/lib/axios/api";
 
 import { dashboardQueryKeys } from "./keys";
 
 export const leadsWithoutNextActionQueryOptions = queryOptions({
   queryKey: dashboardQueryKeys.leadsWithoutNextAction,
-  queryFn: () => dashboardMockApi.listLeadsWithoutNextAction(),
+  queryFn: async () =>
+    (await api.get<ListLeadsWithoutNextActionResponse>(dashboardRoutes.leadsWithoutNextAction))
+      .data,
 });
 
 export function useLeadsWithoutNextAction() {

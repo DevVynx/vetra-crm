@@ -1,8 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import type { LeadDetail, UpdateLeadRequest } from "@vetra/contracts";
+import type { LeadDetail, UpdateLeadRequest, UpdateLeadResponse } from "@vetra/contracts";
+import { buildPath, leadsRoutes } from "@vetra/routes";
 import { toast } from "sonner";
 
-import { leadsMockApi } from "@/shared/mocks/leadsMockApi";
+import api from "@/shared/lib/axios/api";
 import { useInvalidateAfterLeadChange } from "@/shared/mutations/leads/useInvalidateAfterLeadChange";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 import { toastWithUndo } from "@/shared/utils/toastWithUndo";
@@ -20,7 +21,9 @@ export function useUpdateLead(lead: LeadDetail, onUpdated: () => void) {
   const invalidate = useInvalidateAfterLeadChange();
 
   const mutation = useMutation({
-    mutationFn: (request: UpdateLeadRequest) => leadsMockApi.updateLead(lead.id, request),
+    mutationFn: async (request: UpdateLeadRequest) =>
+      (await api.patch<UpdateLeadResponse>(buildPath(leadsRoutes.byId, { id: lead.id }), request))
+        .data,
     onSuccess: invalidate,
     onError: (error) => toast.error(getErrorMessage(error, "Não foi possível salvar o lead.")),
   });

@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { LeadNote } from "@vetra/contracts";
+import type { LeadNote, UpdateLeadNoteResponse } from "@vetra/contracts";
+import { buildPath, leadNotesRoutes } from "@vetra/routes";
 import { toast } from "sonner";
 
-import { leadsMockApi } from "@/shared/mocks/leadsMockApi";
+import api from "@/shared/lib/axios/api";
 import { leadsQueryKeys } from "@/shared/queries/leads/keys";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 import { toastWithUndo } from "@/shared/utils/toastWithUndo";
@@ -13,7 +14,12 @@ export function useUpdateLeadNote(leadId: string) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({ noteId, content }: NoteEdit) => leadsMockApi.updateLeadNote(noteId, { content }),
+    mutationFn: async ({ noteId, content }: NoteEdit) =>
+      (
+        await api.patch<UpdateLeadNoteResponse>(buildPath(leadNotesRoutes.byId, { id: noteId }), {
+          content,
+        })
+      ).data,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: leadsQueryKeys.notes(leadId) }),
     onError: (error) => toast.error(getErrorMessage(error, "Não foi possível salvar a nota.")),
   });

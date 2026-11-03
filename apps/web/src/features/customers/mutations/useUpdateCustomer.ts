@@ -1,8 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
-import type { CustomerDetail, UpdateCustomerRequest } from "@vetra/contracts";
+import type {
+  CustomerDetail,
+  UpdateCustomerRequest,
+  UpdateCustomerResponse,
+} from "@vetra/contracts";
+import { buildPath, customersRoutes } from "@vetra/routes";
 import { toast } from "sonner";
 
-import { customersMockApi } from "@/shared/mocks/customersMockApi";
+import api from "@/shared/lib/axios/api";
 import { useInvalidateAfterLeadChange } from "@/shared/mutations/leads/useInvalidateAfterLeadChange";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 import { toastWithUndo } from "@/shared/utils/toastWithUndo";
@@ -21,8 +26,13 @@ export function useUpdateCustomer(customer: CustomerDetail, onUpdated: () => voi
   const invalidate = useInvalidateAfterLeadChange();
 
   const mutation = useMutation({
-    mutationFn: (request: UpdateCustomerRequest) =>
-      customersMockApi.updateCustomer(customer.id, request),
+    mutationFn: async (request: UpdateCustomerRequest) =>
+      (
+        await api.patch<UpdateCustomerResponse>(
+          buildPath(customersRoutes.byId, { id: customer.id }),
+          request
+        )
+      ).data,
     onSuccess: invalidate,
     onError: (error) => toast.error(getErrorMessage(error, "Não foi possível salvar o cliente.")),
   });

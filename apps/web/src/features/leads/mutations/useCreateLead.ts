@@ -1,8 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import type { CreateLeadRequest } from "@vetra/contracts";
+import type { CreateLeadRequest, CreateLeadResponse } from "@vetra/contracts";
+import { buildPath, leadsRoutes } from "@vetra/routes";
 import { toast } from "sonner";
 
-import { leadsMockApi } from "@/shared/mocks/leadsMockApi";
+import api from "@/shared/lib/axios/api";
 import { useInvalidateAfterLeadChange } from "@/shared/mutations/leads/useInvalidateAfterLeadChange";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 import { toastWithUndo } from "@/shared/utils/toastWithUndo";
@@ -11,12 +12,13 @@ export function useCreateLead(onCreated: () => void) {
   const invalidate = useInvalidateAfterLeadChange();
 
   const remove = useMutation({
-    mutationFn: (leadId: string) => leadsMockApi.deleteLead(leadId),
+    mutationFn: (leadId: string) => api.delete(buildPath(leadsRoutes.byId, { id: leadId })),
     onSuccess: invalidate,
   });
 
   return useMutation({
-    mutationFn: (request: CreateLeadRequest) => leadsMockApi.createLead(request),
+    mutationFn: async (request: CreateLeadRequest) =>
+      (await api.post<CreateLeadResponse>(leadsRoutes.base, request)).data,
     onSuccess: (lead) => {
       onCreated();
       toastWithUndo("Lead criado.", () => remove.mutate(lead.id));

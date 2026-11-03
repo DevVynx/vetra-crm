@@ -1,12 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
 import type {
   CreateCustomerProjectRequest,
+  CreateCustomerProjectResponse,
   CustomerProject,
   UpdateCustomerProjectRequest,
+  UpdateCustomerProjectResponse,
 } from "@vetra/contracts";
+import { buildPath, projectsRoutes } from "@vetra/routes";
 import { toast } from "sonner";
 
-import { customersMockApi } from "@/shared/mocks/customersMockApi";
+import api from "@/shared/lib/axios/api";
 import { useInvalidateAfterLeadChange } from "@/shared/mutations/leads/useInvalidateAfterLeadChange";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 import { toastWithUndo } from "@/shared/utils/toastWithUndo";
@@ -24,7 +27,7 @@ export function useCustomerProjectActions(customerId: string) {
     toast.error(getErrorMessage(error, "Não foi possível salvar o projeto."));
 
   const deleteRequest = (projectId: string) =>
-    customersMockApi.deleteCustomerProject(customerId, projectId);
+    api.delete(buildPath(projectsRoutes.byId, { id: customerId, projectId }));
 
   // Undoing a creation: the project just goes away, no toast.
   const discardProject = useMutation({
@@ -45,20 +48,31 @@ export function useCustomerProjectActions(customerId: string) {
   });
 
   const createProject = useMutation({
-    mutationFn: (request: CreateCustomerProjectRequest) =>
-      customersMockApi.createCustomerProject(customerId, request),
+    mutationFn: async (request: CreateCustomerProjectRequest) =>
+      (
+        await api.post<CreateCustomerProjectResponse>(
+          buildPath(projectsRoutes.byCustomer, { id: customerId }),
+          request
+        )
+      ).data,
     onSuccess: invalidate,
     onError,
   });
 
   const updateProject = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       projectId,
       request,
     }: {
       projectId: string;
       request: UpdateCustomerProjectRequest;
-    }) => customersMockApi.updateCustomerProject(customerId, projectId, request),
+    }) =>
+      (
+        await api.patch<UpdateCustomerProjectResponse>(
+          buildPath(projectsRoutes.byId, { id: customerId, projectId }),
+          request
+        )
+      ).data,
     onSuccess: invalidate,
     onError,
   });

@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { buildPath, leadsRoutes } from "@vetra/routes";
 import { toast } from "sonner";
 
-import { leadsMockApi } from "@/shared/mocks/leadsMockApi";
+import api from "@/shared/lib/axios/api";
 import { useInvalidateAfterLeadChange } from "@/shared/mutations/leads/useInvalidateAfterLeadChange";
 import { leadsQueryKeys } from "@/shared/queries/leads/keys";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
@@ -13,7 +14,7 @@ export function useDeleteLead(leadId: string) {
   const invalidate = useInvalidateAfterLeadChange();
 
   return useMutation({
-    mutationFn: () => leadsMockApi.deleteLead(leadId),
+    mutationFn: () => api.delete(buildPath(leadsRoutes.byId, { id: leadId })),
     onSuccess: async () => {
       // Drop the detail first: refetching a deleted lead would flash "not found".
       queryClient.removeQueries({ queryKey: leadsQueryKeys.detail(leadId) });
