@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
-import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
+import { Route as AppConfigsRouteImport } from './routes/_app/configs'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
 import { Route as AppCustomersIndexRouteImport } from './routes/_app/customers.index'
 import { Route as AppCustomersCustomerIdRouteImport } from './routes/_app/customers.$customerId'
@@ -27,9 +27,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
-  id: '/configuracoes',
-  path: '/configuracoes',
+const AppConfigsRoute = AppConfigsRouteImport.update({
+  id: '/configs',
+  path: '/configs',
   getParentRoute: () => AppRoute,
 } as any)
 const AppWhatsappRoute = AppWhatsappRouteImport.update({
@@ -60,7 +60,7 @@ const AppLeadsLeadIdRoute = AppLeadsLeadIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
-  '/configuracoes': typeof AppConfiguracoesRoute
+  '/configs': typeof AppConfigsRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/customers/$customerId': typeof AppCustomersCustomerIdRoute
   '/leads/$leadId': typeof AppLeadsLeadIdRoute
@@ -68,7 +68,7 @@ export interface FileRoutesByFullPath {
   '/leads/': typeof AppLeadsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/configuracoes': typeof AppConfiguracoesRoute
+  '/configs': typeof AppConfigsRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/': typeof AppIndexRoute
   '/customers/$customerId': typeof AppCustomersCustomerIdRoute
@@ -79,7 +79,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
-  '/_app/configuracoes': typeof AppConfiguracoesRoute
+  '/_app/configs': typeof AppConfigsRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
   '/_app/': typeof AppIndexRoute
   '/_app/customers/$customerId': typeof AppCustomersCustomerIdRoute
@@ -91,7 +91,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/configuracoes'
+    | '/configs'
     | '/whatsapp'
     | '/customers/$customerId'
     | '/leads/$leadId'
@@ -99,7 +99,7 @@ export interface FileRouteTypes {
     | '/leads/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/configuracoes'
+    | '/configs'
     | '/whatsapp'
     | '/'
     | '/customers/$customerId'
@@ -109,7 +109,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
-    | '/_app/configuracoes'
+    | '/_app/configs'
     | '/_app/whatsapp'
     | '/_app/'
     | '/_app/customers/$customerId'
@@ -138,11 +138,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/configuracoes': {
-      id: '/_app/configuracoes'
-      path: '/configuracoes'
-      fullPath: '/configuracoes'
-      preLoaderRoute: typeof AppConfiguracoesRouteImport
+    '/_app/configs': {
+      id: '/_app/configs'
+      path: '/configs'
+      fullPath: '/configs'
+      preLoaderRoute: typeof AppConfigsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/whatsapp': {
@@ -184,7 +184,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
-  AppConfiguracoesRoute: typeof AppConfiguracoesRoute
+  AppConfigsRoute: typeof AppConfigsRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
   AppIndexRoute: typeof AppIndexRoute
   AppCustomersCustomerIdRoute: typeof AppCustomersCustomerIdRoute
@@ -194,7 +194,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppConfiguracoesRoute: AppConfiguracoesRoute,
+  AppConfigsRoute: AppConfigsRoute,
   AppWhatsappRoute: AppWhatsappRoute,
   AppIndexRoute: AppIndexRoute,
   AppCustomersCustomerIdRoute: AppCustomersCustomerIdRoute,
