@@ -47,12 +47,14 @@ export const filterSchema = z
   }, "invalidFilterValueCount");
 export type Filter = z.infer<typeof filterSchema>;
 
+// Malformed JSON is passed on as the raw string, so the array schema rejects it instead of the
+// default silently dropping every filter.
 function parseJson(value: unknown): unknown {
   if (typeof value !== "string") return value;
   try {
     return JSON.parse(value);
   } catch {
-    return undefined;
+    return value;
   }
 }
 
