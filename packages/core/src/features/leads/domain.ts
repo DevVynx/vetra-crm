@@ -1,0 +1,96 @@
+import { v7 as uuidv7 } from "uuid";
+
+import type { Filter } from "../../shared/filters";
+import type { Stage } from "../stages/domain";
+import { LeadIsCustomerError, LeadMustCloseWithDealError } from "./errors";
+
+export type Lead = {
+  id: string;
+  businessName: string;
+  contactName: string | null;
+  niche: string;
+  city: string;
+  phone: string;
+  email: string | null;
+  demoUrl: string | null;
+  stageId: string;
+  stoppedAtStageId: string | null;
+  stageChangedAt: Date;
+  prospectedAt: Date;
+  lastContactAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type LeadContact = Pick<
+  Lead,
+  "businessName" | "contactName" | "niche" | "city" | "phone" | "email"
+>;
+
+// The part of a lead a stage change touches, kept so the change can be undone exactly.
+export type LeadStageState = Pick<Lead, "id" | "stageId" | "stoppedAtStageId" | "stageChangedAt">;
+
+const isLive = (stage: Stage) => stage.role === "entry" || stage.role === "middle";
+
+// New leads start in the entry stage, prospected now.
+function create(contact: LeadContact, entryStage: Stage, now: Date): Lead {
+  return {
+    ...contact,
+    id: uuidv7(),
+    demoUrl: null,
+    stageId: entryStage.id,
+    stoppedAtStageId: null,
+    stageChangedAt: now,
+    prospectedAt: now,
+    lastContactAt: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function ensureIsNotCustomer(current: Stage): void {
+  if (current.role === "closing") throw new LeadIsCustomerError();
+}
+
+// Archiving remembers the live stage the lead stopped at, so it can be reactivated there.
+function moveToStage(lead: Lead, current: Stage, target: Stage, now: Date): LeadStageState {
+  ensureIsNotCustomer(current);
+  if (target.role === "closing") throw new LeadMustCloseWithDealError();
+
+  const stoppedAtStageId =
+    target.role === "archive" ? (isLive(current) ? current.id : lead.stoppedAtStageId) : null;
+
+  return { id: lead.id, stageId: target.id, stoppedAtStageId, stageChangedAt: now };
+}
+
+function stageStateOf(lead: Lead): LeadStageState {
+  return {
+    id: lead.id,
+    stageId: lead.stageId,
+    stoppedAtStageId: lead.stoppedAtStageId,
+    stageChangedAt: lead.stageChangedAt,
+  };
+}
+
+// Lists show live leads only; archived ones appear when the stage filter asks for an archive stage.
+function visibleStageIdsFor(stages: Stage[], filters: Filter[]): string[] {
+  const requested = new Set(
+    filters
+      .filter(
+        ({ field, operator }) =>
+          field === "stage" && (operator === "is" || operator === "is_any_of")
+      )
+      .flatMap(({ values }) => values.map(String))
+  );
+  return stages
+    .filter((stage) => isLive(stage) || (stage.role === "archive" && requested.has(stage.id)))
+    .map((stage) => stage.id);
+}
+
+export const leadDomain = {
+  create,
+  ensureIsNotCustomer,
+  moveToStage,
+  stageStateOf,
+  visibleStageIdsFor,
+};

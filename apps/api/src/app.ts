@@ -3,6 +3,7 @@ import cors from "cors";
 import express, { Express } from "express";
 import helmet from "helmet";
 
+import { leadsRouter } from "@/features/leads/routes";
 import { profileRouter } from "@/features/profile/routes";
 import { stagesRouter } from "@/features/stages/routes";
 import { handleGlobalError } from "@/shared/middlewares/handleGlobalError";
@@ -27,6 +28,7 @@ app.use(
   })
 );
 
+app.use("/api", leadsRouter);
 app.use("/api", profileRouter);
 app.use("/api", stagesRouter);
 
