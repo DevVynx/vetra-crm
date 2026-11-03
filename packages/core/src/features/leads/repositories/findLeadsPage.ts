@@ -1,4 +1,14 @@
-import { and, count, db, inArray, leadsTable, nextActionsTable, or, sql } from "@vetra/database";
+import {
+  and,
+  count,
+  db,
+  inArray,
+  leadsTable,
+  nextActionsTable,
+  or,
+  qualified,
+  sql,
+} from "@vetra/database";
 
 import {
   containsSql,
@@ -6,7 +16,6 @@ import {
   type FilterColumns,
   filtersToSql,
 } from "../../../shared/filters";
-import { qualified } from "../../../shared/sql/qualified";
 import type { Lead } from "../domain";
 import { leadColumns } from "./leadColumns";
 

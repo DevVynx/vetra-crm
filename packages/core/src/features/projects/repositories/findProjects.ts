@@ -6,10 +6,10 @@ import {
   expensesTable,
   installmentsTable,
   projectsTable,
+  qualified,
   sql,
 } from "@vetra/database";
 
-import { qualified } from "../../../shared/sql/qualified";
 import type { ProjectWithFinancial } from "../domain";
 
 const revenueSql = (paid: boolean) => sql<number>`(

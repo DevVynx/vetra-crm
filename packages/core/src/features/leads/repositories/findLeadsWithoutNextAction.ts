@@ -1,6 +1,14 @@
-import { and, db, desc, inArray, leadsTable, nextActionsTable, sql } from "@vetra/database";
+import {
+  and,
+  db,
+  desc,
+  inArray,
+  leadsTable,
+  nextActionsTable,
+  qualified,
+  sql,
+} from "@vetra/database";
 
-import { qualified } from "../../../shared/sql/qualified";
 import type { Lead } from "../domain";
 import { leadColumns } from "./leadColumns";
 

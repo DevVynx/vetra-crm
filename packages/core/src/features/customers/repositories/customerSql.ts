@@ -1,6 +1,12 @@
-import { dealsTable, installmentsTable, leadsTable, projectsTable, sql } from "@vetra/database";
+import {
+  dealsTable,
+  installmentsTable,
+  leadsTable,
+  projectsTable,
+  qualified,
+  sql,
+} from "@vetra/database";
 
-import { qualified } from "../../../shared/sql/qualified";
 import { leadColumns } from "../../leads/repositories/leadColumns";
 
 export const dealColumns = {
