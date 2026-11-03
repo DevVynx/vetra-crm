@@ -425,7 +425,6 @@ function buildMockPastDeals(): WonDeal[] {
 }
 
 // Becomes a setting on the Configurações page.
-export const mockProfile = { firstName: "Vinícius" };
 
 const note = (id: string, leadId: string, content: string, daysAgo: number, hour: number) => ({
   id,

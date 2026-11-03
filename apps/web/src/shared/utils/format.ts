@@ -58,3 +58,5 @@ export function parseCurrencyToCents(text: string): number | null {
 export function centsToInput(valueInCents: number): string {
   return maskCurrency(String(valueInCents));
 }
+
+export const firstNameOf = (name: string) => name.split(" ")[0] ?? name;

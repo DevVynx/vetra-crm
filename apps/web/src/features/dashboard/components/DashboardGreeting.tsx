@@ -5,8 +5,9 @@ import { useState } from "react";
 import { CreateLeadSheet } from "@/features/leads/components/CreateLeadSheet";
 import { Button } from "@/shared/components/ui/button";
 import { useHotkey } from "@/shared/hooks/useHotkey";
-import { mockProfile } from "@/shared/mocks/fixtures";
+import { useProfile } from "@/shared/queries/profile/useProfile";
 import { formatLongDate } from "@/shared/utils/date";
+import { firstNameOf } from "@/shared/utils/format";
 
 import { PeriodSelect } from "./PeriodSelect";
 
@@ -23,6 +24,7 @@ type DashboardGreetingProps = {
 
 export function DashboardGreeting({ period, onPeriodChange }: DashboardGreetingProps) {
   const now = new Date();
+  const { data: profile } = useProfile();
   const [isCreatingLead, setIsCreatingLead] = useState(false);
   useHotkey("n", () => setIsCreatingLead(true));
 
@@ -33,7 +35,8 @@ export function DashboardGreeting({ period, onPeriodChange }: DashboardGreetingP
           {formatLongDate(now)}
         </p>
         <h2 className="text-2xl font-semibold tracking-tight">
-          {greetingFor(now.getHours())}, {mockProfile.firstName}
+          {greetingFor(now.getHours())}
+          {profile && `, ${firstNameOf(profile.name)}`}
         </h2>
       </div>
 
