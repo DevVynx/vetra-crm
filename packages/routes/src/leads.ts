@@ -4,5 +4,4 @@ export const leadsRoutes = {
   stage: "/leads/stage",
   stageRestore: "/leads/stage/restore",
   byId: "/leads/:id",
-  stageById: "/leads/:id/stage",
 } as const;

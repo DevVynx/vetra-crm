@@ -11,7 +11,6 @@ import {
   restoreLeadStagesController,
   updateLeadController,
   updateLeadsStageController,
-  updateLeadStageController,
 } from "./controllers";
 import v from "./validators";
 
@@ -26,7 +25,6 @@ leadsRouter.post(leadsRoutes.stageRestore, v.restoreLeadStages, restoreLeadStage
 leadsRouter.get(leadsRoutes.byId, v.getLead, getLeadController);
 leadsRouter.patch(leadsRoutes.byId, v.updateLead, updateLeadController);
 leadsRouter.delete(leadsRoutes.byId, v.deleteLead, deleteLeadController);
-leadsRouter.patch(leadsRoutes.stageById, v.updateLeadStage, updateLeadStageController);
 leadsRouter.get(
   dashboardRoutes.leadsWithoutNextAction,
   v.listLeadsWithoutNextAction,

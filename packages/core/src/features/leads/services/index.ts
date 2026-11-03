@@ -1,5 +1,4 @@
 import { changeLeadsStage } from "./changeLeadsStage";
-import { changeLeadStage } from "./changeLeadStage";
 import { createLead } from "./createLead";
 import { deleteLead } from "./deleteLead";
 import { getLead } from "./getLead";
@@ -11,7 +10,6 @@ import { updateLead } from "./updateLead";
 
 export const leadServices = {
   changeLeadsStage,
-  changeLeadStage,
   createLead,
   deleteLead,
   getLead,

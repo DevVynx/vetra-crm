@@ -7,4 +7,3 @@ export * from "./listLeadsWithoutNextAction";
 export * from "./restoreLeadStages";
 export * from "./updateLead";
 export * from "./updateLeadsStage";
-export * from "./updateLeadStage";
