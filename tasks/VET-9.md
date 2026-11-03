@@ -223,12 +223,12 @@ Payloads follow the existing contracts. Lists support the shared filter expressi
 - Undo flows keep their current UX and call the new `restore` endpoints where they called mock `restore*` helpers.
 - **Dates:**
   - a central date-formatting helper using the profile time zone, e.g. with `@date-fns/tz`
-  - every displayed date goes through it
+  - every displayed date goes through it, and everything that depends on the current time (greeting, "hoje", "atrasada", due-date shortcuts, chart buckets) uses the profile zone instead of the browser's
   - date and time inputs convert from the profile zone to UTC
 - **Configurações:** add the "Fuso horário" row in `ProfileSettings`, using a searchable combobox. The project has none yet: install the shadcn / Base UI combobox or the Dice UI `combobox`, adapting imports to `@/shared/components/ui`.
 - **Excluir cliente:** typed-name confirmation in `CustomerActionsMenu`, reusing the existing dialog components.
 - Loading, error and empty states stay as they are, with errors through `getErrorMessage`.
-- Zustand may be used for client-only state if a need appears. It is not needed for the time zone, which comes from the profile query.
+- Zustand may be used for client-only state if a need appears.
 - Remove `apps/web/src/shared/mocks` and every import of it.
 
 ---
@@ -236,19 +236,20 @@ Payloads follow the existing contracts. Lists support the shared filter expressi
 ## Technical Notes
 
 - Implementation is incremental, with a pause for the user's review after each block, in this order:
-  1. foundation + Profile with time zone (end-to-end reference)
-  2. Stages
-  3. Leads core and filter engine
-  4. Notes and next actions
-  5. Closing and customers
-  6. Ledger and projects
-  7. Dashboard
-  8. Seed, mock removal and docs
-- The mock remains for resources not yet migrated, and is deleted only at the last block.
+  1. foundation + Profile with time zone (end-to-end reference) + Portuguese error messages in `getErrorMessage`
+  2. Stages (backend), together with the `leads` table schema, since lead counts and stage deletion move leads
+  3. Leads core and filter engine (backend)
+  4. Notes and next actions (backend)
+  5. Closing and customers (backend)
+  6. Ledger and projects (backend)
+  7. Dashboard (backend)
+  8. Front-end switch: every hook moves from the mock to the API at once, dates shown in the profile time zone, time-zone change invalidates dependent queries, seed, mock removal and docs
+- Blocks 2–7 are backend only, verified over HTTP against the database. The mocks share state (leads reference mock stage ids; customers and the dashboard read the same mock leads), so switching one screen at a time would break the others. The front-end keeps running fully on the mock until block 8. Profile was the exception because nothing else depends on it.
+- Block 8 still commits per feature, so each switch stays reviewable on its own.
 - Time-zone handling stays centralized: one domain helper for boundaries on the server and one formatting helper on the web.
 - Mock-only helpers (`respond()` latency, `linkMockEntriesToProjects`, fixtures) do not move to the backend; the seed builds its data directly.
 - Behavior must not depend on stage names, only on roles and positions.
-- Each block ends with `pnpm format`, `pnpm check-types`, `pnpm lint` and `pnpm build` passing, and the migrated screens checked in the browser.
+- Each block ends with `pnpm format`, `pnpm check-types`, `pnpm lint` and `pnpm build` passing; backend blocks are checked over HTTP, block 8 in the browser.
 
 ---
 
