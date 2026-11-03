@@ -1,11 +1,10 @@
 import { leadRepositories } from "../../leads/repositories";
-import { CustomerNotFoundError } from "../errors";
-import { customerRepositories } from "../repositories";
+import { ensureCustomerExists } from "./ensureCustomerExists";
 
 // Deleting the lead takes everything of the customer with it (cascade): deal, installments,
 // expenses, projects, notes and next actions.
 export async function deleteCustomer(id: string): Promise<void> {
-  if (!(await customerRepositories.findCustomerById(id))) throw new CustomerNotFoundError();
+  await ensureCustomerExists(id);
 
   await leadRepositories.deleteLead(id);
 }
