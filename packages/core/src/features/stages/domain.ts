@@ -60,6 +60,12 @@ function roleStageOf(stages: Stage[], role: "entry" | "closing"): Stage {
 }
 
 const entryOf = (stages: Stage[]) => roleStageOf(stages, "entry");
+
+// The "Leads ativos" card highlights how many leads sit in the last stage before closing.
+const lastMiddleOf = (stages: Stage[]) =>
+  funnelOf(stages)
+    .filter((stage) => stage.role === "middle")
+    .at(-1);
 const closingOf = (stages: Stage[]) => roleStageOf(stages, "closing");
 
 // A new middle stage goes right before the closing stage; a new archive stage goes last.
@@ -133,6 +139,8 @@ function remove(stages: Stage[], id: string): Stage[] {
 
 export const stageDomain = {
   createPreset,
+  funnelOf,
+  lastMiddleOf,
   ordered,
   find,
   entryOf,
