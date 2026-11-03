@@ -29,6 +29,13 @@
       "when": 1793736278733,
       "tag": "0003_enable_unaccent",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793738207033,
+      "tag": "0004_add_lead_notes",
+      "breakpoints": true
     }
   ]
 }
