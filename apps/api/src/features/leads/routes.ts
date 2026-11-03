@@ -1,4 +1,4 @@
-import { leadsRoutes } from "@vetra/routes";
+import { dashboardRoutes, leadsRoutes } from "@vetra/routes";
 import { Router } from "express";
 
 import {
@@ -7,6 +7,7 @@ import {
   getLeadController,
   getLeadFilterOptionsController,
   listLeadsController,
+  listLeadsWithoutNextActionController,
   restoreLeadStagesController,
   updateLeadController,
   updateLeadsStageController,
@@ -26,3 +27,8 @@ leadsRouter.get(leadsRoutes.byId, v.getLead, getLeadController);
 leadsRouter.patch(leadsRoutes.byId, v.updateLead, updateLeadController);
 leadsRouter.delete(leadsRoutes.byId, v.deleteLead, deleteLeadController);
 leadsRouter.patch(leadsRoutes.stageById, v.updateLeadStage, updateLeadStageController);
+leadsRouter.get(
+  dashboardRoutes.leadsWithoutNextAction,
+  v.listLeadsWithoutNextAction,
+  listLeadsWithoutNextActionController
+);

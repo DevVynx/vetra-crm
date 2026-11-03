@@ -43,3 +43,13 @@ export type UpdateLeadNoteResponse = z.infer<typeof updateLeadNoteResponseSchema
 
 export const deleteLeadNoteResponseSchema = z.void();
 export type DeleteLeadNoteResponse = z.infer<typeof deleteLeadNoteResponseSchema>;
+
+export const leadNoteParamsSchema = z.object({ id: z.string().min(1) });
+export type LeadNoteParams = z.infer<typeof leadNoteParamsSchema>;
+
+// Undo of a deletion: the deleted note is sent back as it was.
+export const restoreLeadNoteRequestSchema = leadNoteSchema;
+export type RestoreLeadNoteRequest = z.infer<typeof restoreLeadNoteRequestSchema>;
+
+export const restoreLeadNoteResponseSchema = z.void();
+export type RestoreLeadNoteResponse = z.infer<typeof restoreLeadNoteResponseSchema>;

@@ -21,6 +21,7 @@ const v = {
   updateLeadStage: validation({ params: leadParamsSchema, body: updateLeadStageRequestSchema }),
   updateLeadsStage: validation({ body: updateLeadsStageRequestSchema }),
   restoreLeadStages: validation({ body: restoreLeadStagesRequestSchema }),
+  listLeadsWithoutNextAction: validation({}),
 };
 
 export default v;

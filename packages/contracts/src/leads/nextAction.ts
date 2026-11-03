@@ -62,3 +62,6 @@ export const listLeadsWithoutNextActionResponseSchema = z.object({
 export type ListLeadsWithoutNextActionResponse = z.infer<
   typeof listLeadsWithoutNextActionResponseSchema
 >;
+
+export const nextActionParamsSchema = z.object({ id: z.string().min(1) });
+export type NextActionParams = z.infer<typeof nextActionParamsSchema>;

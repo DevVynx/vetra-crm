@@ -3,6 +3,7 @@ export * from "./deleteLead";
 export * from "./getLead";
 export * from "./getLeadFilterOptions";
 export * from "./listLeads";
+export * from "./listLeadsWithoutNextAction";
 export * from "./restoreLeadStages";
 export * from "./updateLead";
 export * from "./updateLeadsStage";

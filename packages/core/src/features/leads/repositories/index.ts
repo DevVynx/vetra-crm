@@ -4,6 +4,7 @@ import { findLeadById } from "./findLeadById";
 import { findLeadFieldValues } from "./findLeadFieldValues";
 import { findLeadsByIds } from "./findLeadsByIds";
 import { findLeadsPage } from "./findLeadsPage";
+import { findLeadsWithoutNextAction } from "./findLeadsWithoutNextAction";
 import { insertLead } from "./insertLead";
 import { moveLeadsToStage } from "./moveLeadsToStage";
 import { saveLeadStages } from "./saveLeadStages";
@@ -18,6 +19,7 @@ export const leadRepositories = {
   findLeadFieldValues,
   findLeadsByIds,
   findLeadsPage,
+  findLeadsWithoutNextAction,
   insertLead,
   moveLeadsToStage,
   saveLeadStages,
