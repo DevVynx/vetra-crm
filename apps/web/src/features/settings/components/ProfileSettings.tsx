@@ -7,6 +7,7 @@ import { useProfile } from "@/shared/queries/profile/useProfile";
 
 import { SettingsRow } from "./SettingsRow";
 import { SettingsSection } from "./SettingsSection";
+import { TimeZoneField } from "./TimeZoneField";
 
 type NameFieldProps = {
   savedName: string;
@@ -42,6 +43,9 @@ export function ProfileSettings() {
     <SettingsSection title="Perfil">
       <SettingsRow title="Nome" description="Usado na saudação do Painel.">
         {profile && <NameField key={profile.name} savedName={profile.name} />}
+      </SettingsRow>
+      <SettingsRow title="Fuso horário" description="Usado nas datas e nos períodos do Painel.">
+        {profile && <TimeZoneField savedTimeZone={profile.timeZone} />}
       </SettingsRow>
     </SettingsSection>
   );
