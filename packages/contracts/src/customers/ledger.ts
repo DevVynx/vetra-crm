@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { filtersParamSchema } from "../filters";
+
 export const ledgerEntryTypeSchema = z.enum(["revenue", "expense"]);
 export type LedgerEntryType = z.infer<typeof ledgerEntryTypeSchema>;
 
@@ -16,9 +18,20 @@ export const ledgerEntrySchema = z.object({
   occurredAt: z.iso.datetime(),
   // When the entry was registered, which can differ from when it happened.
   createdAt: z.iso.datetime(),
+  projectId: z.string().nullable(),
   projectName: z.string().nullable(),
 });
 export type LedgerEntry = z.infer<typeof ledgerEntrySchema>;
+
+export const ledgerFilterFields = ["type", "status", "project", "amount", "date"] as const;
+
+// The id the "project" filter uses for entries that are not linked to any project.
+export const NO_PROJECT_FILTER_VALUE = "none";
+
+export const listLedgerEntriesQuerySchema = z.object({
+  filters: filtersParamSchema(ledgerFilterFields),
+});
+export type ListLedgerEntriesQuery = z.infer<typeof listLedgerEntriesQuerySchema>;
 
 export const listLedgerEntriesResponseSchema = z.object({ entries: z.array(ledgerEntrySchema) });
 export type ListLedgerEntriesResponse = z.infer<typeof listLedgerEntriesResponseSchema>;
@@ -28,6 +41,7 @@ const ledgerEntryInputSchema = z.object({
   amountInCents: z.number().int().positive(),
   status: ledgerEntryStatusSchema,
   occurredAt: z.iso.datetime(),
+  projectId: z.string().nullable(),
 });
 
 export const createLedgerEntryRequestSchema = ledgerEntryInputSchema.extend({

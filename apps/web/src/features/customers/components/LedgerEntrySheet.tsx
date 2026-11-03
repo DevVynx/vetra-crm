@@ -11,6 +11,7 @@ import { centsToInput, parseCurrencyToCents } from "@/shared/utils/format";
 import { maskCurrency, masked } from "@/shared/utils/masks";
 
 import { useLedgerEntryActions } from "../mutations/useLedgerEntryActions";
+import { ProjectSelect } from "./ProjectSelect";
 
 type LedgerEntryFormValues = {
   type: LedgerEntryType;
@@ -18,6 +19,7 @@ type LedgerEntryFormValues = {
   value: string;
   status: LedgerEntryStatus;
   date: Date;
+  projectId: string | null;
 };
 
 const typeOptions: { value: LedgerEntryType; label: string }[] = [
@@ -44,6 +46,7 @@ const emptyValues = (type: LedgerEntryType): LedgerEntryFormValues => ({
   value: "",
   status: "confirmed",
   date: new Date(),
+  projectId: null,
 });
 
 export function LedgerEntrySheet({
@@ -62,6 +65,7 @@ export function LedgerEntrySheet({
       value: centsToInput(entry.amountInCents),
       status: entry.status,
       date: new Date(entry.occurredAt),
+      projectId: entry.projectId,
     },
   });
   const { register, control, formState } = form;
@@ -80,6 +84,7 @@ export function LedgerEntrySheet({
       amountInCents,
       status: values.status,
       occurredAt: values.date.toISOString(),
+      projectId: values.projectId,
     };
     if (entry) update(entry, request, close);
     else create({ ...request, type: values.type }, close);
@@ -145,6 +150,19 @@ export function LedgerEntrySheet({
           )}
         />
         <FieldError errors={[errors.value]} />
+      </Field>
+
+      <Field>
+        <FieldLabel>
+          Projeto <span className="text-muted-foreground font-normal">(opcional)</span>
+        </FieldLabel>
+        <Controller
+          control={control}
+          name="projectId"
+          render={({ field }) => (
+            <ProjectSelect customerId={customerId} value={field.value} onChange={field.onChange} />
+          )}
+        />
       </Field>
 
       <Field>

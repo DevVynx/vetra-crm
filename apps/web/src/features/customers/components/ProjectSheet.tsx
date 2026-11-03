@@ -1,4 +1,4 @@
-import type { ProjectStatus } from "@vetra/contracts";
+import type { CustomerProject, ProjectStatus } from "@vetra/contracts";
 import { FolderPlusIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -8,10 +8,10 @@ import { SegmentedChoice } from "@/shared/components/SegmentedChoice";
 import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { atDefaultHour } from "@/shared/utils/dueDates";
-import { parseCurrencyToCents } from "@/shared/utils/format";
+import { centsToInput, parseCurrencyToCents } from "@/shared/utils/format";
 import { maskCurrency, masked } from "@/shared/utils/masks";
 
-import { useCreateCustomerProject } from "../mutations/useCreateCustomerProject";
+import { useCustomerProjectActions } from "../mutations/useCustomerProjectActions";
 
 type ProjectFormValues = {
   name: string;
@@ -32,31 +32,43 @@ const emptyValues = (): ProjectFormValues => ({
   startedAt: atDefaultHour(new Date()),
 });
 
-type CreateProjectSheetProps = {
+type ProjectSheetProps = {
   customerId: string;
+  project?: CustomerProject;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function CreateProjectSheet({ customerId, open, onOpenChange }: CreateProjectSheetProps) {
-  const form = useForm<ProjectFormValues>({ defaultValues: emptyValues() });
+export function ProjectSheet({ customerId, project, open, onOpenChange }: ProjectSheetProps) {
+  const { create, update, isSaving } = useCustomerProjectActions(customerId);
+  const form = useForm<ProjectFormValues>({
+    defaultValues: emptyValues(),
+    values: project && {
+      name: project.name,
+      value: centsToInput(project.valueInCents),
+      status: project.status,
+      startedAt: new Date(project.startedAt),
+    },
+  });
   const { register, control, formState } = form;
   const { errors } = formState;
 
-  const createProject = useCreateCustomerProject(customerId, () => {
+  const close = () => {
     onOpenChange(false);
-    form.reset(emptyValues());
-  });
+    if (!project) form.reset(emptyValues());
+  };
 
   const submit = form.handleSubmit((values) => {
     const valueInCents = parseCurrencyToCents(values.value);
     if (valueInCents === null) return;
-    createProject.mutate({
+    const request = {
       name: values.name.trim(),
       status: values.status,
       valueInCents,
       startedAt: values.startedAt.toISOString(),
-    });
+    };
+    if (project) update(project, request, "Projeto atualizado.", close);
+    else create(request, close);
   });
 
   return (
@@ -64,9 +76,14 @@ export function CreateProjectSheet({ customerId, open, onOpenChange }: CreatePro
       icon={FolderPlusIcon}
       open={open}
       onOpenChange={onOpenChange}
-      title="Novo projeto"
-      submitLabel="Criar projeto"
-      isPending={createProject.isPending}
+      title={project ? "Editar projeto" : "Novo projeto"}
+      description={
+        project
+          ? undefined
+          : "Depois, vincule os registros financeiros a ele para acompanhar o recebimento."
+      }
+      submitLabel={project ? "Salvar alterações" : "Criar projeto"}
+      isPending={isSaving}
       onSubmit={submit}
     >
       <Field data-invalid={Boolean(errors.name)}>

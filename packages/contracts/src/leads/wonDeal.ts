@@ -8,6 +8,7 @@ export const installmentSchema = z.object({
   amountInCents: z.number().int().positive(),
   dueAt: z.iso.datetime(),
   paidAt: z.iso.datetime().nullable(),
+  projectId: z.string().nullable().optional(),
   // Set when the installment was registered by hand; otherwise the ledger derives them.
   description: z.string().min(1).optional(),
   createdAt: z.iso.datetime().optional(),

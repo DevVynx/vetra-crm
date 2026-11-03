@@ -7,9 +7,12 @@ import {
   WalletIcon,
 } from "lucide-react";
 
+import { ActiveFilters } from "@/shared/components/filters/ActiveFilters";
+import type { FilterController } from "@/shared/components/filters/useFilterController";
 import { KpiCell } from "@/shared/components/KpiCell";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
+import { Button } from "@/shared/components/ui/button";
 import { formatCurrency } from "@/shared/utils/format";
 
 import { useCustomerLedger } from "../queries/useCustomerLedger";
@@ -77,17 +80,34 @@ function FinancialSummary({ financial }: { financial: CustomerDetail["financial"
   );
 }
 
-export function FinancialTab({ customer }: { customer: CustomerDetail }) {
-  const { data, isPending } = useCustomerLedger(customer.id);
+type FinancialTabProps = {
+  customer: CustomerDetail;
+  filtering: FilterController;
+};
+
+export function FinancialTab({ customer, filtering }: FinancialTabProps) {
+  const { data, isPending } = useCustomerLedger(customer.id, filtering.value);
   const entries = data?.entries ?? [];
+  const hasFilters = filtering.value.length > 0;
 
   return (
     <div className="flex flex-col gap-4">
       <FinancialSummary financial={customer.financial} />
+      <ActiveFilters controller={filtering} />
       {isPending ? (
         <SectionSkeleton rows={3} />
       ) : entries.length === 0 ? (
-        <SectionEmpty icon={ReceiptTextIcon} title="Nenhum lançamento" />
+        <SectionEmpty
+          icon={ReceiptTextIcon}
+          title={hasFilters ? "Nenhum lançamento encontrado" : "Nenhum lançamento"}
+          description={hasFilters ? "Tente outros filtros ou limpe-os." : undefined}
+        >
+          {hasFilters && (
+            <Button size="sm" variant="outline" onClick={filtering.clear}>
+              Limpar filtros
+            </Button>
+          )}
+        </SectionEmpty>
       ) : (
         <ul className="bg-card @container rounded-xl border py-2">
           {entries.map((entry) => (

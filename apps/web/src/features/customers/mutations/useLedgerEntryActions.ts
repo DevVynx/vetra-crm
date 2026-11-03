@@ -16,7 +16,14 @@ const toUpdateRequest = ({
   amountInCents,
   status,
   occurredAt,
-}: LedgerEntry): UpdateLedgerEntryRequest => ({ description, amountInCents, status, occurredAt });
+  projectId,
+}: LedgerEntry): UpdateLedgerEntryRequest => ({
+  description,
+  amountInCents,
+  status,
+  occurredAt,
+  projectId,
+});
 
 export function useLedgerEntryActions(customerId: string) {
   const invalidate = useInvalidateAfterLeadChange();

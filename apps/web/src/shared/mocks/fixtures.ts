@@ -386,7 +386,10 @@ export function buildMockWonDeals(): WonDeal[] {
       leadId: "lead-14",
       closedValueInCents: 180000,
       closedAt: inDays(-90).toISOString(),
-      installments: [installment("installment-5", 180000, inDays(-90), inDays(-88))],
+      installments: [
+        installment("installment-5", 120000, inDays(-90), inDays(-88)),
+        installment("installment-8", 60000, inDays(-90), inDays(-88)),
+      ],
       monthlyFeeInCents: 15000,
       projectStatus: "delivered",
     },
@@ -521,6 +524,7 @@ export function buildMockExpenses(
             : addDays(new Date(deal.closedAt), index * 3 + 1)
           ).toISOString(),
           createdAt: addDays(new Date(deal.closedAt), index).toISOString(),
+          projectId: dealProjects[index % dealProjects.length]?.id ?? null,
           projectName: dealProjects[index % dealProjects.length]?.name ?? null,
         };
       }),
@@ -528,7 +532,7 @@ export function buildMockExpenses(
   );
 }
 
-export type MockProject = CustomerProject & { leadId: string };
+export type MockProject = Omit<CustomerProject, "financial"> & { leadId: string };
 
 const projectNameByNiche: Record<string, string> = {
   Pizzaria: "Cardápio digital",
@@ -569,4 +573,23 @@ export function buildMockProjects(wonDeals: WonDeal[]): MockProject[] {
       { ...base, id: `${deal.leadId}-project-1`, name, valueInCents: deal.closedValueInCents },
     ];
   });
+}
+
+// Each payment goes to the project with the most value still unpaid, so the amounts stay close to
+// what each project is worth.
+export function linkMockEntriesToProjects(wonDeals: WonDeal[], projects: MockProject[]) {
+  for (const deal of wonDeals) {
+    const unpaid = new Map(
+      projects
+        .filter((project) => project.leadId === deal.leadId)
+        .map((project) => [project.id, project.valueInCents])
+    );
+
+    for (const installment of deal.installments) {
+      const [projectId] = [...unpaid.entries()].sort((a, b) => b[1] - a[1])[0] ?? [null];
+      installment.projectId = projectId;
+      if (projectId)
+        unpaid.set(projectId, (unpaid.get(projectId) ?? 0) - installment.amountInCents);
+    }
+  }
 }

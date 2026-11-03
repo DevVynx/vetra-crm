@@ -8,6 +8,7 @@ import {
   buildMockNotes,
   buildMockProjects,
   buildMockWonDeals,
+  linkMockEntriesToProjects,
 } from "./fixtures";
 
 const MOCK_LATENCY_IN_MS = 250;
@@ -31,6 +32,7 @@ export function paginate<T>(items: T[], page: number, pageSize: number) {
 
 const wonDeals = buildMockWonDeals();
 const projects = buildMockProjects(wonDeals);
+linkMockEntriesToProjects(wonDeals, projects);
 
 export const mockStore = {
   nextActions: buildMockNextActions(),
@@ -52,6 +54,7 @@ const installmentsOf = (
     amountInCents: index === count - 1 ? remainingInCents - base * (count - 1) : base,
     dueAt: addMonths(new Date(firstDueAt), index).toISOString(),
     paidAt: null,
+    projectId: null,
     description: `Parcela ${index + 1} de ${count}`,
   }));
 };
@@ -75,6 +78,7 @@ export function openWonDeal(
       amountInCents: receivedInCents,
       dueAt: closedAt,
       paidAt: closedAt,
+      projectId: null,
       description: remainingInCents > 0 ? "Entrada" : "Pagamento à vista",
     });
   }

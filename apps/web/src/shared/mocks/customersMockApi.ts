@@ -17,13 +17,17 @@ import type {
   ListCustomerProjectsResponse,
   ListCustomersQuery,
   ListCustomersResponse,
+  ListLedgerEntriesQuery,
   ListLedgerEntriesResponse,
+  UpdateCustomerProjectRequest,
+  UpdateCustomerProjectResponse,
   UpdateCustomerRequest,
   UpdateCustomerResponse,
   UpdateLedgerEntryRequest,
   UpdateLedgerEntryResponse,
   WonDeal,
 } from "@vetra/contracts";
+import { NO_PROJECT_FILTER_VALUE } from "@vetra/contracts";
 
 import { normalizeText } from "@/shared/utils/text";
 
@@ -33,6 +37,7 @@ import {
   leadContactFor,
   mockCustomerDocuments,
   mockLeads,
+  type MockProject,
   updateMockLead,
 } from "./fixtures";
 import { closingStageId } from "./stageRules";
@@ -57,16 +62,19 @@ const activeProjectsOf = (leadId: string) =>
   projectsOf(leadId).filter((project) => project.status === "in_production");
 
 const totalOf = (deal: WonDeal) => sumBy(deal.installments, (item) => item.amountInCents);
+// The closed value counts as billed even while part of it has no installments yet.
+const billedOf = (deal: WonDeal) => Math.max(deal.closedValueInCents, totalOf(deal));
 const receivedOf = (deal: WonDeal) =>
   sumBy(
     deal.installments.filter((item) => item.paidAt !== null),
     (item) => item.amountInCents
   );
 
-const revenueEntriesOf = (deal: WonDeal): LedgerEntry[] => {
-  const dealProjects = projectsOf(deal.leadId);
+const projectNameOf = (leadId: string, projectId: string | null | undefined) =>
+  projectsOf(leadId).find((project) => project.id === projectId)?.name ?? null;
 
-  return deal.installments.map((item, index) => ({
+const revenueEntriesOf = (deal: WonDeal): LedgerEntry[] =>
+  deal.installments.map((item, index) => ({
     id: item.id,
     type: "revenue",
     description:
@@ -78,16 +86,48 @@ const revenueEntriesOf = (deal: WonDeal): LedgerEntry[] => {
     status: item.paidAt ? "confirmed" : "pending",
     occurredAt: item.paidAt ?? item.dueAt,
     createdAt: item.createdAt ?? deal.closedAt,
-    projectName: dealProjects[index % dealProjects.length]?.name ?? null,
+    projectId: item.projectId ?? null,
+    projectName: projectNameOf(deal.leadId, item.projectId),
   }));
-};
+
+const ledgerEntriesOf = (id: string): LedgerEntry[] =>
+  [...revenueEntriesOf(findDeal(id)), ...(mockStore.expenses[id] ?? [])].map((entry) => ({
+    ...entry,
+    projectName: projectNameOf(id, entry.projectId),
+  }));
 
 const revenueOrExpenseEntry = (id: string, entryId: string): LedgerEntry => {
-  const entry = [...revenueEntriesOf(findDeal(id)), ...(mockStore.expenses[id] ?? [])].find(
-    (item) => item.id === entryId
-  );
+  const entry = ledgerEntriesOf(id).find((item) => item.id === entryId);
   if (!entry) throw new Error(`Entry ${entryId} not found`);
   return entry;
+};
+
+const ledgerFilterAccessors: FilterAccessors<LedgerEntry> = {
+  type: (entry) => entry.type,
+  status: (entry) => entry.status,
+  project: (entry) => entry.projectId ?? NO_PROJECT_FILTER_VALUE,
+  amount: (entry) => entry.amountInCents,
+  date: (entry) => entry.occurredAt,
+};
+
+const projectSummaryOf = (leadId: string, project: MockProject): CustomerProject => {
+  const linked = ledgerEntriesOf(leadId).filter((entry) => entry.projectId === project.id);
+  const sumOf = (type: LedgerEntry["type"], status: LedgerEntry["status"]) =>
+    sumBy(
+      linked.filter((entry) => entry.type === type && entry.status === status),
+      (entry) => entry.amountInCents
+    );
+  const { leadId: _leadId, ...rest } = project;
+
+  return {
+    ...rest,
+    financial: {
+      receivedInCents: sumOf("revenue", "confirmed"),
+      pendingInCents: sumOf("revenue", "pending"),
+      expensesInCents: sumOf("expense", "confirmed"),
+      linkedEntriesCount: linked.length,
+    },
+  };
 };
 
 const customerFilterAccessors: FilterAccessors<CustomerListItem> = {
@@ -157,7 +197,7 @@ export const customersMockApi = {
       closedAt: deal.closedAt,
       billing: {
         receivedInCents: confirmedRevenue,
-        totalInCents: totalOf(deal),
+        totalInCents: billedOf(deal),
         monthlyFeeInCents: deal.monthlyFeeInCents,
       },
       projectMetrics: {
@@ -167,7 +207,7 @@ export const customersMockApi = {
       },
       financial: {
         confirmedRevenueInCents: confirmedRevenue,
-        pendingRevenueInCents: totalOf(deal) - confirmedRevenue,
+        pendingRevenueInCents: billedOf(deal) - confirmedRevenue,
         confirmedExpenseInCents: confirmedExpense,
         pendingExpenseInCents: sumExpenses("pending"),
         balanceInCents: confirmedRevenue - confirmedExpense,
@@ -175,16 +215,20 @@ export const customersMockApi = {
     });
   },
 
-  listCustomerLedger(id: string): Promise<ListLedgerEntriesResponse> {
-    const deal = findDeal(id);
-    const entries = [...revenueEntriesOf(deal), ...(mockStore.expenses[id] ?? [])];
-    return respond({ entries: entries.sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)) });
+  listCustomerLedger(
+    id: string,
+    { filters }: ListLedgerEntriesQuery
+  ): Promise<ListLedgerEntriesResponse> {
+    const entries = ledgerEntriesOf(id)
+      .filter((entry) => matchesFilters(entry, filters, ledgerFilterAccessors))
+      .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
+    return respond({ entries });
   },
 
   listCustomerProjects(id: string): Promise<ListCustomerProjectsResponse> {
     findDeal(id);
     const projects = projectsOf(id)
-      .map(({ leadId: _leadId, ...project }) => project)
+      .map((project) => projectSummaryOf(id, project))
       .sort((a, b) => {
         if (a.status !== b.status) return a.status === "in_production" ? -1 : 1;
         return b.startedAt.localeCompare(a.startedAt);
@@ -199,13 +243,14 @@ export const customersMockApi = {
     const deal = findDeal(id);
     const createdAt = new Date().toISOString();
     const entryId = crypto.randomUUID();
-    const { type, description, amountInCents, status, occurredAt } = request;
+    const { type, description, amountInCents, status, occurredAt, projectId } = request;
     if (type === "revenue") {
       deal.installments.push({
         id: entryId,
         amountInCents,
         dueAt: occurredAt,
         paidAt: status === "confirmed" ? occurredAt : null,
+        projectId,
         description,
         createdAt,
       });
@@ -220,6 +265,7 @@ export const customersMockApi = {
           status,
           occurredAt,
           createdAt,
+          projectId,
           projectName: null,
         },
       ];
@@ -233,7 +279,7 @@ export const customersMockApi = {
     request: UpdateLedgerEntryRequest
   ): Promise<UpdateLedgerEntryResponse> {
     const deal = findDeal(id);
-    const { description, amountInCents, status, occurredAt } = request;
+    const { description, amountInCents, status, occurredAt, projectId } = request;
     const installment = deal.installments.find((item) => item.id === entryId);
     if (installment) {
       Object.assign(installment, {
@@ -241,11 +287,14 @@ export const customersMockApi = {
         description,
         dueAt: occurredAt,
         paidAt: status === "confirmed" ? occurredAt : null,
+        projectId,
       });
     } else {
       const expenses = mockStore.expenses[id] ?? [];
       mockStore.expenses[id] = expenses.map((entry) =>
-        entry.id === entryId ? { ...entry, description, amountInCents, status, occurredAt } : entry
+        entry.id === entryId
+          ? { ...entry, description, amountInCents, status, occurredAt, projectId }
+          : entry
       );
     }
     return respond(revenueOrExpenseEntry(id, entryId));
@@ -266,6 +315,7 @@ export const customersMockApi = {
         amountInCents: entry.amountInCents,
         dueAt: entry.occurredAt,
         paidAt: entry.status === "confirmed" ? entry.occurredAt : null,
+        projectId: entry.projectId,
         description: entry.description,
         createdAt: entry.createdAt,
       });
@@ -280,18 +330,40 @@ export const customersMockApi = {
     request: CreateCustomerProjectRequest
   ): Promise<CreateCustomerProjectResponse> {
     findDeal(id);
-    const project: CustomerProject = {
+    const project: MockProject = {
       id: crypto.randomUUID(),
+      leadId: id,
       ...request,
       deliveredAt: request.status === "delivered" ? new Date().toISOString() : null,
     };
-    mockStore.projects.push({ ...project, leadId: id });
-    return respond(project);
+    mockStore.projects.push(project);
+    return respond(projectSummaryOf(id, project));
+  },
+
+  updateCustomerProject(
+    id: string,
+    projectId: string,
+    request: UpdateCustomerProjectRequest
+  ): Promise<UpdateCustomerProjectResponse> {
+    findDeal(id);
+    const project = projectsOf(id).find((item) => item.id === projectId);
+    if (!project) throw new Error(`Project ${projectId} not found`);
+    const deliveredAt =
+      request.status === "delivered" ? (project.deliveredAt ?? new Date().toISOString()) : null;
+    Object.assign(project, request, { deliveredAt });
+    return respond(projectSummaryOf(id, project));
   },
 
   deleteCustomerProject(id: string, projectId: string): Promise<DeleteCustomerProjectResponse> {
+    const deal = findDeal(id);
     mockStore.projects = mockStore.projects.filter(
       (project) => !(project.leadId === id && project.id === projectId)
+    );
+    for (const installment of deal.installments) {
+      if (installment.projectId === projectId) installment.projectId = null;
+    }
+    mockStore.expenses[id] = (mockStore.expenses[id] ?? []).map((entry) =>
+      entry.projectId === projectId ? { ...entry, projectId: null } : entry
     );
     return respond(undefined);
   },

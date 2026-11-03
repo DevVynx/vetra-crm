@@ -1,4 +1,5 @@
 import { getRouteApi, Navigate } from "@tanstack/react-router";
+import type { CustomerProject, Filter } from "@vetra/contracts";
 import { FolderKanbanIcon, HandshakeIcon, PlusIcon, WalletIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -9,6 +10,8 @@ import { DetailPanelTrigger } from "@/shared/components/detail/DetailPanelTrigge
 import { DetailNotFound, DetailSkeleton } from "@/shared/components/detail/DetailStates";
 import { SplitDetailLayout } from "@/shared/components/detail/SplitDetailLayout";
 import { WhatsAppButton } from "@/shared/components/detail/WhatsAppButton";
+import { FilterButton } from "@/shared/components/filters/FilterButton";
+import { useFilterController } from "@/shared/components/filters/useFilterController";
 import { usePageCrumb } from "@/shared/components/layout/PageCrumb";
 import { Button } from "@/shared/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
@@ -16,32 +19,65 @@ import { useHotkey } from "@/shared/hooks/useHotkey";
 import { useLead } from "@/shared/queries/leads/useLead";
 import { pluralize } from "@/shared/utils/format";
 
+import { buildLedgerFilterFields } from "../constants/ledgerFilterFields";
 import { useCustomer } from "../queries/useCustomer";
 import { useCustomerLedger } from "../queries/useCustomerLedger";
 import { useCustomerProjects } from "../queries/useCustomerProjects";
 import { BillingCard } from "./BillingCard";
-import { CreateProjectSheet } from "./CreateProjectSheet";
 import { CustomerActionsMenu } from "./CustomerActionsMenu";
 import { FinancialTab } from "./FinancialTab";
 import { LedgerEntrySheet } from "./LedgerEntrySheet";
 import { ProjectMetricsCard } from "./ProjectMetricsCard";
+import { ProjectSheet } from "./ProjectSheet";
 import { ProjectsTab } from "./ProjectsTab";
 
 const route = getRouteApi("/_app/customers/$customerId");
 
 type CustomerTab = "financial" | "projects";
 
+const NO_FILTERS: Filter[] = [];
+
 export function CustomerDetailPage() {
   const { customerId } = route.useParams();
+  const { filters = NO_FILTERS } = route.useSearch();
+  const navigate = route.useNavigate();
   const { data: customer, isPending, isError } = useCustomer(customerId);
   // Only asked when the customer is missing: the record may be a lead that has not closed yet.
   const lead = useLead(customerId, { enabled: isError });
   const [tab, setTab] = useState<CustomerTab>("financial");
   const [isCreating, setIsCreating] = useState(false);
   useHotkey("n", () => setIsCreating(true), Boolean(customer));
-  const ledger = useCustomerLedger(customerId);
+  const ledger = useCustomerLedger(customerId, filters);
   const projects = useCustomerProjects(customerId);
+
+  const filtering = useFilterController({
+    fields:
+      tab === "financial"
+        ? buildLedgerFilterFields(
+            (projects.data?.projects ?? []).map((project) => ({
+              value: project.id,
+              label: project.name,
+            })),
+            projects.isPending
+          )
+        : [],
+    value: filters,
+    onChange: (next) =>
+      navigate({
+        search: (previous) => ({ ...previous, filters: next.length > 0 ? next : undefined }),
+      }),
+  });
   usePageCrumb(customer?.businessName);
+
+  const showProjectEntries = (project: CustomerProject) => {
+    setTab("financial");
+    navigate({
+      search: (previous) => ({
+        ...previous,
+        filters: [{ field: "project", operator: "is", values: [project.id] }],
+      }),
+    });
+  };
 
   if (isPending || (isError && lead.isPending)) return <DetailSkeleton />;
 
@@ -113,6 +149,7 @@ export function CustomerDetailPage() {
           </TabsList>
           <div className="ml-auto flex gap-2">
             <WhatsAppButton />
+            {tab === "financial" && <FilterButton controller={filtering} />}
             <Button
               className="font-semibold"
               title={`${tab === "financial" ? "Novo registro" : "Novo projeto"} (N)`}
@@ -128,17 +165,17 @@ export function CustomerDetailPage() {
           open={isCreating && tab === "financial"}
           onOpenChange={setIsCreating}
         />
-        <CreateProjectSheet
+        <ProjectSheet
           customerId={customer.id}
           open={isCreating && tab === "projects"}
           onOpenChange={setIsCreating}
         />
         <p className="text-muted-foreground text-sm">{countLabel}</p>
         <TabsContent value="financial">
-          <FinancialTab customer={customer} />
+          <FinancialTab customer={customer} filtering={filtering} />
         </TabsContent>
         <TabsContent value="projects">
-          <ProjectsTab customerId={customer.id} />
+          <ProjectsTab customerId={customer.id} onViewEntries={showProjectEntries} />
         </TabsContent>
       </Tabs>
     </SplitDetailLayout>

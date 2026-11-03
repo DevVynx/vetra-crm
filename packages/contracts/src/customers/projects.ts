@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { projectStatusSchema } from "../leads/wonDeal";
 
+const amountInCentsSchema = z.number().int().nonnegative();
+
 export const customerProjectSchema = z.object({
   id: z.string(),
   name: z.string().min(1),
@@ -9,6 +11,13 @@ export const customerProjectSchema = z.object({
   valueInCents: z.number().int().positive(),
   startedAt: z.iso.datetime(),
   deliveredAt: z.iso.datetime().nullable(),
+  // Money of the ledger entries linked to this project.
+  financial: z.object({
+    receivedInCents: amountInCentsSchema,
+    pendingInCents: amountInCentsSchema,
+    expensesInCents: amountInCentsSchema,
+    linkedEntriesCount: z.number().int().nonnegative(),
+  }),
 });
 export type CustomerProject = z.infer<typeof customerProjectSchema>;
 
@@ -27,6 +36,12 @@ export type CreateCustomerProjectRequest = z.infer<typeof createCustomerProjectR
 
 export const createCustomerProjectResponseSchema = customerProjectSchema;
 export type CreateCustomerProjectResponse = z.infer<typeof createCustomerProjectResponseSchema>;
+
+export const updateCustomerProjectRequestSchema = createCustomerProjectRequestSchema;
+export type UpdateCustomerProjectRequest = z.infer<typeof updateCustomerProjectRequestSchema>;
+
+export const updateCustomerProjectResponseSchema = customerProjectSchema;
+export type UpdateCustomerProjectResponse = z.infer<typeof updateCustomerProjectResponseSchema>;
 
 export const deleteCustomerProjectResponseSchema = z.void();
 export type DeleteCustomerProjectResponse = z.infer<typeof deleteCustomerProjectResponseSchema>;
