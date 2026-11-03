@@ -36,6 +36,13 @@
       "when": 1793738207033,
       "tag": "0004_add_lead_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793741070604,
+      "tag": "0005_add_customer_tables",
+      "breakpoints": true
     }
   ]
 }
