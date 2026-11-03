@@ -30,15 +30,27 @@ export function useLedgerEntryActions(customerId: string) {
   const onError = (error: unknown) =>
     toast.error(getErrorMessage(error, "Não foi possível salvar o registro."));
 
-  const removeEntry = useMutation({
+  const restoreEntry = useMutation({
+    mutationFn: (entry: LedgerEntry) => customersMockApi.restoreLedgerEntry(customerId, entry),
+    onSuccess: invalidate,
+    onError,
+  });
+
+  // Undoing a creation: the entry just goes away, no toast.
+  const discardEntry = useMutation({
     mutationFn: (entryId: string) => customersMockApi.deleteLedgerEntry(customerId, entryId),
     onSuccess: invalidate,
     onError,
   });
 
-  const restoreEntry = useMutation({
-    mutationFn: (entry: LedgerEntry) => customersMockApi.restoreLedgerEntry(customerId, entry),
-    onSuccess: invalidate,
+  // The undo toast is shown here and not in the caller: the row that started the deletion is
+  // gone once the ledger refetches, and its callbacks would never run.
+  const deleteEntry = useMutation({
+    mutationFn: (entry: LedgerEntry) => customersMockApi.deleteLedgerEntry(customerId, entry.id),
+    onSuccess: (_, entry) => {
+      toastWithUndo("Registro excluído.", () => restoreEntry.mutate(entry));
+      return invalidate();
+    },
     onError,
   });
 
@@ -60,7 +72,7 @@ export function useLedgerEntryActions(customerId: string) {
     createEntry.mutate(request, {
       onSuccess: (entry) => {
         onDone();
-        toastWithUndo("Registro criado.", () => removeEntry.mutate(entry.id));
+        toastWithUndo("Registro criado.", () => discardEntry.mutate(entry.id));
       },
     });
 
@@ -77,10 +89,7 @@ export function useLedgerEntryActions(customerId: string) {
       }
     );
 
-  const remove = (entry: LedgerEntry) =>
-    removeEntry.mutate(entry.id, {
-      onSuccess: () => toastWithUndo("Registro excluído.", () => restoreEntry.mutate(entry)),
-    });
+  const remove = (entry: LedgerEntry) => deleteEntry.mutate(entry);
 
   return { create, update, remove, isPending: createEntry.isPending || updateEntry.isPending };
 }

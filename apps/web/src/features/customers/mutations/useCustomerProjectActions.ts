@@ -23,10 +23,24 @@ export function useCustomerProjectActions(customerId: string) {
   const onError = (error: unknown) =>
     toast.error(getErrorMessage(error, "Não foi possível salvar o projeto."));
 
-  const removeProject = useMutation({
-    mutationFn: (projectId: string) =>
-      customersMockApi.deleteCustomerProject(customerId, projectId),
+  const deleteRequest = (projectId: string) =>
+    customersMockApi.deleteCustomerProject(customerId, projectId);
+
+  // Undoing a creation: the project just goes away, no toast.
+  const discardProject = useMutation({
+    mutationFn: deleteRequest,
     onSuccess: invalidate,
+    onError,
+  });
+
+  // The toast is shown here and not in the caller: the card that started the deletion is gone
+  // once the projects refetch, and its callbacks would never run.
+  const deleteProject = useMutation({
+    mutationFn: deleteRequest,
+    onSuccess: () => {
+      toast.success("Projeto excluído.");
+      return invalidate();
+    },
     onError,
   });
 
@@ -53,7 +67,7 @@ export function useCustomerProjectActions(customerId: string) {
     createProject.mutate(request, {
       onSuccess: (project) => {
         onDone();
-        toastWithUndo("Projeto criado.", () => removeProject.mutate(project.id));
+        toastWithUndo("Projeto criado.", () => discardProject.mutate(project.id));
       },
     });
 
@@ -76,18 +90,13 @@ export function useCustomerProjectActions(customerId: string) {
     );
 
   const remove = (project: CustomerProject, onDone: () => void) =>
-    removeProject.mutate(project.id, {
-      onSuccess: () => {
-        onDone();
-        toast.success("Projeto excluído.");
-      },
-    });
+    deleteProject.mutate(project.id, { onSuccess: onDone });
 
   return {
     create,
     update,
     remove,
     isSaving: createProject.isPending || updateProject.isPending,
-    isRemoving: removeProject.isPending,
+    isRemoving: deleteProject.isPending,
   };
 }
