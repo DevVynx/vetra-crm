@@ -1,7 +1,7 @@
-import { db, leadsTable } from "@vetra/database";
+import { type Database, db, leadsTable, type Transaction } from "@vetra/database";
 
 import type { Lead } from "../domain";
 
-export async function insertLead(lead: Lead): Promise<void> {
-  await db.insert(leadsTable).values(lead);
+export async function insertLead(lead: Lead, executor: Database | Transaction = db): Promise<void> {
+  await executor.insert(leadsTable).values(lead);
 }

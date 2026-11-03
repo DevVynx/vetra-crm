@@ -52,6 +52,16 @@ function find(stages: Stage[], id: string): Stage {
   return stage;
 }
 
+// The preset is created on startup and the rules never remove these stages, so they exist.
+function roleStageOf(stages: Stage[], role: "entry" | "closing"): Stage {
+  const stage = stages.find((item) => item.role === role);
+  if (!stage) throw new Error(`No ${role} stage: the stage preset was not created`);
+  return stage;
+}
+
+const entryOf = (stages: Stage[]) => roleStageOf(stages, "entry");
+const closingOf = (stages: Stage[]) => roleStageOf(stages, "closing");
+
 // A new middle stage goes right before the closing stage; a new archive stage goes last.
 function add(
   stages: Stage[],
@@ -125,6 +135,8 @@ export const stageDomain = {
   createPreset,
   ordered,
   find,
+  entryOf,
+  closingOf,
   add,
   reorder,
   deletionTargetOf,
