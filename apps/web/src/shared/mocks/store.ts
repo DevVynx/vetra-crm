@@ -1,4 +1,5 @@
-import type { WonDeal } from "@vetra/contracts";
+import type { DealPaymentRequest, Installment, WonDeal } from "@vetra/contracts";
+import { addMonths } from "date-fns";
 
 import {
   buildMockAwaitingConversations,
@@ -40,25 +41,55 @@ export const mockStore = {
   awaitingConversations: buildMockAwaitingConversations(),
 };
 
+const installmentsOf = (
+  remainingInCents: number,
+  count: number,
+  firstDueAt: string
+): Installment[] => {
+  const base = Math.floor(remainingInCents / count);
+  return Array.from({ length: count }, (_, index) => ({
+    id: crypto.randomUUID(),
+    amountInCents: index === count - 1 ? remainingInCents - base * (count - 1) : base,
+    dueAt: addMonths(new Date(firstDueAt), index).toISOString(),
+    paidAt: null,
+    description: `Parcela ${index + 1} de ${count}`,
+  }));
+};
+
 export function openWonDeal(
   leadId: string,
-  closedValueInCents: number,
-  firstInstallmentDueAt: string
+  {
+    closedValueInCents,
+    receivedInCents,
+    installmentsCount,
+    firstInstallmentDueAt,
+  }: DealPaymentRequest
 ) {
-  const deal: WonDeal = {
+  const closedAt = new Date().toISOString();
+  const remainingInCents = closedValueInCents - receivedInCents;
+  const installments: Installment[] = [];
+
+  if (receivedInCents > 0) {
+    installments.push({
+      id: crypto.randomUUID(),
+      amountInCents: receivedInCents,
+      dueAt: closedAt,
+      paidAt: closedAt,
+      description: remainingInCents > 0 ? "Entrada" : "Pagamento à vista",
+    });
+  }
+  if (remainingInCents > 0 && installmentsCount > 0 && firstInstallmentDueAt) {
+    installments.push(
+      ...installmentsOf(remainingInCents, installmentsCount, firstInstallmentDueAt)
+    );
+  }
+
+  mockStore.wonDeals.push({
     leadId,
     closedValueInCents,
-    closedAt: new Date().toISOString(),
-    installments: [
-      {
-        id: crypto.randomUUID(),
-        amountInCents: closedValueInCents,
-        dueAt: firstInstallmentDueAt,
-        paidAt: null,
-      },
-    ],
+    closedAt,
+    installments,
     monthlyFeeInCents: null,
     projectStatus: "in_production",
-  };
-  mockStore.wonDeals.push(deal);
+  } satisfies WonDeal);
 }

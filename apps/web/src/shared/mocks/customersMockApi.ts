@@ -299,12 +299,19 @@ export const customersMockApi = {
   createCustomer({
     document,
     closedValueInCents,
+    receivedInCents,
+    installmentsCount,
     firstInstallmentDueAt,
     ...contact
   }: CreateCustomerRequest): Promise<CreateCustomerResponse> {
     const created = addMockLead(contact, closingStageId());
     mockCustomerDocuments[created.id] = document;
-    openWonDeal(created.id, closedValueInCents, firstInstallmentDueAt);
+    openWonDeal(created.id, {
+      closedValueInCents,
+      receivedInCents,
+      installmentsCount,
+      firstInstallmentDueAt,
+    });
     return respond(created);
   },
 

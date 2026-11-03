@@ -1,5 +1,6 @@
 export * from "./common";
 export * from "./contact";
+export * from "./dealPayment";
 export * from "./detail";
 export * from "./list";
 export * from "./nextAction";

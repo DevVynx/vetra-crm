@@ -220,12 +220,9 @@ export const leadsMockApi = {
     return respond(undefined);
   },
 
-  closeLead(
-    id: string,
-    { closedValueInCents, firstInstallmentDueAt }: CloseLeadRequest
-  ): Promise<CloseLeadResponse> {
+  closeLead(id: string, payment: CloseLeadRequest): Promise<CloseLeadResponse> {
     const lead = findLead(id);
-    openWonDeal(id, closedValueInCents, firstInstallmentDueAt);
+    openWonDeal(id, payment);
     mockStore.nextActions = mockStore.nextActions.filter((action) => action.lead.id !== id);
     const closed: LeadSummary = { ...lead, stage: closingStageId(), stoppedAtStage: null };
     mockLeads[mockLeads.indexOf(lead)] = closed;

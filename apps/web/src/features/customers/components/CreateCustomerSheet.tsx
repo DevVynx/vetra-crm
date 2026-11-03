@@ -6,6 +6,7 @@ import {
   DealFields,
   type DealFormValues,
   emptyDealValues,
+  toDealPayment,
 } from "@/shared/components/detail/DealFields";
 import { FormSheet } from "@/shared/components/FormSheet";
 import {
@@ -13,7 +14,6 @@ import {
   emptyContactValues,
   toCustomerRequest,
 } from "@/shared/utils/contactForm";
-import { parseCurrencyToCents } from "@/shared/utils/format";
 
 import { useCreateCustomer } from "../mutations/useCreateCustomer";
 
@@ -38,13 +38,8 @@ export function CreateCustomerSheet({ open, onOpenChange }: CreateCustomerSheetP
   });
 
   const submit = form.handleSubmit((values) => {
-    const closedValueInCents = parseCurrencyToCents(values.value);
-    if (closedValueInCents === null) return;
-    createCustomer.mutate({
-      ...toCustomerRequest(values),
-      closedValueInCents,
-      firstInstallmentDueAt: values.dueAt.toISOString(),
-    });
+    const payment = toDealPayment(values);
+    if (payment) createCustomer.mutate({ ...toCustomerRequest(values), ...payment });
   });
 
   return (

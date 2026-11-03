@@ -5,9 +5,9 @@ import {
   DealFields,
   type DealFormValues,
   emptyDealValues,
+  toDealPayment,
 } from "@/shared/components/detail/DealFields";
 import { FormSheet } from "@/shared/components/FormSheet";
-import { parseCurrencyToCents } from "@/shared/utils/format";
 
 import { useCloseLead } from "../mutations/useCloseLead";
 
@@ -26,10 +26,9 @@ export function CloseLeadSheet({ leadId, businessName, open, onOpenChange }: Clo
     form.reset(emptyDealValues());
   });
 
-  const submit = form.handleSubmit(({ value, dueAt }) => {
-    const closedValueInCents = parseCurrencyToCents(value);
-    if (closedValueInCents === null) return;
-    closeLead.mutate({ closedValueInCents, firstInstallmentDueAt: dueAt.toISOString() });
+  const submit = form.handleSubmit((values) => {
+    const payment = toDealPayment(values);
+    if (payment) closeLead.mutate(payment);
   });
 
   return (
@@ -38,7 +37,7 @@ export function CloseLeadSheet({ leadId, businessName, open, onOpenChange }: Clo
       open={open}
       onOpenChange={onOpenChange}
       title={`Fechar ${businessName}`}
-      description="O lead vira cliente com este valor. Parcelas e mensalidade você ajusta depois, na página do cliente."
+      description="O lead vira cliente com este valor. Mensalidade e novos registros você ajusta depois, na página do cliente."
       submitLabel="Fechar e criar cliente"
       isPending={closeLead.isPending}
       onSubmit={submit}
