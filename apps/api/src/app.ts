@@ -3,6 +3,7 @@ import cors from "cors";
 import express, { Express } from "express";
 import helmet from "helmet";
 
+import { profileRouter } from "@/features/profile/routes";
 import { handleGlobalError } from "@/shared/middlewares/handleGlobalError";
 import { notFoundHandler } from "@/shared/middlewares/notFoundHandler";
 
@@ -24,6 +25,8 @@ app.use(
     crossOriginEmbedderPolicy: false,
   })
 );
+
+app.use("/api", profileRouter);
 
 app.use(notFoundHandler);
 app.use(handleGlobalError);
