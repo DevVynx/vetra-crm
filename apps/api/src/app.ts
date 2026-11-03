@@ -3,6 +3,7 @@ import cors from "cors";
 import express, { Express } from "express";
 import helmet from "helmet";
 
+import { customersRouter } from "@/features/customers/routes";
 import { leadNotesRouter } from "@/features/lead-notes/routes";
 import { leadsRouter } from "@/features/leads/routes";
 import { nextActionsRouter } from "@/features/next-actions/routes";
@@ -30,6 +31,7 @@ app.use(
   })
 );
 
+app.use("/api", customersRouter);
 app.use("/api", leadNotesRouter);
 app.use("/api", leadsRouter);
 app.use("/api", nextActionsRouter);

@@ -48,6 +48,17 @@ function create(contact: LeadContact, entryStage: Stage, now: Date): Lead {
   };
 }
 
+// A customer created directly, without going through the funnel, starts already closed.
+function createClosed(contact: LeadContact, closingStage: Stage, now: Date): Lead {
+  return create(contact, closingStage, now);
+}
+
+// Closing a deal is the only way into the closing stage.
+function close(lead: Lead, current: Stage, closingStage: Stage, now: Date): LeadStageState {
+  ensureIsNotCustomer(current);
+  return { id: lead.id, stageId: closingStage.id, stoppedAtStageId: null, stageChangedAt: now };
+}
+
 function ensureIsNotCustomer(current: Stage): void {
   if (current.role === "closing") throw new LeadIsCustomerError();
 }
@@ -88,7 +99,9 @@ function visibleStageIdsFor(stages: Stage[], filters: Filter[]): string[] {
 }
 
 export const leadDomain = {
+  close,
   create,
+  createClosed,
   ensureIsNotCustomer,
   moveToStage,
   stageStateOf,
