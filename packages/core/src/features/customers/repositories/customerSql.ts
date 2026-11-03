@@ -1,5 +1,6 @@
 import { dealsTable, installmentsTable, leadsTable, projectsTable, sql } from "@vetra/database";
 
+import { qualified } from "../../../shared/sql/qualified";
 import { leadColumns } from "../../leads/repositories/leadColumns";
 
 export const dealColumns = {
@@ -16,14 +17,14 @@ export const customerColumns = { lead: leadColumns, deal: dealColumns };
 // Per-customer figures computed in the database, correlated to the current lead row.
 export const receivedSql = sql<number>`(
   SELECT COALESCE(SUM(${installmentsTable.amountInCents}), 0)::int FROM ${installmentsTable}
-  WHERE ${installmentsTable.leadId} = ${leadsTable.id} AND ${installmentsTable.paidAt} IS NOT NULL
+  WHERE ${installmentsTable.leadId} = ${qualified(leadsTable.id)} AND ${installmentsTable.paidAt} IS NOT NULL
 )`;
 
 export const projectsCountSql = sql<number>`(
-  SELECT COUNT(*)::int FROM ${projectsTable} WHERE ${projectsTable.leadId} = ${leadsTable.id}
+  SELECT COUNT(*)::int FROM ${projectsTable} WHERE ${projectsTable.leadId} = ${qualified(leadsTable.id)}
 )`;
 
 export const activeProjectsCountSql = sql<number>`(
   SELECT COUNT(*)::int FROM ${projectsTable}
-  WHERE ${projectsTable.leadId} = ${leadsTable.id} AND ${projectsTable.status} = 'in_production'
+  WHERE ${projectsTable.leadId} = ${qualified(leadsTable.id)} AND ${projectsTable.status} = 'in_production'
 )`;

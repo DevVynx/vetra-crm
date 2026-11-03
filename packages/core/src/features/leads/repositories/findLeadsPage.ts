@@ -6,6 +6,7 @@ import {
   type FilterColumns,
   filtersToSql,
 } from "../../../shared/filters";
+import { qualified } from "../../../shared/sql/qualified";
 import type { Lead } from "../domain";
 import { leadColumns } from "./leadColumns";
 
@@ -22,7 +23,7 @@ type findLeadsPageInput = {
   pageSize: number;
 };
 
-const hasNextAction = sql`EXISTS (SELECT 1 FROM ${nextActionsTable} WHERE ${nextActionsTable.leadId} = ${leadsTable.id})`;
+const hasNextAction = sql`EXISTS (SELECT 1 FROM ${nextActionsTable} WHERE ${nextActionsTable.leadId} = ${qualified(leadsTable.id)})`;
 
 const leadFilterColumns: FilterColumns = {
   stage: { kind: "select", expression: sql`${leadsTable.stageId}` },
@@ -46,7 +47,7 @@ const searchSql = (search: string) =>
 const nextActionSql = sql`(
   SELECT ${nextActionsTable.description} AS description, ${nextActionsTable.dueAt} AS due_at
   FROM ${nextActionsTable}
-  WHERE ${nextActionsTable.leadId} = ${leadsTable.id}
+  WHERE ${nextActionsTable.leadId} = ${qualified(leadsTable.id)}
   ORDER BY ${nextActionsTable.dueAt}
   LIMIT 1
 ) AS next_action`;
