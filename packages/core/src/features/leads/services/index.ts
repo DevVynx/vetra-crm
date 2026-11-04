@@ -3,6 +3,7 @@ import { createLead } from "./createLead";
 import { deleteLead } from "./deleteLead";
 import { getLead } from "./getLead";
 import { listLeadFieldValues } from "./listLeadFieldValues";
+import { listLeadIds } from "./listLeadIds";
 import { listLeads } from "./listLeads";
 import { listLeadsWithoutNextAction } from "./listLeadsWithoutNextAction";
 import { restoreLeadStages } from "./restoreLeadStages";
@@ -14,6 +15,7 @@ export const leadServices = {
   deleteLead,
   getLead,
   listLeadFieldValues,
+  listLeadIds,
   listLeads,
   listLeadsWithoutNextAction,
   restoreLeadStages,

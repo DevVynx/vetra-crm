@@ -6,6 +6,7 @@ import {
   deleteLeadController,
   getLeadController,
   getLeadFilterOptionsController,
+  listLeadIdsController,
   listLeadsController,
   listLeadsWithoutNextActionController,
   restoreLeadStagesController,
@@ -18,8 +19,9 @@ export const leadsRouter: Router = Router();
 
 leadsRouter.get(leadsRoutes.base, v.listLeads, listLeadsController);
 leadsRouter.post(leadsRoutes.base, v.createLead, createLeadController);
-// Fixed paths go before /leads/:id, otherwise "filter-options" and "stage" would be read as ids.
+// Fixed paths go before /leads/:id, otherwise "filter-options", "ids" and "stage" would be read as ids.
 leadsRouter.get(leadsRoutes.filterOptions, v.getLeadFilterOptions, getLeadFilterOptionsController);
+leadsRouter.get(leadsRoutes.ids, v.listLeadIds, listLeadIdsController);
 leadsRouter.patch(leadsRoutes.stage, v.updateLeadsStage, updateLeadsStageController);
 leadsRouter.post(leadsRoutes.stageRestore, v.restoreLeadStages, restoreLeadStagesController);
 leadsRouter.get(leadsRoutes.byId, v.getLead, getLeadController);

@@ -34,6 +34,15 @@ export const listLeadsQuerySchema = z
   .superRefine(checkSortParams);
 export type ListLeadsQuery = z.infer<typeof listLeadsQuerySchema>;
 
+export const listLeadIdsQuerySchema = z.object({
+  q: z.string().trim().default(""),
+  filters: filtersParamSchema(leadFilterFields),
+});
+export type ListLeadIdsQuery = z.infer<typeof listLeadIdsQuerySchema>;
+
+export const listLeadIdsResponseSchema = z.object({ ids: z.array(z.string()) });
+export type ListLeadIdsResponse = z.infer<typeof listLeadIdsResponseSchema>;
+
 export const leadListItemSchema = leadSummarySchema.extend({
   nextAction: z.object({ description: z.string(), dueAt: z.iso.datetime() }).nullable(),
   lastContactAt: z.iso.datetime().nullable(),

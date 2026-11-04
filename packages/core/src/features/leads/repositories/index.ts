@@ -2,6 +2,7 @@ import { countLeadsByStage } from "./countLeadsByStage";
 import { deleteLead } from "./deleteLead";
 import { findLeadById } from "./findLeadById";
 import { findLeadFieldValues } from "./findLeadFieldValues";
+import { findLeadIds } from "./findLeadIds";
 import { findLeadsByIds } from "./findLeadsByIds";
 import { findLeadsPage } from "./findLeadsPage";
 import { findLeadsWithoutNextAction } from "./findLeadsWithoutNextAction";
@@ -17,6 +18,7 @@ export const leadRepositories = {
   deleteLead,
   findLeadById,
   findLeadFieldValues,
+  findLeadIds,
   findLeadsByIds,
   findLeadsPage,
   findLeadsWithoutNextAction,

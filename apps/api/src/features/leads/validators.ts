@@ -2,6 +2,7 @@ import {
   createLeadRequestSchema,
   filterOptionsQuerySchema,
   leadParamsSchema,
+  listLeadIdsQuerySchema,
   listLeadsQuerySchema,
   restoreLeadStagesRequestSchema,
   updateLeadRequestSchema,
@@ -12,6 +13,7 @@ import { validation } from "@/shared/http/validation";
 
 const v = {
   listLeads: validation({ query: listLeadsQuerySchema }),
+  listLeadIds: validation({ query: listLeadIdsQuerySchema }),
   getLeadFilterOptions: validation({ query: filterOptionsQuerySchema }),
   getLead: validation({ params: leadParamsSchema }),
   createLead: validation({ body: createLeadRequestSchema }),

@@ -1,48 +1,18 @@
-import {
-  and,
-  count,
-  db,
-  inArray,
-  leadsTable,
-  nextActionsTable,
-  or,
-  qualified,
-  sql,
-} from "@vetra/database";
+import { count, db, leadsTable, nextActionsTable, qualified, sql } from "@vetra/database";
 
-import {
-  containsSql,
-  type Filter,
-  type FilterColumns,
-  filtersToSql,
-} from "../../../shared/filters";
 import { type Sort, type SortColumns, sortToSql } from "../../../shared/sort";
 import type { Lead } from "../domain";
 import { leadColumns } from "./leadColumns";
+import { type LeadListScope, leadListWhere } from "./leadListWhere";
 
 export type LeadListRow = Lead & {
   nextAction: { description: string; dueAt: Date } | null;
 };
 
-type findLeadsPageInput = {
-  visibleStageIds: string[];
-  search: string;
-  filters: Filter[];
+type findLeadsPageInput = LeadListScope & {
   sort: Sort | undefined;
-  timeZone: string;
   page: number;
   pageSize: number;
-};
-
-const hasNextAction = sql`EXISTS (SELECT 1 FROM ${nextActionsTable} WHERE ${nextActionsTable.leadId} = ${qualified(leadsTable.id)})`;
-
-const leadFilterColumns: FilterColumns = {
-  stage: { kind: "select", expression: sql`${leadsTable.stageId}` },
-  niche: { kind: "select", expression: sql`${leadsTable.niche}` },
-  city: { kind: "select", expression: sql`${leadsTable.city}` },
-  next_action: { kind: "boolean", expression: hasNextAction },
-  last_contact: { kind: "date", expression: sql`${leadsTable.lastContactAt}` },
-  prospected_at: { kind: "date", expression: sql`${leadsTable.prospectedAt}` },
 };
 
 const leadSortColumns: SortColumns = {
@@ -57,15 +27,6 @@ const leadSortColumns: SortColumns = {
 // The most urgent next action on top, then the leads without one.
 const DEFAULT_SORT: Sort = { field: "next_action", direction: "asc" };
 
-const searchSql = (search: string) =>
-  search
-    ? or(
-        ...[leadsTable.businessName, leadsTable.contactName, leadsTable.niche, leadsTable.city].map(
-          (column) => containsSql(sql`${column}`, search)
-        )
-      )
-    : undefined;
-
 // The earliest pending action of each lead, as a lateral subquery.
 const nextActionSql = sql`(
   SELECT ${nextActionsTable.description} AS description, ${nextActionsTable.dueAt} AS due_at
@@ -76,19 +37,12 @@ const nextActionSql = sql`(
 ) AS next_action`;
 
 export async function findLeadsPage({
-  visibleStageIds,
-  search,
-  filters,
   sort = DEFAULT_SORT,
-  timeZone,
   page,
   pageSize,
+  ...scope
 }: findLeadsPageInput): Promise<{ items: LeadListRow[]; total: number; page: number }> {
-  const where = and(
-    inArray(leadsTable.stageId, visibleStageIds),
-    searchSql(search),
-    filtersToSql(filters, leadFilterColumns, timeZone)
-  );
+  const where = leadListWhere(scope);
 
   const [{ total } = { total: 0 }] = await db
     .select({ total: count() })
