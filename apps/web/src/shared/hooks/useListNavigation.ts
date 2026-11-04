@@ -18,5 +18,5 @@ export function useListNavigation({ count, resetKey, onActivate }: ListNavigatio
   useHotkey("ArrowUp", () => moveTo(Math.max(activeIndex - 1, 0)), count > 0 && activeIndex > 0);
   useHotkey("Enter", () => onActivate(activeIndex), activeIndex >= 0);
 
-  return activeIndex;
+  return { activeIndex, moveTo };
 }

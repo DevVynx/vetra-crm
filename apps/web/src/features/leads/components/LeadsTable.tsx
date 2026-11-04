@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { LeadListItem } from "@vetra/contracts";
 import { isBefore } from "date-fns";
-import { type ReactNode, useEffect } from "react";
+import { type MouseEvent, type ReactNode, useEffect } from "react";
 
 import { BusinessAvatar } from "@/shared/components/BusinessAvatar";
 import { LeadStageBadge } from "@/shared/components/LeadStageBadge";
@@ -60,6 +60,12 @@ export type LeadSelection = {
   bulkBar: ReactNode;
 };
 
+// A checkbox keeps the focus after a click, and Space would keep toggling it instead of following
+// the keyboard cursor. Keyboard users stay on it: their "click" has no detail.
+function releaseFocusAfterClick(event: MouseEvent<HTMLElement>) {
+  if (event.detail > 0) event.currentTarget.blur();
+}
+
 function TableHeaders({ leads, selection }: { leads: LeadListItem[]; selection?: LeadSelection }) {
   const selectedOnPage = leads.filter((lead) => selection?.selectedIds.has(lead.id)).length;
   const showsBulkBar = Boolean(selection?.isSelecting && selection.selectedIds.size > 0);
@@ -74,6 +80,7 @@ function TableHeaders({ leads, selection }: { leads: LeadListItem[]; selection?:
               checked={leads.length > 0 && selectedOnPage === leads.length}
               indeterminate={selectedOnPage > 0 && selectedOnPage < leads.length}
               onCheckedChange={() => selection.onTogglePage(leads.map((lead) => lead.id))}
+              onClick={releaseFocusAfterClick}
             />
             {/* Laid over the column headers, which stay underneath holding their widths and the
                 row height: the columns don't jump, and pageSize doesn't change. It is placed against
@@ -145,7 +152,11 @@ export function LeadsTable({ leads, activeIndex, isFull, selection }: LeadsTable
           return (
             <TableRow
               key={lead.id}
-              className="data-[active=true]:bg-muted/60 data-[state=selected]:bg-primary/10 data-[state=selected]:hover:bg-primary/15 cursor-pointer"
+              className={cn(
+                "data-[active=true]:bg-muted/60 data-[state=selected]:bg-primary/10 data-[state=selected]:hover:bg-primary/15 cursor-pointer",
+                selection.isSelecting &&
+                  "data-[active=true]:outline-ring data-[active=true]:outline-1 data-[active=true]:-outline-offset-1"
+              )}
               data-active={index === activeIndex}
               data-state={isSelected ? "selected" : undefined}
               onClick={() =>
@@ -160,7 +171,10 @@ export function LeadsTable({ leads, activeIndex, isFull, selection }: LeadsTable
                     aria-label={`Selecionar ${lead.businessName}`}
                     checked={isSelected}
                     onCheckedChange={() => selection.onToggle(lead.id)}
-                    onClick={(event) => event.stopPropagation()}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      releaseFocusAfterClick(event);
+                    }}
                   />
                 </TableCell>
               )}

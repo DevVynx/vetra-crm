@@ -106,7 +106,7 @@ export function CustomersPage() {
   const hasActiveFilters = q !== "" || filters.length > 0;
   const customers = data?.items ?? [];
 
-  const activeIndex = useListNavigation({
+  const { activeIndex } = useListNavigation({
     count: customers.length,
     resetKey: `${q}|${JSON.stringify(filters)}|${sort}|${direction}|${page}`,
     onActivate: (index) => {

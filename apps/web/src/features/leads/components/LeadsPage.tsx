@@ -116,15 +116,6 @@ export function LeadsPage() {
   const hasActiveFilters = q !== "" || filters.length > 0;
   const leads = data?.items ?? [];
 
-  const stopSelecting = () => {
-    setIsSelecting(false);
-    setSelectedIds(new Set());
-  };
-
-  // Lives here and not in the bar: the bar goes away with the table when an action empties the
-  // list, and the callbacks of a mutation don't run once its component is gone.
-  const { changeStages, isPending: isChangingStages } = useBulkChangeLeadStage(stopSelecting);
-
   // A selection only holds for the list it was made on, so it can't act on leads that left it.
   const selectionScope = JSON.stringify({ q, filters, sort, direction });
   const [previousScope, setPreviousScope] = useState(selectionScope);
@@ -161,7 +152,7 @@ export function LeadsPage() {
       return next;
     });
 
-  const activeIndex = useListNavigation({
+  const { activeIndex, moveTo } = useListNavigation({
     count: leads.length,
     resetKey: `${q}|${JSON.stringify(filters)}|${sort}|${direction}|${page}`,
     onActivate: (index) => {
@@ -172,14 +163,31 @@ export function LeadsPage() {
     },
   });
 
+  const stopSelecting = () => {
+    setIsSelecting(false);
+    setSelectedIds(new Set());
+    moveTo(-1);
+  };
+
+  // Lives here and not in the bar: the bar goes away with the table when an action empties the
+  // list, and the callbacks of a mutation don't run once its component is gone.
+  const { changeStages, isPending: isChangingStages } = useBulkChangeLeadStage(stopSelecting);
+
+  // Clicking also places the keyboard cursor, so Space continues from the last row touched.
+  const toggleRow = (leadId: string) => {
+    moveTo(leads.findIndex((lead) => lead.id === leadId));
+    toggleLead(leadId);
+  };
+
+  const toggleActiveRow = () => {
+    const lead = leads[Math.max(activeIndex, 0)];
+    if (lead) toggleRow(lead.id);
+  };
+
   useHotkey("n", () => setIsCreating(true));
   useHotkey("/", focusSearch);
   useHotkey("Escape", stopSelecting, isSelecting);
-  useHotkey(
-    " ",
-    () => leads[activeIndex] && toggleLead(leads[activeIndex].id),
-    isSelecting && activeIndex >= 0
-  );
+  useHotkey(" ", toggleActiveRow, isSelecting);
 
   return (
     <div className="flex h-full min-h-[32rem] flex-col gap-4 p-6">
@@ -192,7 +200,12 @@ export function LeadsPage() {
             variant="outline"
             className={cn("dark:bg-background font-semibold", isSelecting && selectedChoiceClass)}
             aria-pressed={isSelecting}
-            onClick={isSelecting ? stopSelecting : () => setIsSelecting(true)}
+            onClick={(event) => {
+              if (isSelecting) return stopSelecting();
+              setIsSelecting(true);
+              // With the focus on it, the next Space would press it again and end the selection.
+              event.currentTarget.blur();
+            }}
           >
             <ListChecksIcon />
             {isSelecting ? "Concluir seleção" : "Selecionar"}
@@ -260,7 +273,7 @@ export function LeadsPage() {
               selection={{
                 isSelecting,
                 selectedIds,
-                onToggle: toggleLead,
+                onToggle: toggleRow,
                 onTogglePage: togglePage,
                 bulkBar: (
                   <LeadsBulkBar
