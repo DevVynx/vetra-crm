@@ -1,4 +1,5 @@
 import { Trash2Icon } from "lucide-react";
+import type { ReactNode } from "react";
 
 import {
   AlertDialog,
@@ -20,7 +21,9 @@ type ConfirmDialogProps = {
   confirmLabel: string;
   destructive?: boolean;
   isPending?: boolean;
+  confirmDisabled?: boolean;
   onConfirm: () => void;
+  children?: ReactNode;
 };
 
 export function ConfirmDialog({
@@ -31,7 +34,9 @@ export function ConfirmDialog({
   confirmLabel,
   destructive = false,
   isPending = false,
+  confirmDisabled = false,
   onConfirm,
+  children,
 }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -45,12 +50,13 @@ export function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {children}
         <AlertDialogFooter>
           <AlertDialogCancel className="h-10">Cancelar</AlertDialogCancel>
           <AlertDialogAction
             className="h-10 font-semibold"
             variant={destructive ? "destructive" : "default"}
-            disabled={isPending}
+            disabled={isPending || confirmDisabled}
             onClick={onConfirm}
           >
             {confirmLabel}
