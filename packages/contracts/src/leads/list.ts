@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { filtersParamSchema } from "../filters";
+import { checkSortParams, sortParamsShape } from "../sort";
 import { leadSummarySchema } from "./common";
 
 export const leadFilterFields = [
@@ -12,12 +13,25 @@ export const leadFilterFields = [
   "prospected_at",
 ] as const;
 
-export const listLeadsQuerySchema = z.object({
-  q: z.string().trim().default(""),
-  filters: filtersParamSchema(leadFilterFields),
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).default(25),
-});
+export const leadSortFields = [
+  "next_action",
+  "prospected_at",
+  "last_contact",
+  "business_name",
+  "niche",
+  "city",
+] as const;
+export type LeadSortField = (typeof leadSortFields)[number];
+
+export const listLeadsQuerySchema = z
+  .object({
+    q: z.string().trim().default(""),
+    filters: filtersParamSchema(leadFilterFields),
+    ...sortParamsShape(leadSortFields),
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(25),
+  })
+  .superRefine(checkSortParams);
 export type ListLeadsQuery = z.infer<typeof listLeadsQuerySchema>;
 
 export const leadListItemSchema = leadSummarySchema.extend({

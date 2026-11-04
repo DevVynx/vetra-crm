@@ -16,6 +16,7 @@ import {
   type FilterColumns,
   filtersToSql,
 } from "../../../shared/filters";
+import { type Sort, type SortColumns, sortToSql } from "../../../shared/sort";
 import type { Lead } from "../domain";
 import { leadColumns } from "./leadColumns";
 
@@ -27,6 +28,7 @@ type findLeadsPageInput = {
   visibleStageIds: string[];
   search: string;
   filters: Filter[];
+  sort: Sort | undefined;
   timeZone: string;
   page: number;
   pageSize: number;
@@ -42,6 +44,18 @@ const leadFilterColumns: FilterColumns = {
   last_contact: { kind: "date", expression: sql`${leadsTable.lastContactAt}` },
   prospected_at: { kind: "date", expression: sql`${leadsTable.prospectedAt}` },
 };
+
+const leadSortColumns: SortColumns = {
+  next_action: { kind: "value", expression: sql`next_action.due_at` },
+  prospected_at: { kind: "value", expression: sql`${leadsTable.prospectedAt}` },
+  last_contact: { kind: "value", expression: sql`${leadsTable.lastContactAt}` },
+  business_name: { kind: "text", expression: sql`${leadsTable.businessName}` },
+  niche: { kind: "text", expression: sql`${leadsTable.niche}` },
+  city: { kind: "text", expression: sql`${leadsTable.city}` },
+};
+
+// The most urgent next action on top, then the leads without one.
+const DEFAULT_SORT: Sort = { field: "next_action", direction: "asc" };
 
 const searchSql = (search: string) =>
   search
@@ -61,11 +75,11 @@ const nextActionSql = sql`(
   LIMIT 1
 ) AS next_action`;
 
-// Leads with a next action come first, the most urgent on top; the rest by newest prospect.
 export async function findLeadsPage({
   visibleStageIds,
   search,
   filters,
+  sort = DEFAULT_SORT,
   timeZone,
   page,
   pageSize,
@@ -91,12 +105,7 @@ export async function findLeadsPage({
     .from(leadsTable)
     .leftJoin(sql`LATERAL ${nextActionSql}`, sql`true`)
     .where(where)
-    .orderBy(
-      sql`next_action.due_at IS NULL`,
-      sql`next_action.due_at`,
-      sql`${leadsTable.prospectedAt} DESC`,
-      leadsTable.id
-    )
+    .orderBy(sortToSql(sort, leadSortColumns), sql`${leadsTable.prospectedAt} DESC`, leadsTable.id)
     .limit(pageSize)
     .offset((currentPage - 1) * pageSize);
 

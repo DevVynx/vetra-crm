@@ -4,5 +4,6 @@ export * from "./filters";
 export * from "./leads";
 export * from "./profile";
 export * from "./shared";
+export * from "./sort";
 export * from "./stages";
 export * from "./whatsapp";

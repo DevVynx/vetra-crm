@@ -11,7 +11,13 @@ export async function listLeadsController(
   req: ValidatedRequest<typeof v.listLeads>,
   res: Response<ListLeadsResponse>
 ) {
-  const { q, filters, page, pageSize } = req.query;
-  const result = await leadServices.listLeads({ search: q, filters, page, pageSize });
+  const { q, filters, sort, direction, page, pageSize } = req.query;
+  const result = await leadServices.listLeads({
+    search: q,
+    filters,
+    sort: sort && direction ? { field: sort, direction } : undefined,
+    page,
+    pageSize,
+  });
   res.json(listLeadsResponseSchema.parse({ ...result, items: result.items.map(toLeadListItem) }));
 }

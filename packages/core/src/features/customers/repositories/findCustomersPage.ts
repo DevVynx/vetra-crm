@@ -1,4 +1,4 @@
-import { and, count, db, dealsTable, desc, eq, leadsTable, or, sql } from "@vetra/database";
+import { and, count, db, dealsTable, eq, leadsTable, or, sql } from "@vetra/database";
 
 import {
   containsSql,
@@ -6,6 +6,7 @@ import {
   type FilterColumns,
   filtersToSql,
 } from "../../../shared/filters";
+import { type Sort, type SortColumns, sortToSql } from "../../../shared/sort";
 import type { Lead } from "../../leads/domain";
 import type { Deal } from "../domain";
 import {
@@ -26,6 +27,7 @@ export type CustomerListRow = {
 type findCustomersPageInput = {
   search: string;
   filters: Filter[];
+  sort: Sort | undefined;
   timeZone: string;
   page: number;
   pageSize: number;
@@ -40,6 +42,18 @@ const customerFilterColumns: FilterColumns = {
   closed_at: { kind: "date", expression: sql`${dealsTable.closedAt}` },
 };
 
+const customerSortColumns: SortColumns = {
+  closed_at: { kind: "value", expression: sql`${dealsTable.closedAt}` },
+  closed_value: { kind: "value", expression: sql`${dealsTable.closedValueInCents}` },
+  received: { kind: "value", expression: sql`${receivedSql}` },
+  monthly_fee: { kind: "value", expression: sql`${dealsTable.monthlyFeeInCents}` },
+  business_name: { kind: "text", expression: sql`${leadsTable.businessName}` },
+  niche: { kind: "text", expression: sql`${leadsTable.niche}` },
+  city: { kind: "text", expression: sql`${leadsTable.city}` },
+};
+
+const DEFAULT_SORT: Sort = { field: "closed_at", direction: "desc" };
+
 const searchSql = (search: string) =>
   search
     ? or(
@@ -49,10 +63,11 @@ const searchSql = (search: string) =>
       )
     : undefined;
 
-// Customers are the leads with a deal, newest closing first.
+// Customers are the leads with a deal.
 export async function findCustomersPage({
   search,
   filters,
+  sort = DEFAULT_SORT,
   timeZone,
   page,
   pageSize,
@@ -76,7 +91,7 @@ export async function findCustomersPage({
     .from(leadsTable)
     .innerJoin(dealsTable, eq(dealsTable.leadId, leadsTable.id))
     .where(where)
-    .orderBy(desc(dealsTable.closedAt), leadsTable.id)
+    .orderBy(sortToSql(sort, customerSortColumns), leadsTable.id)
     .limit(pageSize)
     .offset((currentPage - 1) * pageSize);
 

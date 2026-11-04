@@ -11,8 +11,14 @@ export async function listCustomersController(
   req: ValidatedRequest<typeof v.listCustomers>,
   res: Response<ListCustomersResponse>
 ) {
-  const { q, filters, page, pageSize } = req.query;
-  const result = await customerServices.listCustomers({ search: q, filters, page, pageSize });
+  const { q, filters, sort, direction, page, pageSize } = req.query;
+  const result = await customerServices.listCustomers({
+    search: q,
+    filters,
+    sort: sort && direction ? { field: sort, direction } : undefined,
+    page,
+    pageSize,
+  });
   res.json(
     listCustomersResponseSchema.parse({ ...result, items: result.items.map(toCustomerListItem) })
   );

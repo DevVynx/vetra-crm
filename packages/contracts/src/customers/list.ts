@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { filtersParamSchema } from "../filters";
 import { leadSummarySchema } from "../leads/common";
+import { checkSortParams, sortParamsShape } from "../sort";
 
 const amountInCentsSchema = z.number().int().nonnegative();
 const countSchema = z.number().int().nonnegative();
@@ -15,12 +16,26 @@ export const customerFilterFields = [
   "closed_at",
 ] as const;
 
-export const listCustomersQuerySchema = z.object({
-  q: z.string().trim().default(""),
-  filters: filtersParamSchema(customerFilterFields),
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).default(25),
-});
+export const customerSortFields = [
+  "closed_at",
+  "closed_value",
+  "received",
+  "monthly_fee",
+  "business_name",
+  "niche",
+  "city",
+] as const;
+export type CustomerSortField = (typeof customerSortFields)[number];
+
+export const listCustomersQuerySchema = z
+  .object({
+    q: z.string().trim().default(""),
+    filters: filtersParamSchema(customerFilterFields),
+    ...sortParamsShape(customerSortFields),
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(25),
+  })
+  .superRefine(checkSortParams);
 export type ListCustomersQuery = z.infer<typeof listCustomersQuerySchema>;
 
 export const customerListItemSchema = leadSummarySchema.extend({

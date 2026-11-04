@@ -1,10 +1,12 @@
 import type { Filter } from "../../../shared/filters";
+import type { Sort } from "../../../shared/sort";
 import { getProfile } from "../../profile/services/getProfile";
 import { type CustomerListRow, customerRepositories } from "../repositories";
 
 type listCustomersInput = {
   search: string;
   filters: Filter[];
+  sort: Sort | undefined;
   page: number;
   pageSize: number;
 };
@@ -12,6 +14,7 @@ type listCustomersInput = {
 export async function listCustomers({
   search,
   filters,
+  sort,
   page,
   pageSize,
 }: listCustomersInput): Promise<{
@@ -24,6 +27,7 @@ export async function listCustomers({
   const result = await customerRepositories.findCustomersPage({
     search,
     filters,
+    sort,
     timeZone: profile.timeZone,
     page,
     pageSize,
