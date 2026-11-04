@@ -22,7 +22,7 @@ export function useDeleteLeadNote(leadId: string) {
   const remove = useMutation({
     mutationFn: (note: LeadNote) => api.delete(buildPath(leadNotesRoutes.byId, { id: note.id })),
     onSuccess: (_, note) => {
-      toastWithUndo("Nota excluída.", () => restore.mutate(note));
+      toastWithUndo("Nota excluída com sucesso.", () => restore.mutate(note));
       return refreshNotes();
     },
     onError: (error) => toast.error(getErrorMessage(error, "Não foi possível excluir a nota.")),

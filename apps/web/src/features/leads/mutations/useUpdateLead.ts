@@ -34,7 +34,7 @@ export function useUpdateLead(lead: LeadDetail, onUpdated: () => void) {
     mutation.mutate(request, {
       onSuccess: () => {
         onUpdated();
-        toastWithUndo("Lead atualizado.", () => mutation.mutate(previous));
+        toastWithUndo("Lead atualizado com sucesso.", () => mutation.mutate(previous));
       },
     });
   };

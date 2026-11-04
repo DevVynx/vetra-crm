@@ -21,7 +21,7 @@ export function useCreateLead(onCreated: () => void) {
       (await api.post<CreateLeadResponse>(leadsRoutes.base, request)).data,
     onSuccess: (lead) => {
       onCreated();
-      toastWithUndo("Lead criado.", () => remove.mutate(lead.id));
+      toastWithUndo("Lead criado com sucesso.", () => remove.mutate(lead.id));
       return invalidate();
     },
     onError: (error) => toast.error(getErrorMessage(error, "Não foi possível criar o lead.")),

@@ -19,7 +19,7 @@ export function useDeleteLead(leadId: string) {
       // Drop the detail first: refetching a deleted lead would flash "not found".
       queryClient.removeQueries({ queryKey: leadsQueryKeys.detail(leadId) });
       await navigate({ to: "/leads" });
-      toast.success("Lead excluído.");
+      toast.success("Lead excluído com notas e próximas ações.");
       return invalidate();
     },
     onError: (error) => toast.error(getErrorMessage(error, "Não foi possível excluir o lead.")),

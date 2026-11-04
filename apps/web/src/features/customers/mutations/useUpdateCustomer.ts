@@ -42,7 +42,7 @@ export function useUpdateCustomer(customer: CustomerDetail, onUpdated: () => voi
     mutation.mutate(request, {
       onSuccess: () => {
         onUpdated();
-        toastWithUndo("Cliente atualizado.", () => mutation.mutate(previous));
+        toastWithUndo("Cliente atualizado com sucesso.", () => mutation.mutate(previous));
       },
     });
   };

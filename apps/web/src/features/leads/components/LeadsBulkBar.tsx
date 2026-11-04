@@ -56,7 +56,7 @@ export function LeadsBulkBar({ ids, onDone, onCancel }: LeadsBulkBarProps) {
                 onClick={() =>
                   changeStages(
                     { ids, stage: stage.id },
-                    `${summary} ${isSingle ? "movido" : "movidos"} para ${stage.name}`
+                    `${isSingle ? "Movido" : `${ids.length} movidos`} para ${stage.name}.`
                   )
                 }
               >
@@ -85,7 +85,7 @@ export function LeadsBulkBar({ ids, onDone, onCancel }: LeadsBulkBarProps) {
         onConfirm={(archiveStageId) => {
           changeStages(
             { ids, stage: archiveStageId },
-            `${summary} ${isSingle ? "arquivado" : "arquivados"}`
+            `${summary} ${isSingle ? "arquivado" : "arquivados"} com sucesso.`
           );
           setIsArchiving(false);
         }}

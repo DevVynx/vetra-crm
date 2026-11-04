@@ -22,7 +22,7 @@ export function useCreateCustomer(onCreated: () => void) {
       (await api.post<CreateCustomerResponse>(customersRoutes.base, request)).data,
     onSuccess: (customer) => {
       onCreated();
-      toastWithUndo("Cliente criado.", () => remove.mutate(customer.id));
+      toastWithUndo("Cliente criado com sucesso.", () => remove.mutate(customer.id));
       return invalidate();
     },
     onError: (error) => toast.error(getErrorMessage(error, "Não foi possível criar o cliente.")),

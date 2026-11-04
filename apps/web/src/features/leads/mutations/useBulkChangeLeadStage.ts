@@ -17,7 +17,8 @@ export function useBulkChangeLeadStage(onChanged: () => void) {
   const restore = useMutation({
     mutationFn: (leads: LeadStageState[]) => api.post(leadsRoutes.stageRestore, { leads }),
     onSuccess: invalidate,
-    onError: (error) => toast.error(getErrorMessage(error, "Não foi possível desfazer.")),
+    onError: (error) =>
+      toast.error(getErrorMessage(error, "Não foi possível desfazer essa alteração.")),
   });
 
   const mutation = useMutation({

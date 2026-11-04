@@ -143,12 +143,12 @@ export function LeadStageStepper({ lead }: { lead: LeadDetail }) {
 
   const select = (stage: Stage) => {
     if (stage.role === "closing") return setIsClosing(true);
-    changeStage(stage.id, lead.stage, `Etapa alterada para ${stage.name}`);
+    changeStage(stage.id, lead.stage, `Movido para ${stage.name}.`);
   };
 
   const reactivate = () => {
     const target = lead.stoppedAtStage ?? stages.entry.id;
-    changeStage(target, lead.stage, `Lead reativado em ${stages.nameOf(target)}`);
+    changeStage(target, lead.stage, `Reativado em ${stages.nameOf(target)}.`);
   };
 
   return (

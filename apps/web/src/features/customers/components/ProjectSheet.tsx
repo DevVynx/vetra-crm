@@ -67,7 +67,7 @@ export function ProjectSheet({ customerId, project, open, onOpenChange }: Projec
       valueInCents,
       startedAt: values.startedAt.toISOString(),
     };
-    if (project) update(project, request, "Projeto atualizado.", close);
+    if (project) update(project, request, "Projeto atualizado com sucesso.", close);
     else create(request, close);
   });
 

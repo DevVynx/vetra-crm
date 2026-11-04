@@ -52,7 +52,7 @@ export function ProjectCard({ customerId, project, onViewEntries }: ProjectCardP
     update(
       project,
       { ...toProjectRequest(project), status: isDelivered ? "in_production" : "delivered" },
-      isDelivered ? "Projeto reaberto." : "Projeto marcado como entregue."
+      isDelivered ? "Projeto reaberto com sucesso." : "Projeto marcado como entregue."
     );
 
   return (

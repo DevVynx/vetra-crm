@@ -11,8 +11,8 @@ const validationMessages: Record<string, (issue: ValidationIssue) => string> = {
   invalid_type: () => "Um dos campos está em um formato inválido.",
   invalid_format: () => "Um dos campos está em um formato inválido.",
   invalid_value: () => "Um dos campos tem um valor inválido.",
-  invalidTimeZone: () => "Fuso horário inválido.",
-  receivedExceedsClosedValue: () => "O valor recebido não pode passar do valor fechado.",
+  invalidTimeZone: () => "Fuso horário inválido. Escolha outro da lista.",
+  receivedExceedsClosedValue: () => "O recebido não pode passar do valor fechado.",
   firstInstallmentDueAtRequired: () => "Informe o vencimento da primeira parcela.",
 };
 

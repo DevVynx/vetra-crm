@@ -22,7 +22,7 @@ export function useDeleteCustomer(customerId: string) {
       queryClient.removeQueries({ queryKey: customersQueryKeys.detail(customerId) });
       queryClient.removeQueries({ queryKey: leadsQueryKeys.detail(customerId) });
       await navigate({ to: "/customers" });
-      toast.success("Cliente excluído.");
+      toast.success("Cliente e todo o histórico foram excluídos.");
       return invalidate();
     },
     onError: (error) => toast.error(getErrorMessage(error, "Não foi possível excluir o cliente.")),

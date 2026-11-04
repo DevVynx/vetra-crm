@@ -54,7 +54,7 @@ export function useLedgerEntryActions(customerId: string) {
     mutationFn: (entry: LedgerEntry) =>
       api.delete(buildPath(ledgerRoutes.byId, { id: customerId, entryId: entry.id })),
     onSuccess: (_, entry) => {
-      toastWithUndo("Registro excluído.", () => restoreEntry.mutate(entry));
+      toastWithUndo("Registro excluído com sucesso.", () => restoreEntry.mutate(entry));
       return invalidate();
     },
     onError,
@@ -94,7 +94,7 @@ export function useLedgerEntryActions(customerId: string) {
     createEntry.mutate(request, {
       onSuccess: (entry) => {
         onDone();
-        toastWithUndo("Registro criado.", () => discardEntry.mutate(entry.id));
+        toastWithUndo("Registro criado com sucesso.", () => discardEntry.mutate(entry.id));
       },
     });
 
@@ -104,7 +104,7 @@ export function useLedgerEntryActions(customerId: string) {
       {
         onSuccess: () => {
           onDone();
-          toastWithUndo("Registro atualizado.", () =>
+          toastWithUndo("Registro atualizado com sucesso.", () =>
             updateEntry.mutate({ entryId: entry.id, request: toUpdateRequest(entry) })
           );
         },

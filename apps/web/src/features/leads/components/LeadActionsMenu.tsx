@@ -52,7 +52,7 @@ export function LeadActionsMenu({ lead }: { lead: LeadDetail }) {
           changeStage(
             archiveStageId,
             lead.stage,
-            `Lead arquivado como ${stages.nameOf(archiveStageId)}`
+            `Lead arquivado em ${stages.nameOf(archiveStageId)}.`
           );
           close();
         }}

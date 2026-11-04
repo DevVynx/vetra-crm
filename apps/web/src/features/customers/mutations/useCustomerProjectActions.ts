@@ -41,7 +41,7 @@ export function useCustomerProjectActions(customerId: string) {
   const deleteProject = useMutation({
     mutationFn: deleteRequest,
     onSuccess: () => {
-      toast.success("Projeto excluído.");
+      toast.success("Projeto excluído e registros desvinculados.");
       return invalidate();
     },
     onError,
@@ -81,7 +81,7 @@ export function useCustomerProjectActions(customerId: string) {
     createProject.mutate(request, {
       onSuccess: (project) => {
         onDone();
-        toastWithUndo("Projeto criado.", () => discardProject.mutate(project.id));
+        toastWithUndo("Projeto criado com sucesso.", () => discardProject.mutate(project.id));
       },
     });
 

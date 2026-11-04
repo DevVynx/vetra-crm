@@ -30,7 +30,7 @@ export function useUpdateLeadNote(leadId: string) {
       {
         onSuccess: () => {
           onSaved();
-          toastWithUndo("Nota atualizada.", () =>
+          toastWithUndo("Nota atualizada com sucesso.", () =>
             mutation.mutate({ noteId: note.id, content: note.content })
           );
         },
