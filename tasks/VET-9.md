@@ -33,7 +33,7 @@ Build the real backend for everything the mock layer in `apps/web/src/shared/moc
   - a "Fuso horário" row in Configurações → Perfil
 - **Dev seed:** `pnpm db:seed` with realistic demo data.
 - **Removal:** delete `apps/web/src/shared/mocks` and everything that imports it.
-- **Docs:** update `DATABASE.md` (hard delete) and the decisions log in `PROJECT-OVERVIEW.md`.
+- **Docs:** update `DATABASE.md` (hard delete), the decisions log in `PROJECT-OVERVIEW.md`, and `WEB-VITE-OVERVIEW.md` (the time zone rule: calendar reads such as "which day is this?" go through `shared/time-zone/zonedDate`, because `date-fns` computes in the zone of the date it receives; Zustand and `@date-fns/tz` in the stack).
 
 Out of scope:
 
@@ -288,6 +288,7 @@ Automated tests are out of scope for this issue, by decision. Verify each block 
 - No factory functions in `packages/core` or `apps/api`; rules live in `domain.ts`.
 - The API binds to `127.0.0.1` only and CORS allows only the web origin.
 - `DATABASE.md` and the `PROJECT-OVERVIEW.md` decisions log reflect hard delete, customer = lead + deal, and the profile time zone.
+- `WEB-VITE-OVERVIEW.md` documents the time zone rule for calendar reads and lists Zustand and `@date-fns/tz` in the stack.
 - `pnpm format`, `pnpm check-types`, `pnpm lint` and `pnpm build` pass; there are no console errors.
 
 ---
