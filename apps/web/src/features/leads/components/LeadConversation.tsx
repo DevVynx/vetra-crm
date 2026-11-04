@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { BellRingIcon, ClockIcon, PlusIcon } from "lucide-react";
+import { BellRingIcon, ClockIcon, MessageCircleIcon } from "lucide-react";
 
 import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
 import { Section } from "@/shared/components/Section";
-import { SectionEmptyRow } from "@/shared/components/SectionEmptyRow";
+import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -34,12 +34,7 @@ export function LeadConversation({ leadId }: { leadId: string }) {
       {isPending ? (
         <SectionSkeleton rows={2} />
       ) : !conversation || !state ? (
-        <SectionEmptyRow text="Nenhuma conversa ainda.">
-          <Button size="sm" variant="ghost" nativeButton={false} render={<Link to="/whatsapp" />}>
-            <PlusIcon />
-            Abrir WhatsApp
-          </Button>
-        </SectionEmptyRow>
+        <SectionEmpty icon={MessageCircleIcon} title="WhatsApp ainda não conectado" />
       ) : (
         <div className="flex flex-col gap-3">
           <div

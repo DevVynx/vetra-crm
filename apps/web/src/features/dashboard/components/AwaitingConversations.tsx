@@ -30,7 +30,7 @@ export function AwaitingConversations() {
       {isPending ? (
         <SectionSkeleton rows={2} />
       ) : conversations.length === 0 ? (
-        <SectionEmpty icon={MessageCircleIcon} title="Nenhuma conversa esperando resposta" />
+        <SectionEmpty icon={MessageCircleIcon} title="WhatsApp ainda não conectado" />
       ) : (
         <div className="flex flex-col gap-2">
           {conversations.map((conversation) => (
