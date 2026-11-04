@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { LeadListItem } from "@vetra/contracts";
 import { isBefore } from "date-fns";
-import { useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 
 import { BusinessAvatar } from "@/shared/components/BusinessAvatar";
 import { LeadStageBadge } from "@/shared/components/LeadStageBadge";
@@ -57,14 +57,16 @@ export type LeadSelection = {
   selectedIds: ReadonlySet<string>;
   onToggle: (leadId: string) => void;
   onTogglePage: (leadIds: string[]) => void;
+  bulkBar: ReactNode;
 };
 
 function TableHeaders({ leads, selection }: { leads: LeadListItem[]; selection?: LeadSelection }) {
   const selectedOnPage = leads.filter((lead) => selection?.selectedIds.has(lead.id)).length;
+  const showsBulkBar = Boolean(selection?.isSelecting && selection.selectedIds.size > 0);
 
   return (
     <TableHeader>
-      <TableRow>
+      <TableRow className={cn(showsBulkBar && "hover:bg-transparent")}>
         {selection?.isSelecting && (
           <TableHead className="w-px pl-4">
             <Checkbox
@@ -73,6 +75,14 @@ function TableHeaders({ leads, selection }: { leads: LeadListItem[]; selection?:
               indeterminate={selectedOnPage > 0 && selectedOnPage < leads.length}
               onCheckedChange={() => selection.onTogglePage(leads.map((lead) => lead.id))}
             />
+            {/* Laid over the column headers, which stay underneath holding their widths and the
+                row height: the columns don't jump, and pageSize doesn't change. It is placed against
+                the table container and not the row, which can be wider than the screen. */}
+            {showsBulkBar && (
+              <div className="bg-card absolute top-0 right-0 left-8 flex h-10 items-center pr-4 pl-2">
+                {selection.bulkBar}
+              </div>
+            )}
           </TableHead>
         )}
         <ColumnHead className={selection?.isSelecting ? undefined : "pl-4"}>Negócio</ColumnHead>
@@ -135,7 +145,7 @@ export function LeadsTable({ leads, activeIndex, isFull, selection }: LeadsTable
           return (
             <TableRow
               key={lead.id}
-              className="data-[active=true]:bg-muted/60 cursor-pointer"
+              className="data-[active=true]:bg-muted/60 data-[state=selected]:bg-primary/10 data-[state=selected]:hover:bg-primary/15 cursor-pointer"
               data-active={index === activeIndex}
               data-state={isSelected ? "selected" : undefined}
               onClick={() =>

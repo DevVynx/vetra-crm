@@ -2,6 +2,7 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import type { Filter, LeadSortField } from "@vetra/contracts";
 import { ListChecksIcon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { ActiveFilters } from "@/shared/components/filters/ActiveFilters";
 import { FilterButton } from "@/shared/components/filters/FilterButton";
@@ -23,7 +24,9 @@ import { cn } from "@/shared/utils/cn";
 
 import { buildLeadFilterFields } from "../constants/leadFilterFields";
 import { DEFAULT_LEAD_SORT_FIELD, leadSortOptions } from "../constants/leadSortOptions";
+import { useBulkChangeLeadStage } from "../mutations/useBulkChangeLeadStage";
 import { useLeadFilterOptions } from "../queries/useLeadFilterOptions";
+import { useLeadIds } from "../queries/useLeadIds";
 import { useLeads } from "../queries/useLeads";
 import { CreateLeadSheet } from "./CreateLeadSheet";
 import { LeadsBulkBar } from "./LeadsBulkBar";
@@ -118,6 +121,31 @@ export function LeadsPage() {
     setSelectedIds(new Set());
   };
 
+  // Lives here and not in the bar: the bar goes away with the table when an action empties the
+  // list, and the callbacks of a mutation don't run once its component is gone.
+  const { changeStages, isPending: isChangingStages } = useBulkChangeLeadStage(stopSelecting);
+
+  // A selection only holds for the list it was made on, so it can't act on leads that left it.
+  const selectionScope = JSON.stringify({ q, filters, sort, direction });
+  const [previousScope, setPreviousScope] = useState(selectionScope);
+  if (selectionScope !== previousScope) {
+    setPreviousScope(selectionScope);
+    setSelectedIds(new Set());
+  }
+
+  const leadIds = useLeadIds({ q, filters });
+
+  const selectAllLeads = async () => {
+    const { data: result } = await leadIds.refetch();
+    if (result) setSelectedIds(new Set(result.ids));
+    else toast.error("Não foi possível selecionar todos os leads.");
+  };
+
+  const hasMoreToSelect =
+    data !== undefined &&
+    leads.every((lead) => selectedIds.has(lead.id)) &&
+    data.total > selectedIds.size;
+
   const toggleLead = (leadId: string) =>
     setSelectedIds((current) => {
       const next = new Set(current);
@@ -154,7 +182,7 @@ export function LeadsPage() {
   );
 
   return (
-    <div className="relative flex h-full min-h-[32rem] flex-col gap-4 p-6">
+    <div className="flex h-full min-h-[32rem] flex-col gap-4 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-semibold tracking-tight">Leads</h2>
         <div className="flex flex-wrap gap-2">
@@ -234,15 +262,27 @@ export function LeadsPage() {
                 selectedIds,
                 onToggle: toggleLead,
                 onTogglePage: togglePage,
+                bulkBar: (
+                  <LeadsBulkBar
+                    ids={[...selectedIds]}
+                    selectAll={
+                      hasMoreToSelect
+                        ? {
+                            total: data.total,
+                            isPending: leadIds.isFetching,
+                            onClick: selectAllLeads,
+                          }
+                        : undefined
+                    }
+                    changeStages={changeStages}
+                    isChanging={isChangingStages}
+                  />
+                ),
               }}
             />
           )}
         </div>
       </div>
-
-      {isSelecting && selectedIds.size > 0 && (
-        <LeadsBulkBar ids={[...selectedIds]} onDone={stopSelecting} onCancel={stopSelecting} />
-      )}
 
       <div className="min-h-7">
         {data && (

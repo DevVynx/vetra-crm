@@ -1,8 +1,9 @@
-import type { ListLeadsQuery } from "@vetra/contracts";
+import type { ListLeadIdsQuery, ListLeadsQuery } from "@vetra/contracts";
 
 export const leadsQueryKeys = {
   all: ["leads"] as const,
   list: (query: ListLeadsQuery) => ["leads", "list", query] as const,
+  ids: (query: ListLeadIdsQuery) => ["leads", "ids", query] as const,
   filterOptions: (field: string) => ["leads", "filter-options", field] as const,
   detail: (leadId: string) => ["leads", "detail", leadId] as const,
   conversation: (leadId: string) => ["leads", "conversation", leadId] as const,
