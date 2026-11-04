@@ -22,9 +22,8 @@ system's identity, so they're handled last, not first.
 
 Modeling a domain means modeling both what the data **is** and what behavior can be
 derived from it — not just the shape you're used to drawing as a database table.
-For a future `Lead`, `packages/core/src/features/leads/domain.ts` would hold the
-`Lead` type together with its behavior — creating one, which stage transitions are
-allowed, whether a follow-up is overdue. The principle holds regardless of how much
+`packages/core/src/features/leads/domain.ts` holds the `Lead` type together with its
+behavior — creating one, closing it, which stage moves are allowed. The principle holds regardless of how much
 behavior a given entity ends up with: **the entity's own file is where every
 computation derivable from its data belongs**, grouped into a `<name>Domain` object
 (`leadDomain.create`), never scattered across whichever service happens to need it

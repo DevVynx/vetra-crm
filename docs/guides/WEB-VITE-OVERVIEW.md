@@ -45,6 +45,31 @@ layer (see the decisions log in `PROJECT-OVERVIEW.md`). The backend stays
 language-neutral; turning an API error into Portuguese text is `getErrorMessage`'s
 job (`WEB-VITE-DATA-LAYER.md`).
 
+## Dates and the profile time zone
+
+The API sends instants in UTC. Everything on screen, and everything that depends on "now"
+(the greeting, "hoje", "atrasada", due date shortcuts, chart buckets), follows the profile
+time zone instead of the browser's, using date-fns with `@date-fns/tz`.
+
+The zone lives in a Zustand store (`shared/time-zone/timeZoneStore.ts`) instead of a
+context because date helpers also run outside React, in query `select`s and form defaults.
+`TimeZoneProvider`, inside the `_app` layout, fills the store from the profile before any
+screen renders. Helpers read the store without subscribing to it, so the provider remounts
+the screens when the zone changes.
+
+The rules:
+
+- **Calendar reads go through `shared/time-zone/zonedDate.ts`.** date-fns computes in the
+  zone of the date it receives, so "which day or hour is this?" (`format`, `isToday`,
+  `isSameDay`, `setHours`, `startOfDay`...) needs `inProfileZone(date)`,
+  `nowInProfileZone()` or `startOfTodayInProfileZone()`. In a two-date function, the first
+  argument decides the zone: `isSameDay(inProfileZone(a), b)`. Comparing instants (`isBefore`) and
+  relative time (`formatRelative`) don't depend on the zone.
+- **Prefer the existing helpers.** `shared/utils/date.ts` and `shared/utils/dueDates.ts`
+  already do this, and `DateTimePicker` is the date input.
+- **Values that leave a helper or picker are plain `Date`s** (`toInstant`). A `TZDate`
+  serializes with its offset (`-03:00`), which `z.iso.datetime()` rejects.
+
 ## Environment variables
 
 `@vetra/env/client-vite` only works from code that Vite itself
@@ -75,6 +100,7 @@ split this fits into.
 - `shared/components/ui/` — shadcn/ui primitives (see `WEB-COMPONENTS.md`).
 - `shared/components/` — composed components used across more than one feature.
 - `shared/lib/` — `axios/` (HTTP client), `tanstack/` (query client + utils).
+- `shared/time-zone/` — the profile time zone store, provider and date helpers.
 - `shared/providers/`, `shared/utils/`.
 
 A component or hook used by exactly one feature belongs under that feature's folder,

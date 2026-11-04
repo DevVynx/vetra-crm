@@ -1,10 +1,10 @@
 # Adding a Feature — End to End
 
-A practical walkthrough of every file a new feature touches, in order. There is no
-real feature in the codebase yet, so the paths below use a hypothetical `leads`
-feature as the illustration — treat them as "the shape a feature takes", not as
-files that already exist. Revise this guide once the first real feature lands and
-can serve as the concrete reference.
+A practical walkthrough of every file a new feature touches, in order. `leads` is the
+reference: every layer below has real `leads` code to read alongside this guide.
+
+Plain exported functions only, with no factories and no classes except errors: one file
+per query or action, grouped by a barrel, with the rules in `domain.ts`.
 
 Each step below links to the guide with the actual conventions for that layer —
 read the relevant one before writing the files, don't just copy the shape blindly.
@@ -29,7 +29,7 @@ See `API-MODULES.md` and `DOMAIN-MODELING.md`.
 ## 2. Database — `packages/database/src/schema/<name>.ts`
 
 See `DATABASE.md`. Only if the feature needs its own table. Reuse `common.ts`'s
-column helpers, then `pnpm --filter @vetra/database db:generate` and
+column helpers, then `pnpm --filter @vetra/database db:generate --name=<what_it_does>` and
 `db:migrate`.
 
 ## 3. Contracts — `packages/contracts/src/<name>/`
@@ -55,6 +55,8 @@ See `API-MODULES.md` and `API-VALIDATION.md`.
 - `controllers/` — one file per action, exporting `<action>Controller`, barrel
   `index.ts`.
 - `validators.ts` — default-exported `v` object built from the contracts schemas.
+- `helpers/` — shaping domain entities into responses (e.g. `leadResponses.ts`), when more
+  than one controller needs it.
 - `routes.ts` — wire path constant + validator + middlewares + controller.
 - Mount the new router in `apps/api/src/app.ts`, under `/api`.
 
@@ -62,8 +64,10 @@ See `API-MODULES.md` and `API-VALIDATION.md`.
 
 See `WEB-VITE-DATA-LAYER.md` and `WEB-COMPONENTS.md`.
 
-- `queries/` / `mutations/` — one hook per resource/action.
-- `components/` — the feature's screens/forms. UI text in Portuguese.
+- `queries/` / `mutations/` — one hook per resource/action, calling the API through
+  `shared/lib/axios/api.ts` with paths from `@vetra/routes`.
+- `components/` — the feature's screens/forms. UI text in Portuguese, and dates in the
+  profile time zone (`WEB-VITE-OVERVIEW.md`).
 - A new route file under `apps/web/src/routes/_app/` (every app page lives under the
   `_app` layout).
 

@@ -16,12 +16,19 @@ interceptors.
 One `queryOptions({ queryKey, queryFn, ... })` per resource, exported so it can be
 reused both by a component-facing `useX()` hook and by an imperative call elsewhere
 (e.g. a route's `loader`). Never inline a `queryKey`/`queryFn` pair directly inside a
-component. Illustrative shape (no real feature exists yet):
+component. Paths come from `@vetra/routes`, with `buildPath` filling their parameters.
+Simplified from `shared/queries/leads/useLead.ts`:
 
 ```ts
-export const leadsQueryOptions = queryOptions({ queryKey: ["leads"], queryFn: ... });
-export function useLeads() {
-  return useQuery(leadsQueryOptions);
+export const leadQueryOptions = (leadId: string) =>
+  queryOptions({
+    queryKey: leadsQueryKeys.detail(leadId),
+    queryFn: async () =>
+      (await api.get<GetLeadResponse>(buildPath(leadsRoutes.byId, { id: leadId }))).data,
+  });
+
+export function useLead(leadId: string) {
+  return useQuery(leadQueryOptions(leadId));
 }
 ```
 
@@ -65,15 +72,17 @@ that resolve to `undefined`. To actually clear cached data, call `remove()`, not
 
 ## Turning errors into user-facing text
 
-`shared/utils/getErrorMessage.ts` turns an API error into text for the user: a `400`
-with `issues[]` is formatted from the issues, otherwise the response's `message` is
-used, otherwise the caller's Portuguese fallback (default `"Algo deu errado."`).
+`shared/utils/getErrorMessage.ts` turns any API error into text for the user:
 
-The backend only sends stable codes (Zod `issue.code`, error class names) in English —
-mapping those codes to Portuguese sentences (both for server-reported issues and for
-client-side form validation) is still to be built, together with the first real form.
-Until then, never render a raw error object or a raw Zod code as the final UI text
-without going through `getErrorMessage`.
+- When the response has `issues[]` and every issue code has a sentence in its
+  `validationMessages` map, it returns those sentences without repeats.
+- In every other case, it returns the caller's Portuguese fallback (default
+  `"Algo deu errado."`), so each mutation passes one that names the action, like
+  `"Não foi possível salvar o lead."`.
+
+The response's `message` is never shown: it is English text for developers. A new custom
+refinement code in the contracts needs its sentence in `validationMessages`, otherwise the
+user gets the fallback. Never render a raw error object or a raw Zod code as UI text.
 
 ## Query client defaults
 

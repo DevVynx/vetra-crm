@@ -47,7 +47,7 @@ default padding overridden by a prop) correctly.
 A constant goes to `features/<name>/constants/` only when at least one of these is true:
 
 - **It's used by more than one file** (e.g. stage labels read by a badge, a chart, and a
-  mock).
+  form).
 - **It's domain vocabulary, not a detail of one screen** (e.g. "the `won` stage is called
   _Fechado_"), which other screens will need too.
 

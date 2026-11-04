@@ -13,29 +13,26 @@ Postgres tables. `apps/api` never imports `@vetra/database` directly —
 
 One file per table under `src/schema/<table>.ts`, exporting the table as
 `<name>Table` (e.g. `leadsTable`) and any Postgres enum as `<name>Enum` (e.g.
-`leadStageEnum`). `src/schema/index.ts` re-exports everything. `src/index.ts` exports the
+`projectStatusEnum`). `src/schema/index.ts` re-exports everything. `src/index.ts` exports the
 configured `db` client alongside the schema.
 
 ## Shared columns
 
 `src/schema/common.ts` holds reusable column factories — `uuidPrimaryKeyColumn()`,
-`createdAtColumn()`, `updatedAtColumn()`, `deletedAtColumn()`. Reuse these on a new
-table instead of redeclaring `id`/`created_at`/`updated_at`/`deleted_at` inline; every
-table follows the same soft-delete shape.
+`createdAtColumn()`, `updatedAtColumn()`, `instantColumn(name)`. Reuse these on a new
+table instead of redeclaring `id`/`created_at`/`updated_at` inline. Every instant is a
+`timestamptz`, stored and sent by the API in UTC; day and period boundaries come from the
+profile time zone.
 
-## Soft deletes and unique constraints
+## Deletes are hard
 
-Rows are soft-deleted (`deletedAtColumn()`, nullable timestamp, no hard `DELETE`). A
-unique index on a column that might legitimately be reused after "deleting" a row
-(phone, slug, ...) must filter the index, not just the column:
+There is no soft delete and no `deleted_at`: `DELETE` removes the row. What belongs to a
+lead goes with it through `ON DELETE CASCADE`, and ledger entries linked to a deleted
+project stay, only losing the link (`ON DELETE SET NULL`).
 
-```ts
-uniqueIndex("leads_whatsapp_unique")
-  .on(table.whatsapp)
-  .where(sql`${table.deletedAt} IS NULL`);
-```
-
-Without the `WHERE`, a soft-deleted row permanently blocks reuse of its unique value.
+Undo lives in the client. Where a screen offers it (notes, ledger entries), the client keeps
+the deleted row and sends it to a `restore` endpoint, which re-creates it with the same `id`
+and `created_at`.
 
 ## IDs are domain-owned, not database-owned
 
@@ -49,10 +46,12 @@ knowing the ID before the row exists (e.g. to build an entity before persisting 
 ## Migration workflow
 
 ```bash
-pnpm --filter @vetra/database db:generate   # generate a migration from schema changes
-pnpm --filter @vetra/database db:migrate    # apply pending migrations
-pnpm --filter @vetra/database db:studio     # inspect data with Drizzle Studio
+pnpm --filter @vetra/database db:generate --name=add_lead_notes   # generate a named migration from schema changes
+pnpm --filter @vetra/database db:migrate                          # apply pending migrations
+pnpm --filter @vetra/database db:studio                           # inspect data with Drizzle Studio
+pnpm db:seed                                                      # fill the database with demo data
 ```
 
-Never hand-edit a generated migration file under `migrations/` — change the schema
+Always pass `--name`, so the file says what it does instead of getting Drizzle's random
+name. Never hand-edit a generated migration file under `migrations/` — change the schema
 and regenerate instead.

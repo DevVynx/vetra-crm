@@ -60,7 +60,6 @@ To reuse it in another project, copy this folder together with the items above a
 
 ## Applying filters
 
-The component only builds the `Filter[]`. Filtering is done by whoever owns the data: the
-mock layer uses `shared/mocks/filterEngine.ts` (`matchesFilters`), and the future API must apply
-the same semantics. Select fields that list their options from the data (niche, city) get them
+The component only builds the `Filter[]`. Filtering is done by whoever owns the data: here, the
+API turns it into SQL with `filtersToSql` (`packages/core/src/shared/filters`). Select fields that list their options from the data (niche, city) get them
 from a `filter-options` endpoint (`filterOptionsQuerySchema` in the contracts).
