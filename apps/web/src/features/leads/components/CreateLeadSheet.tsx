@@ -38,7 +38,7 @@ export function CreateLeadSheet({ open, onOpenChange }: CreateLeadSheetProps) {
       onSubmit={submit}
     >
       <FormProvider {...form}>
-        <ContactFormFields />
+        <ContactFormFields showDemo />
       </FormProvider>
     </FormSheet>
   );

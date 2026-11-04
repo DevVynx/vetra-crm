@@ -15,6 +15,7 @@ const toRequest = (lead: LeadDetail): UpdateLeadRequest => ({
   city: lead.city,
   phone: lead.phone,
   email: lead.email,
+  demoUrl: lead.demoUrl,
 });
 
 export function useUpdateLead(lead: LeadDetail, onUpdated: () => void) {

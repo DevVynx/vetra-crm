@@ -27,17 +27,19 @@ export type LeadContact = Pick<
   "businessName" | "contactName" | "niche" | "city" | "phone" | "email"
 >;
 
+// What can be typed for a lead. Customers only have the contact part: their screens have no demo.
+export type LeadFields = LeadContact & Pick<Lead, "demoUrl">;
+
 // The part of a lead a stage change touches, kept so the change can be undone exactly.
 export type LeadStageState = Pick<Lead, "id" | "stageId" | "stoppedAtStageId" | "stageChangedAt">;
 
 const isLive = (stage: Stage) => stage.role === "entry" || stage.role === "middle";
 
 // New leads start in the entry stage, prospected now.
-function create(contact: LeadContact, entryStage: Stage, now: Date): Lead {
+function create(fields: LeadFields, entryStage: Stage, now: Date): Lead {
   return {
-    ...contact,
+    ...fields,
     id: uuidv7(),
-    demoUrl: null,
     stageId: entryStage.id,
     stoppedAtStageId: null,
     stageChangedAt: now,
@@ -50,7 +52,7 @@ function create(contact: LeadContact, entryStage: Stage, now: Date): Lead {
 
 // A customer created directly, without going through the funnel, starts already closed.
 function createClosed(contact: LeadContact, closingStage: Stage, now: Date): Lead {
-  return create(contact, closingStage, now);
+  return create({ ...contact, demoUrl: null }, closingStage, now);
 }
 
 // Closing a deal is the only way into the closing stage.

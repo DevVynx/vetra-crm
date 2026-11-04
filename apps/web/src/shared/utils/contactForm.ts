@@ -6,6 +6,7 @@ export type ContactFormValues = {
   phone: string;
   document: string;
   email: string;
+  demoUrl: string;
   niche: string;
   city: string;
 };
@@ -16,6 +17,7 @@ export const emptyContactValues: ContactFormValues = {
   phone: "",
   document: "",
   email: "",
+  demoUrl: "",
   niche: "",
   city: "",
 };
@@ -27,7 +29,13 @@ export const normalizePhone = (value: string) => {
   return digits.length <= 11 ? `55${digits}` : digits;
 };
 
-export const toLeadRequest = (values: ContactFormValues): UpdateLeadRequest => ({
+// Addresses are often pasted without the protocol, as in "site.vercel.app".
+export const normalizeDemoUrl = (value: string) => {
+  const url = value.trim();
+  return url.includes("://") ? url : `https://${url}`;
+};
+
+const toContactFields = (values: ContactFormValues) => ({
   businessName: values.businessName.trim(),
   contactName: values.contactName.trim() || null,
   niche: values.niche.trim(),
@@ -36,7 +44,12 @@ export const toLeadRequest = (values: ContactFormValues): UpdateLeadRequest => (
   email: values.email.trim() || null,
 });
 
+export const toLeadRequest = (values: ContactFormValues): UpdateLeadRequest => ({
+  ...toContactFields(values),
+  demoUrl: values.demoUrl.trim() ? normalizeDemoUrl(values.demoUrl) : null,
+});
+
 export const toCustomerRequest = (values: ContactFormValues): UpdateCustomerRequest => ({
-  ...toLeadRequest(values),
+  ...toContactFields(values),
   document: values.document.trim() || null,
 });

@@ -27,6 +27,7 @@ export function EditLeadSheet({ lead, open, onOpenChange }: EditLeadSheetProps) 
       contactName: lead.contactName ?? "",
       phone: maskPhone(lead.phone),
       email: lead.email ?? "",
+      demoUrl: lead.demoUrl ?? "",
       niche: lead.niche,
       city: lead.city,
     },
@@ -46,7 +47,7 @@ export function EditLeadSheet({ lead, open, onOpenChange }: EditLeadSheetProps) 
       onSubmit={submit}
     >
       <FormProvider {...form}>
-        <ContactFormFields />
+        <ContactFormFields showDemo />
       </FormProvider>
     </FormSheet>
   );

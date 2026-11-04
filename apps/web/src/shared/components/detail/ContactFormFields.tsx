@@ -1,16 +1,29 @@
+import { demoUrlSchema } from "@vetra/contracts";
 import { useFormContext } from "react-hook-form";
 import { z } from "zod";
 
 import { OptionalTag } from "@/shared/components/OptionalTag";
 import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import { type ContactFormValues, normalizePhone } from "@/shared/utils/contactForm";
+import {
+  type ContactFormValues,
+  normalizeDemoUrl,
+  normalizePhone,
+} from "@/shared/utils/contactForm";
 import { maskDocument, masked, maskNoSpaces, maskPhone } from "@/shared/utils/masks";
 
 const required = (message: string) => (value: string) => value.trim().length > 0 || message;
 
+type ContactFormFieldsProps = {
+  showDocument?: boolean;
+  showDemo?: boolean;
+};
+
 // Fields of a lead or customer; must sit inside a react-hook-form FormProvider.
-export function ContactFormFields({ showDocument = false }: { showDocument?: boolean }) {
+export function ContactFormFields({
+  showDocument = false,
+  showDemo = false,
+}: ContactFormFieldsProps) {
   const { register, formState } = useFormContext<ContactFormValues>();
   const { errors } = formState;
 
@@ -88,6 +101,30 @@ export function ContactFormFields({ showDocument = false }: { showDocument?: boo
         />
         <FieldError errors={[errors.email]} />
       </Field>
+
+      {showDemo && (
+        <Field data-invalid={Boolean(errors.demoUrl)}>
+          <FieldLabel htmlFor="contact-demo-url">
+            Demo <OptionalTag />
+          </FieldLabel>
+          <Input
+            id="contact-demo-url"
+            inputMode="url"
+            placeholder="https://padaria-bom-pao.vercel.app"
+            aria-invalid={Boolean(errors.demoUrl)}
+            {...masked(
+              register("demoUrl", {
+                validate: (value) =>
+                  value.trim() === "" ||
+                  demoUrlSchema.safeParse(normalizeDemoUrl(value)).success ||
+                  "Link inválido.",
+              }),
+              maskNoSpaces
+            )}
+          />
+          <FieldError errors={[errors.demoUrl]} />
+        </Field>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <Field data-invalid={Boolean(errors.niche)}>

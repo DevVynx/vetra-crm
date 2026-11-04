@@ -4,7 +4,11 @@ import { FormProvider, useForm } from "react-hook-form";
 
 import { ContactFormFields } from "@/shared/components/detail/ContactFormFields";
 import { FormSheet } from "@/shared/components/FormSheet";
-import { type ContactFormValues, toCustomerRequest } from "@/shared/utils/contactForm";
+import {
+  type ContactFormValues,
+  emptyContactValues,
+  toCustomerRequest,
+} from "@/shared/utils/contactForm";
 import { maskPhone } from "@/shared/utils/masks";
 
 import { useUpdateCustomer } from "../mutations/useUpdateCustomer";
@@ -18,6 +22,7 @@ type EditCustomerSheetProps = {
 export function EditCustomerSheet({ customer, open, onOpenChange }: EditCustomerSheetProps) {
   const form = useForm<ContactFormValues>({
     values: {
+      ...emptyContactValues,
       businessName: customer.businessName,
       contactName: customer.contactName ?? "",
       phone: maskPhone(customer.phone),

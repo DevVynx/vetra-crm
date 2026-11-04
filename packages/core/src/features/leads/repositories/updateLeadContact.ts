@@ -1,15 +1,12 @@
 import { db, eq, leadsTable } from "@vetra/database";
 
-import type { Lead, LeadContact } from "../domain";
+import type { Lead, LeadFields } from "../domain";
 import { leadColumns } from "./leadColumns";
 
-export async function updateLeadContact(
-  id: string,
-  contact: LeadContact
-): Promise<Lead | undefined> {
+export async function updateLeadContact(id: string, fields: LeadFields): Promise<Lead | undefined> {
   const [lead] = await db
     .update(leadsTable)
-    .set(contact)
+    .set(fields)
     .where(eq(leadsTable.id, id))
     .returning(leadColumns);
   return lead;
