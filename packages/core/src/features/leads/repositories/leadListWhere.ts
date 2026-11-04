@@ -25,7 +25,7 @@ const leadFilterColumns: FilterColumns = {
   prospected_at: { kind: "date", expression: sql`${leadsTable.prospectedAt}` },
 };
 
-const searchSql = (search: string) =>
+export const leadSearchSql = (search: string) =>
   search
     ? or(
         ...[leadsTable.businessName, leadsTable.contactName, leadsTable.niche, leadsTable.city].map(
@@ -38,6 +38,6 @@ const searchSql = (search: string) =>
 export const leadListWhere = ({ visibleStageIds, search, filters, timeZone }: LeadListScope) =>
   and(
     inArray(leadsTable.stageId, visibleStageIds),
-    searchSql(search),
+    leadSearchSql(search),
     filtersToSql(filters, leadFilterColumns, timeZone)
   );

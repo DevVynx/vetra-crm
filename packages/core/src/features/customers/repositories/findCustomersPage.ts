@@ -1,13 +1,9 @@
-import { and, count, db, dealsTable, eq, leadsTable, or, sql } from "@vetra/database";
+import { and, count, db, dealsTable, eq, leadsTable, sql } from "@vetra/database";
 
-import {
-  containsSql,
-  type Filter,
-  type FilterColumns,
-  filtersToSql,
-} from "../../../shared/filters";
+import { type Filter, type FilterColumns, filtersToSql } from "../../../shared/filters";
 import { type Sort, type SortColumns, sortToSql } from "../../../shared/sort";
 import type { Lead } from "../../leads/domain";
+import { leadSearchSql } from "../../leads/repositories/leadListWhere";
 import type { Deal } from "../domain";
 import {
   activeProjectsCountSql,
@@ -54,15 +50,6 @@ const customerSortColumns: SortColumns = {
 
 const DEFAULT_SORT: Sort = { field: "closed_at", direction: "desc" };
 
-const searchSql = (search: string) =>
-  search
-    ? or(
-        ...[leadsTable.businessName, leadsTable.contactName, leadsTable.niche, leadsTable.city].map(
-          (column) => containsSql(sql`${column}`, search)
-        )
-      )
-    : undefined;
-
 // Customers are the leads with a deal.
 export async function findCustomersPage({
   search,
@@ -72,7 +59,7 @@ export async function findCustomersPage({
   page,
   pageSize,
 }: findCustomersPageInput): Promise<{ items: CustomerListRow[]; total: number; page: number }> {
-  const where = and(searchSql(search), filtersToSql(filters, customerFilterColumns, timeZone));
+  const where = and(leadSearchSql(search), filtersToSql(filters, customerFilterColumns, timeZone));
 
   const [{ total } = { total: 0 }] = await db
     .select({ total: count() })
