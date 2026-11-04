@@ -44,9 +44,7 @@ export function ProjectCard({ customerId, project, onViewEntries }: ProjectCardP
   const isDelivered = project.status === "delivered";
   const { receivedInCents, pendingInCents, expensesInCents, linkedEntriesCount } =
     project.financial;
-  const share = (amount: number) => Math.min(100, (amount / project.valueInCents) * 100);
-  const receivedShare = share(receivedInCents);
-  const pendingShare = Math.min(100 - receivedShare, share(pendingInCents));
+  const receivedShare = Math.min(100, (receivedInCents / project.valueInCents) * 100);
 
   const toggleDelivered = () =>
     update(
@@ -97,12 +95,11 @@ export function ProjectCard({ customerId, project, onViewEntries }: ProjectCardP
           <span className="text-muted-foreground text-xs">valor do projeto</span>
         </div>
         <div
-          className="bg-muted flex h-2 overflow-hidden rounded-full"
+          className="bg-muted h-1.5 overflow-hidden rounded-full"
           role="img"
           aria-label={`${formatCurrency(receivedInCents)} recebidos de ${formatCurrency(project.valueInCents)}`}
         >
-          <div className="bg-success h-full" style={{ width: `${receivedShare}%` }} />
-          <div className="bg-warning/50 h-full" style={{ width: `${pendingShare}%` }} />
+          <div className="bg-success h-full rounded-full" style={{ width: `${receivedShare}%` }} />
         </div>
       </div>
 
