@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-import { projectStatusSchema } from "../leads/wonDeal";
+export const projectStatusSchema = z.enum(["in_production", "delivered"]);
+export type ProjectStatus = z.infer<typeof projectStatusSchema>;
 
 const amountInCentsSchema = z.number().int().nonnegative();
 
