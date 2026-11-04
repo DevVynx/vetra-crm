@@ -140,8 +140,8 @@ export function CustomersTable({ customers, activeIndex, isFull }: CustomersTabl
                 <span>{pluralize(customer.projectsCount, "projeto", "projetos")}</span>
                 <span className="text-muted-foreground text-xs">
                   {customer.activeProjectsCount > 0
-                    ? `${customer.activeProjectsCount} em andamento`
-                    : "Nenhum em andamento"}
+                    ? `${customer.activeProjectsCount} em desenvolvimento`
+                    : "Nenhum em desenvolvimento"}
                 </span>
               </div>
             </TableCell>

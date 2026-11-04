@@ -52,7 +52,7 @@ export const buildCustomerFilterFields = ({
   },
   {
     id: "active_project",
-    label: "Projeto em andamento",
+    label: "Projeto em desenvolvimento",
     icon: FolderKanbanIcon,
     type: "boolean",
     labels: { true: "Sim", false: "Não" },

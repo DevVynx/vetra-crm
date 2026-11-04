@@ -65,7 +65,7 @@ export function ProjectCard({ customerId, project, onViewEntries }: ProjectCardP
           <h3 className="truncate text-base leading-tight font-semibold">{project.name}</h3>
           <div>
             <StatusBadge
-              label={isDelivered ? "Entregue" : "Em andamento"}
+              label={isDelivered ? "Entregue" : "Em desenvolvimento"}
               dotClassName={isDelivered ? "bg-success" : "bg-info"}
             />
           </div>

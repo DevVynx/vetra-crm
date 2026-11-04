@@ -59,7 +59,7 @@ function buildKpis(summary: DashboardSummaryResponse, lastStageName: string): Kp
       icon: FolderKanbanIcon,
       accentClassName: "text-chart-5",
       value: String(summary.activeProjectsCount),
-      context: "em produção",
+      context: "em desenvolvimento",
     },
     {
       label: "Leads ativos",

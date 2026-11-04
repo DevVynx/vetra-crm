@@ -21,7 +21,7 @@ type ProjectFormValues = {
 };
 
 const statusOptions: { value: ProjectStatus; label: string }[] = [
-  { value: "in_production", label: "Em produção" },
+  { value: "in_production", label: "Em desenvolvimento" },
   { value: "delivered", label: "Entregue" },
 ];
 
