@@ -37,7 +37,7 @@ default padding overridden by a prop) correctly.
 
 - `shared/components/ui/` — shadcn primitives only.
 - `shared/components/` — composed, cross-feature components (e.g.
-  `ThemeToggle`, `Notification`).
+  `ThemeToggle`, `ConfirmDialog`).
 - `features/<name>/components/` — anything specific to one feature's screens (e.g.
   `LeadForm`, `LeadsTable`). Don't move a feature component into `shared/` until a
   second feature actually needs it.
