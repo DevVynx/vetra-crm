@@ -12,7 +12,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/shared/components/ui/sidebar";
+import { setSearchPaletteOpen } from "@/shared/search/searchPaletteStore";
 
 import { footerNavigation, mainNavigation, type NavigationItem } from "./navigation";
 
@@ -38,10 +40,20 @@ function NavigationMenu({ items }: { items: NavigationItem[] }) {
 }
 
 function SidebarSearch() {
+  const { setOpenMobile } = useSidebar();
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton variant="outline" disabled aria-label="Buscar (em breve)">
+        <SidebarMenuButton
+          variant="outline"
+          tooltip="Buscar"
+          aria-label="Buscar (Ctrl K)"
+          onClick={() => {
+            setOpenMobile(false);
+            setSearchPaletteOpen(true);
+          }}
+        >
           <SearchIcon />
           <span className="text-muted-foreground flex-1">Buscar…</span>
           <kbd className="text-muted-foreground bg-muted rounded px-1.5 py-0.5 text-[10px] font-medium">

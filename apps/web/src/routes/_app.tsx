@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
+import { SearchPalette } from "@/features/search/components/SearchPalette";
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { AppSidebar } from "@/shared/components/layout/AppSidebar";
 import { PageCrumbProvider } from "@/shared/components/layout/PageCrumb";
@@ -31,6 +32,7 @@ const AppLayout = () => (
           </TimeZoneProvider>
         </ScrollArea>
       </SidebarInset>
+      <SearchPalette />
     </PageCrumbProvider>
   </SidebarProvider>
 );
