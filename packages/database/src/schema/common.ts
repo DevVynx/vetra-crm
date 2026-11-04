@@ -11,6 +11,4 @@ export const updatedAtColumn = () =>
     .$onUpdate(() => new Date())
     .notNull();
 
-export const deletedAtColumn = () => instantColumn("deleted_at");
-
 export const uuidPrimaryKeyColumn = () => text("id").primaryKey();
