@@ -3,6 +3,7 @@ import { isSameDay } from "date-fns";
 import { DateTimePicker } from "@/shared/components/DateTimePicker";
 import { Button } from "@/shared/components/ui/button";
 import { selectedChoiceClass } from "@/shared/constants/choiceStyles";
+import { inProfileZone } from "@/shared/time-zone/zonedDate";
 import { cn } from "@/shared/utils/cn";
 import { quickDueOptions } from "@/shared/utils/dueDates";
 
@@ -24,7 +25,7 @@ export function DueDatePicker({ value, onChange, withTime = true }: DueDatePicke
               type="button"
               size="xs"
               variant="outline"
-              className={cn(isSameDay(date, value) && selectedChoiceClass)}
+              className={cn(isSameDay(inProfileZone(date), value) && selectedChoiceClass)}
               onClick={() => onChange(date)}
             >
               {option.label}

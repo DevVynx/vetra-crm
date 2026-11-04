@@ -1,5 +1,7 @@
 import type { NextAction } from "@vetra/contracts";
-import { isBefore, isToday, startOfToday } from "date-fns";
+import { isBefore, isToday } from "date-fns";
+
+import { inProfileZone, startOfTodayInProfileZone } from "@/shared/time-zone/zonedDate";
 
 export type GroupedNextActions = {
   overdue: NextAction[];
@@ -10,10 +12,10 @@ const byDueDate = (a: NextAction, b: NextAction) => a.dueAt.localeCompare(b.dueA
 
 export function groupNextActions(actions: NextAction[]): GroupedNextActions {
   const sorted = [...actions].sort(byDueDate);
-  const todayStart = startOfToday();
+  const todayStart = startOfTodayInProfileZone();
 
   return {
     overdue: sorted.filter((action) => isBefore(new Date(action.dueAt), todayStart)),
-    today: sorted.filter((action) => isToday(new Date(action.dueAt))),
+    today: sorted.filter((action) => isToday(inProfileZone(action.dueAt))),
   };
 }

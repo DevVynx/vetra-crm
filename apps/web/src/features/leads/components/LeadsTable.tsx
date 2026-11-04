@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { LeadListItem } from "@vetra/contracts";
-import { isBefore, startOfToday } from "date-fns";
+import { isBefore } from "date-fns";
 import { useEffect } from "react";
 
 import { BusinessAvatar } from "@/shared/components/BusinessAvatar";
@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import { useStages } from "@/shared/stages/useStages";
+import { startOfTodayInProfileZone } from "@/shared/time-zone/zonedDate";
 import { cn } from "@/shared/utils/cn";
 import { formatDayLabel, formatLastContact, formatRelative } from "@/shared/utils/date";
 
@@ -24,7 +25,7 @@ function NextActionCell({ lead }: { lead: LeadListItem }) {
   const stages = useStages();
   if (lead.nextAction) {
     const dueAt = new Date(lead.nextAction.dueAt);
-    const isOverdue = isBefore(dueAt, startOfToday());
+    const isOverdue = isBefore(dueAt, startOfTodayInProfileZone());
 
     return (
       <div className="flex flex-col">

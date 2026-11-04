@@ -1,5 +1,4 @@
 import type { Filter, FilterOperator, FilterValue } from "@vetra/contracts";
-import { startOfToday } from "date-fns";
 import { type FormEvent, useState } from "react";
 
 import { DateTimePicker } from "@/shared/components/DateTimePicker";
@@ -29,7 +28,7 @@ const toText = (field: EditableField, value: FilterValue | undefined) => {
 };
 
 const toDate = (value: FilterValue | undefined) =>
-  value === undefined ? atDefaultHour(startOfToday()) : new Date(String(value));
+  value === undefined ? atDefaultHour(new Date()) : new Date(String(value));
 
 // Operator plus one or two inputs, for the field types whose value is typed or picked.
 export function ValueEditor({ field, initial, autoFocus = false, onSubmit }: ValueEditorProps) {

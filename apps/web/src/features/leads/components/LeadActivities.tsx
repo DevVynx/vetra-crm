@@ -1,5 +1,5 @@
 import type { LeadDetail } from "@vetra/contracts";
-import { isBefore, startOfToday } from "date-fns";
+import { isBefore } from "date-fns";
 import { CalendarCheckIcon, CircleAlertIcon, ListChecksIcon } from "lucide-react";
 
 import { DefineNextActionPopover } from "@/shared/components/next-actions/DefineNextActionPopover";
@@ -8,6 +8,7 @@ import { Section } from "@/shared/components/Section";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import { useStages } from "@/shared/stages/useStages";
+import { startOfTodayInProfileZone } from "@/shared/time-zone/zonedDate";
 
 import { useLeadNextActions } from "../queries/useLeadNextActions";
 import { NextActionHighlight } from "./NextActionHighlight";
@@ -17,7 +18,7 @@ export function LeadActivities({ lead }: { lead: LeadDetail }) {
   const { data, isPending } = useLeadNextActions(lead.id);
   const actions = data?.nextActions ?? [];
   const [nextAction, ...laterActions] = actions;
-  const todayStart = startOfToday();
+  const todayStart = startOfTodayInProfileZone();
 
   return (
     <Section

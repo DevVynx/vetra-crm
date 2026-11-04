@@ -15,6 +15,7 @@ import {
   ChartTooltipContent,
 } from "@/shared/components/ui/chart";
 import { useElementWidth } from "@/shared/hooks/useElementWidth";
+import { inProfileZone } from "@/shared/time-zone/zonedDate";
 import { formatCompactCurrency, formatCurrency } from "@/shared/utils/format";
 
 import { useDashboardRevenue } from "../queries/useDashboardRevenue";
@@ -41,7 +42,7 @@ const bucketFormats: Record<
 };
 
 const formatBucket = (iso: unknown, pattern: string) =>
-  typeof iso === "string" ? format(new Date(iso), pattern, { locale: ptBR }) : "";
+  typeof iso === "string" ? format(inProfileZone(iso), pattern, { locale: ptBR }) : "";
 
 export function RevenueChart({ period }: { period: DashboardPeriod }) {
   const { data, isPending } = useDashboardRevenue(period);

@@ -6,6 +6,7 @@ import { CreateLeadSheet } from "@/features/leads/components/CreateLeadSheet";
 import { Button } from "@/shared/components/ui/button";
 import { useHotkey } from "@/shared/hooks/useHotkey";
 import { useProfile } from "@/shared/queries/profile/useProfile";
+import { nowInProfileZone } from "@/shared/time-zone/zonedDate";
 import { formatLongDate } from "@/shared/utils/date";
 import { firstNameOf } from "@/shared/utils/format";
 
@@ -23,7 +24,7 @@ type DashboardGreetingProps = {
 };
 
 export function DashboardGreeting({ period, onPeriodChange }: DashboardGreetingProps) {
-  const now = new Date();
+  const now = nowInProfileZone();
   const { data: profile } = useProfile();
   const [isCreatingLead, setIsCreatingLead] = useState(false);
   useHotkey("n", () => setIsCreatingLead(true));

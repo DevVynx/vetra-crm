@@ -15,6 +15,7 @@ import {
   ChartTooltipContent,
 } from "@/shared/components/ui/chart";
 import { useElementWidth } from "@/shared/hooks/useElementWidth";
+import { inProfileZone } from "@/shared/time-zone/zonedDate";
 
 import { useDashboardProspecting } from "../queries/useDashboardProspecting";
 import { evenlySpacedTicks, withYearOnLongMonthlyAxis } from "../utils/chartTicks";
@@ -39,7 +40,7 @@ const bucketFormats: Record<
 };
 
 const formatBucket = (iso: unknown, pattern: string) =>
-  typeof iso === "string" ? format(new Date(iso), pattern, { locale: ptBR }) : "";
+  typeof iso === "string" ? format(inProfileZone(iso), pattern, { locale: ptBR }) : "";
 
 export function ProspectingChart({ period }: { period: DashboardPeriod }) {
   const { data, isPending } = useDashboardProspecting(period);

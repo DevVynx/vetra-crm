@@ -1,6 +1,7 @@
 import type { Filter, FilterOperator } from "@vetra/contracts";
 import { format } from "date-fns";
 
+import { inProfileZone } from "@/shared/time-zone/zonedDate";
 import { formatCurrency } from "@/shared/utils/format";
 
 import type { FilterField } from "./types";
@@ -40,7 +41,7 @@ export function selectOperatorFor(operator: FilterOperator, valueCount: number):
   return isNegative ? "is_not" : "is";
 }
 
-const displayDate = (value: unknown) => format(new Date(String(value)), "dd/MM/yyyy");
+const displayDate = (value: unknown) => format(inProfileZone(String(value)), "dd/MM/yyyy");
 
 export function describeValues(field: FilterField, { operator, values }: Filter): string {
   switch (field.type) {

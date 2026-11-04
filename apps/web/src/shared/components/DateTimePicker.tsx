@@ -1,4 +1,4 @@
-import { format, setHours, setMinutes, startOfToday } from "date-fns";
+import { format, setHours, setMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
@@ -8,6 +8,12 @@ import { TimeSlotList } from "@/shared/components/date-time/TimeSlotList";
 import { Button } from "@/shared/components/ui/button";
 import { Calendar } from "@/shared/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
+import {
+  inProfileZone,
+  profileTimeZone,
+  startOfTodayInProfileZone,
+  toInstant,
+} from "@/shared/time-zone/zonedDate";
 import { atDefaultHour } from "@/shared/utils/dueDates";
 
 type DateTimePickerProps = {
@@ -27,6 +33,7 @@ export function DateTimePicker({
   allowPast = false,
 }: DateTimePickerProps) {
   const [open, setOpen] = useState(false);
+  const zoned = inProfileZone(value);
 
   const selectDate = (date: Date | undefined) => {
     if (!date) return;
@@ -35,7 +42,7 @@ export function DateTimePicker({
       setOpen(false);
       return;
     }
-    onChange(setMinutes(setHours(date, value.getHours()), value.getMinutes()));
+    onChange(toInstant(setMinutes(setHours(date, zoned.getHours()), zoned.getMinutes())));
   };
 
   return (
@@ -50,7 +57,7 @@ export function DateTimePicker({
         }
       >
         <span className="truncate">
-          {format(value, withTime ? "dd/MM/yyyy HH:mm" : "dd/MM/yyyy")}
+          {format(zoned, withTime ? "dd/MM/yyyy HH:mm" : "dd/MM/yyyy")}
         </span>
         <CalendarIcon
           aria-hidden="true"
@@ -63,9 +70,10 @@ export function DateTimePicker({
           <Calendar
             mode="single"
             locale={ptBR}
-            selected={value}
-            defaultMonth={value}
-            disabled={allowPast ? undefined : { before: startOfToday() }}
+            timeZone={profileTimeZone()}
+            selected={zoned}
+            defaultMonth={zoned}
+            disabled={allowPast ? undefined : { before: startOfTodayInProfileZone() }}
             onSelect={selectDate}
           />
           {withTime &&

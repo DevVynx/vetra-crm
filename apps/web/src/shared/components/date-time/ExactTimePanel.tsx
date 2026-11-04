@@ -8,6 +8,7 @@ import {
   type TimePickerI18nOverrides,
   TimePickerNow,
 } from "@/shared/components/ui/time-picker";
+import { inProfileZone, nowInProfileZone, toInstant } from "@/shared/time-zone/zonedDate";
 
 const i18n: TimePickerI18nOverrides = {
   labels: { hour: "Hora", minute: "Minuto", now: "Agora", panelLabel: "Escolher horário" },
@@ -22,22 +23,30 @@ type ExactTimePanelProps = {
 
 // Hour and minute columns for any time of the day. 6 rows keep it as tall as the calendar beside it.
 export function ExactTimePanel({ value, onChange, onDone, allowPast }: ExactTimePanelProps) {
+  const zoned = inProfileZone(value);
+
   const selectTime = (text: string | null) => {
     const time = parseTimeValue(text);
-    if (time) onChange(setMinutes(setHours(value, time.hour), time.minute));
+    if (time) onChange(toInstant(setMinutes(setHours(zoned, time.hour), time.minute)));
   };
 
   return (
     <div className="flex flex-col justify-between [--time-picker-rows:6] max-sm:border-t sm:border-s">
       <TimePicker
-        value={format(value, "HH:mm")}
+        value={format(zoned, "HH:mm")}
         onValueChange={selectTime}
-        min={!allowPast && isToday(value) ? format(new Date(), "HH:mm") : undefined}
+        min={!allowPast && isToday(zoned) ? format(nowInProfileZone(), "HH:mm") : undefined}
         i18n={i18n}
       >
         <TimePickerColumns />
         <div className="flex items-center justify-between gap-2 border-t p-1.5">
-          <TimePickerNow />
+          {/* The built-in action reads the browser's clock, which may be in another zone. */}
+          <TimePickerNow
+            onClick={(event) => {
+              event.preventDefault();
+              selectTime(format(nowInProfileZone(), "HH:mm"));
+            }}
+          />
           <Button type="button" variant="secondary" className="font-semibold" onClick={onDone}>
             OK
           </Button>
