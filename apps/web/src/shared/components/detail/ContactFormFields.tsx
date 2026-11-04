@@ -104,7 +104,7 @@ export function ContactFormFields({ showDocument = false }: { showDocument?: boo
           <FieldLabel htmlFor="contact-city">Cidade</FieldLabel>
           <Input
             id="contact-city"
-            placeholder="Ex.: Ipatinga"
+            placeholder="Ex.: São Paulo"
             aria-invalid={Boolean(errors.city)}
             {...register("city", { validate: required("Informe a cidade.") })}
           />
