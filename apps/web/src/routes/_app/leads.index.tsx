@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { filterSchema } from "@vetra/contracts";
+import { filterSchema, leadSortFields, sortDirectionSchema } from "@vetra/contracts";
 import { z } from "zod";
 
 import { LeadsPage } from "@/features/leads/components/LeadsPage";
@@ -9,6 +9,8 @@ import { LeadsPage } from "@/features/leads/components/LeadsPage";
 const searchSchema = z.object({
   q: z.string().optional().catch(undefined),
   filters: z.array(filterSchema).optional().catch(undefined),
+  sort: z.enum(leadSortFields).optional().catch(undefined),
+  direction: sortDirectionSchema.optional().catch(undefined),
   page: z.coerce.number().int().min(1).optional().catch(undefined),
 });
 

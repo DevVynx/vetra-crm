@@ -1,5 +1,5 @@
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import type { Filter } from "@vetra/contracts";
+import type { CustomerSortField, Filter } from "@vetra/contracts";
 import { HandshakeIcon, UserPlusIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -9,6 +9,9 @@ import { useFilterController } from "@/shared/components/filters/useFilterContro
 import { Pagination } from "@/shared/components/Pagination";
 import { SearchField } from "@/shared/components/SearchField";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
+import { SortButton } from "@/shared/components/sort/SortButton";
+import type { SortValue } from "@/shared/components/sort/types";
+import { useSortController } from "@/shared/components/sort/useSortController";
 import { Button } from "@/shared/components/ui/button";
 import { useDebouncedCallback } from "@/shared/hooks/useDebouncedCallback";
 import { useHotkey } from "@/shared/hooks/useHotkey";
@@ -17,6 +20,7 @@ import { TABLE_MIN_HEIGHT, useTablePageSize } from "@/shared/hooks/useTablePageS
 import { cn } from "@/shared/utils/cn";
 
 import { buildCustomerFilterFields } from "../constants/customerFilterFields";
+import { customerSortOptions, DEFAULT_CUSTOMER_SORT_FIELD } from "../constants/customerSortOptions";
 import { useCustomerFilterOptions } from "../queries/useCustomerFilterOptions";
 import { useCustomers } from "../queries/useCustomers";
 import { CreateCustomerSheet } from "./CreateCustomerSheet";
@@ -32,14 +36,15 @@ const focusSearch = () => document.querySelector<HTMLInputElement>("[data-search
 
 export function CustomersPage() {
   const search = route.useSearch();
-  const { q = "", filters = NO_FILTERS, page = 1 } = search;
+  const { q = "", filters = NO_FILTERS, page = 1, sort, direction } = search;
+  const order = sort && direction ? { field: sort, direction } : undefined;
   const navigate = route.useNavigate();
   const [searchText, setSearchText] = useState(q);
   const [isCreating, setIsCreating] = useState(false);
   const navigateToCustomer = useNavigate();
   const { ref: tableRef, pageSize } = useTablePageSize();
   const { data, isPending, isPlaceholderData } = useCustomers(
-    { q, filters, page, pageSize },
+    { q, filters, sort: order?.field, direction: order?.direction, page, pageSize },
     { enabled: pageSize > 0 }
   );
 
@@ -59,12 +64,22 @@ export function CustomersPage() {
       }),
     });
 
+  const changeSort = (next: SortValue<CustomerSortField> | undefined) =>
+    navigate({
+      search: (previous) => ({
+        ...previous,
+        sort: next?.field,
+        direction: next?.direction,
+        page: undefined,
+      }),
+    });
+
   const changePage = (next: number) =>
     navigate({ search: (previous) => ({ ...previous, page: next === 1 ? undefined : next }) });
 
   const clearFilters = () => {
     setSearchText("");
-    navigate({ search: {} });
+    navigate({ search: (previous) => ({ sort: previous.sort, direction: previous.direction }) });
   };
 
   const niches = useCustomerFilterOptions("niche");
@@ -81,12 +96,19 @@ export function CustomersPage() {
     onChange: changeFilters,
   });
 
+  const sorting = useSortController({
+    options: customerSortOptions,
+    defaultField: DEFAULT_CUSTOMER_SORT_FIELD,
+    value: order,
+    onChange: changeSort,
+  });
+
   const hasActiveFilters = q !== "" || filters.length > 0;
   const customers = data?.items ?? [];
 
   const activeIndex = useListNavigation({
     count: customers.length,
-    resetKey: `${q}|${JSON.stringify(filters)}|${page}`,
+    resetKey: `${q}|${JSON.stringify(filters)}|${sort}|${direction}|${page}`,
     onActivate: (index) => {
       const customer = customers[index];
       if (customer) {
@@ -100,10 +122,11 @@ export function CustomersPage() {
 
   return (
     <div className="flex h-full min-h-[32rem] flex-col gap-4 p-6">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-semibold tracking-tight">Clientes</h2>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <FilterButton controller={filtering} />
+          <SortButton controller={sorting} />
           <Button
             variant="outline"
             className="dark:bg-background font-semibold"

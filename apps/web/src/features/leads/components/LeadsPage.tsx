@@ -1,5 +1,5 @@
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import type { Filter } from "@vetra/contracts";
+import type { Filter, LeadSortField } from "@vetra/contracts";
 import { ListChecksIcon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -9,6 +9,9 @@ import { useFilterController } from "@/shared/components/filters/useFilterContro
 import { Pagination } from "@/shared/components/Pagination";
 import { SearchField } from "@/shared/components/SearchField";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
+import { SortButton } from "@/shared/components/sort/SortButton";
+import type { SortValue } from "@/shared/components/sort/types";
+import { useSortController } from "@/shared/components/sort/useSortController";
 import { Button } from "@/shared/components/ui/button";
 import { selectedChoiceClass } from "@/shared/constants/choiceStyles";
 import { useDebouncedCallback } from "@/shared/hooks/useDebouncedCallback";
@@ -19,6 +22,7 @@ import { useStages } from "@/shared/stages/useStages";
 import { cn } from "@/shared/utils/cn";
 
 import { buildLeadFilterFields } from "../constants/leadFilterFields";
+import { DEFAULT_LEAD_SORT_FIELD, leadSortOptions } from "../constants/leadSortOptions";
 import { useLeadFilterOptions } from "../queries/useLeadFilterOptions";
 import { useLeads } from "../queries/useLeads";
 import { CreateLeadSheet } from "./CreateLeadSheet";
@@ -35,7 +39,8 @@ const focusSearch = () => document.querySelector<HTMLInputElement>("[data-search
 
 export function LeadsPage() {
   const search = route.useSearch();
-  const { q = "", filters = NO_FILTERS, page = 1 } = search;
+  const { q = "", filters = NO_FILTERS, page = 1, sort, direction } = search;
+  const order = sort && direction ? { field: sort, direction } : undefined;
   const navigate = route.useNavigate();
   const [searchText, setSearchText] = useState(q);
   const [isCreating, setIsCreating] = useState(false);
@@ -44,7 +49,7 @@ export function LeadsPage() {
   const navigateToLead = useNavigate();
   const { ref: tableRef, pageSize } = useTablePageSize();
   const { data, isPending, isPlaceholderData } = useLeads(
-    { q, filters, page, pageSize },
+    { q, filters, sort: order?.field, direction: order?.direction, page, pageSize },
     { enabled: pageSize > 0 }
   );
 
@@ -64,12 +69,22 @@ export function LeadsPage() {
       }),
     });
 
+  const changeSort = (next: SortValue<LeadSortField> | undefined) =>
+    navigate({
+      search: (previous) => ({
+        ...previous,
+        sort: next?.field,
+        direction: next?.direction,
+        page: undefined,
+      }),
+    });
+
   const changePage = (next: number) =>
     navigate({ search: (previous) => ({ ...previous, page: next === 1 ? undefined : next }) });
 
   const clearFilters = () => {
     setSearchText("");
-    navigate({ search: {} });
+    navigate({ search: (previous) => ({ sort: previous.sort, direction: previous.direction }) });
   };
 
   const niches = useLeadFilterOptions("niche");
@@ -86,6 +101,13 @@ export function LeadsPage() {
     fields: filterFields,
     value: filters,
     onChange: changeFilters,
+  });
+
+  const sorting = useSortController({
+    options: leadSortOptions,
+    defaultField: DEFAULT_LEAD_SORT_FIELD,
+    value: order,
+    onChange: changeSort,
   });
 
   const hasActiveFilters = q !== "" || filters.length > 0;
@@ -113,7 +135,7 @@ export function LeadsPage() {
 
   const activeIndex = useListNavigation({
     count: leads.length,
-    resetKey: `${q}|${JSON.stringify(filters)}|${page}`,
+    resetKey: `${q}|${JSON.stringify(filters)}|${sort}|${direction}|${page}`,
     onActivate: (index) => {
       const lead = leads[index];
       if (!lead) return;
@@ -133,10 +155,11 @@ export function LeadsPage() {
 
   return (
     <div className="relative flex h-full min-h-[32rem] flex-col gap-4 p-6">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-semibold tracking-tight">Leads</h2>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <FilterButton controller={filtering} />
+          <SortButton controller={sorting} />
           <Button
             variant="outline"
             className={cn("dark:bg-background font-semibold", isSelecting && selectedChoiceClass)}
