@@ -3,6 +3,7 @@ export * from "./dashboard";
 export * from "./filters";
 export * from "./leads";
 export * from "./profile";
+export * from "./search";
 export * from "./shared";
 export * from "./sort";
 export * from "./stages";

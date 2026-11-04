@@ -6,5 +6,6 @@ export * from "./features/ledger";
 export * from "./features/next-actions";
 export * from "./features/profile";
 export * from "./features/projects";
+export * from "./features/search";
 export * from "./features/stages";
 export * from "./shared/errors";
