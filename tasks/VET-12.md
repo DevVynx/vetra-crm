@@ -130,8 +130,9 @@ Shown as plain informative text, in muted style, never in red, and never blockin
 - **A WhatsApp contact is not assumed to be a lead.** The account may hold family, friends and other personal contacts. They stay as plain conversations, and no lead is ever created automatically.
 - **A phone number is unique across leads and customers**, so a conversation links to at most one person. A customer is a lead with a deal, so the link is the same.
 - Matching uses a canonical phone: the full international number in digits, treating Brazilian mobile numbers with and without the ninth digit as equal. Nothing is assumed about the country at this level, since WhatsApp ids already carry it. The rule lives in `domain.ts`.
+- One number is one conversation: live events and the sync look for the same id or the same canonical phone, so a chat arriving under the other form of a Brazilian number joins the conversation that already exists. The agenda is matched by canonical phone too.
 - Numbers from any country are supported. Forms assume Brazil unless the number starts with +, and the screen always shows the ninth digit on Brazilian mobile numbers, since WhatsApp ids only carry it in some regions.
-- The link is recalculated when a conversation is created, and when a lead is created, has its phone edited or is restored by "Desfazer".
+- The link isn't stored: it is read by comparing the `phoneKey` of the lead and of the conversation, so it can't go stale when a lead is created, gets another phone or is deleted. Only the unique index on `leads.phoneKey` has to hold, and `whatsapp_conversations.lead_id` was dropped.
 - Deleting a lead keeps the conversation, which becomes an unknown number.
 - An `@lid` contact with no resolvable phone appears by name, can receive messages, and doesn't link automatically.
 - The shown name is the lead or customer's contact name when linked, or the business name when the contact is empty, then the name saved in the user's agenda, then the formatted number. There is no separate name field for a conversation: filling the contact means talking to that person, and leaving it empty means talking to the company. The other name shows below it, or the number when there is none.
@@ -155,9 +156,15 @@ Delivered in step 5, working like WhatsApp Web.
 
 **Menu on each message**
 
-- Hovering a message shows a down arrow. Clicking it opens a dropdown with: **Responder**, **Copiar**, **Encaminhar** and **Apagar**.
-- **Encaminhar** is optional: it only goes in if it turns out easy to build.
+- Hovering a message shows a down arrow. Clicking it opens a dropdown with **Responder**, **Copiar**, **Editar**, **Selecionar** and **Apagar para todos**. A received message only has Responder and Copiar, since WhatsApp doesn't let anyone edit or delete someone else's message for everyone. Everything but Copiar is off while disconnected.
+- **Editar** was added at the user's request, for the user's own text messages. **Encaminhar** was left out: it needs a screen to choose the chat, and nobody asked for it again.
 - **Selecting messages:** select one or more messages to delete them.
+
+**Storage for the actions**
+
+- `whatsapp_messages` gained `waha_id` (WAHA's calls need the full id), `reply_to_external_id`, `reply_to_content`, `edited_at` and `deleted_at`. Messages imported before this have no `waha_id`, so the full id is rebuilt as `<fromMe>_<chatId>_<id>`.
+- Deleting drops the text and the quote from the database, like WhatsApp does, and the bubble reads "Mensagem apagada". Messages already stored have no quote, since the import only brings it for new ones.
+- `message.edited` and `message.revoked` events update edits and deletions made by the other person, or from the phone. Their payload comes from WAHA's docs and is not verified with a real account: if it differs, the event is ignored and nothing breaks.
 
 **Replies**
 
@@ -172,12 +179,6 @@ What WAHA's docs say, not yet verified with a real account:
 - **Message id:** these calls need the id in WAHA's format, while `whatsapp_messages.external_id` keeps only its last part, so the format must be checked or the full id stored.
 - **Deleted by the other person:** `message.revoked` brings `before` and `after`, in case showing it enters the scope later.
 
-What the code already has for the CRM part:
-
-- `phoneKey` on `leads` touches `createLead`, `updateLead`, `createCustomer` and `updateCustomer`, reusing `canonicalPhoneOf`. Existing duplicates must be checked before the unique index.
-- `LeadStageStepper` already wires `useChangeLeadStage` and `CloseLeadSheet`, which the stage control can reuse. Those live in `features/leads`, so they move to `shared` once WhatsApp needs them.
-- `conversationSummarySchema` and `leadConversationSchema` predate this work and should give way to `whatsappConversationSchema`.
-- Linking writes to real data as soon as a running API reloads, so its migration and first run need the user's OK.
   Decided with the user:
 
 - **Apagar** deletes for everyone on WhatsApp. The docs don't state the scope or a time limit, so the behavior is confirmed by the user on a conversation of their own.
@@ -256,7 +257,7 @@ The only automatic effect on a lead: any message, sent or received, moves `lastC
 
 **Painel, "Conversas esperando você"**
 
-- Conversations whose last message was received, newest first, each opening its own thread.
+- Conversations of leads and customers whose last message was received, newest first, each opening its own thread. Family and friends stay in the WhatsApp tab: they aren't work waiting on the user.
 - Connected with nothing waiting: "Nenhuma conversa esperando você". Never connected: "WhatsApp não conectado".
 
 **WhatsApp buttons**
