@@ -1,0 +1,1 @@
+ALTER TABLE "whatsapp_conversations" ADD COLUMN "saved_name" text;

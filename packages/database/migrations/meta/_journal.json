@@ -57,6 +57,13 @@
       "when": 1793892577952,
       "tag": "0007_add_whatsapp_message_status",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793900052770,
+      "tag": "0008_add_whatsapp_saved_name",
+      "breakpoints": true
     }
   ]
 }

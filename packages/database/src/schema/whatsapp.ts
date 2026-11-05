@@ -41,7 +41,9 @@ export const whatsappConversationsTable = pgTable(
     phone: text(),
     phoneKey: text(),
     leadId: text().references(() => leadsTable.id, { onDelete: "set null" }),
+    // The name the person gave themselves on WhatsApp; savedName is the one in the user's agenda.
     contactName: text(),
+    savedName: text(),
     photoUrl: text(),
     photoFetchedAt: instantColumn("photo_fetched_at"),
     unreadCount: integer().notNull().default(0),
