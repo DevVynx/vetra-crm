@@ -1,16 +1,36 @@
 import type { CustomerDetail } from "@vetra/contracts";
-import { WalletIcon } from "lucide-react";
+import { PencilIcon, PlusIcon, WalletIcon } from "lucide-react";
+import { useState } from "react";
 
 import { Property, PropertyList } from "@/shared/components/detail/PropertyList";
 import { Section } from "@/shared/components/Section";
+import { Button } from "@/shared/components/ui/button";
 import { formatCurrency, formatPercent } from "@/shared/utils/format";
 
-export function BillingCard({ billing }: { billing: CustomerDetail["billing"] }) {
+import { MonthlyFeeSheet } from "./MonthlyFeeSheet";
+
+type BillingCardProps = {
+  customerId: string;
+  billing: CustomerDetail["billing"];
+};
+
+export function BillingCard({ customerId, billing }: BillingCardProps) {
+  const [isEditingFee, setIsEditingFee] = useState(false);
   const ratio = billing.totalInCents === 0 ? 0 : billing.receivedInCents / billing.totalInCents;
   const remaining = billing.totalInCents - billing.receivedInCents;
 
   return (
-    <Section title="Faturamento" icon={WalletIcon} iconClassName="text-success">
+    <Section
+      title="Faturamento"
+      icon={WalletIcon}
+      iconClassName="text-success"
+      action={
+        <Button size="sm" variant="outline" onClick={() => setIsEditingFee(true)}>
+          {billing.monthlyFeeInCents ? <PencilIcon /> : <PlusIcon />}
+          Mensalidade
+        </Button>
+      }
+    >
       <PropertyList>
         <Property label="Recebido" className="tabular-nums">
           {formatCurrency(billing.receivedInCents)}
@@ -41,6 +61,12 @@ export function BillingCard({ billing }: { billing: CustomerDetail["billing"] })
           )}
         </Property>
       </PropertyList>
+      <MonthlyFeeSheet
+        customerId={customerId}
+        monthlyFeeInCents={billing.monthlyFeeInCents}
+        open={isEditingFee}
+        onOpenChange={setIsEditingFee}
+      />
     </Section>
   );
 }

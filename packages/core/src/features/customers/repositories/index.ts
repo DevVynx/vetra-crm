@@ -5,6 +5,7 @@ import { findCustomersPage } from "./findCustomersPage";
 import { insertCustomer } from "./insertCustomer";
 import { saveClosing } from "./saveClosing";
 import { updateCustomerProfile } from "./updateCustomerProfile";
+import { updateMonthlyFee } from "./updateMonthlyFee";
 
 export type { CustomerFigures } from "./findCustomerFigures";
 export type { CustomerListRow } from "./findCustomersPage";
@@ -17,4 +18,5 @@ export const customerRepositories = {
   insertCustomer,
   saveClosing,
   updateCustomerProfile,
+  updateMonthlyFee,
 };

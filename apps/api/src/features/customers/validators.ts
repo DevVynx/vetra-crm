@@ -6,6 +6,7 @@ import {
   leadParamsSchema,
   listCustomersQuerySchema,
   updateCustomerRequestSchema,
+  updateMonthlyFeeRequestSchema,
 } from "@vetra/contracts";
 
 import { validation } from "@/shared/http/validation";
@@ -17,6 +18,10 @@ const v = {
   createCustomer: validation({ body: createCustomerRequestSchema }),
   updateCustomer: validation({ params: customerParamsSchema, body: updateCustomerRequestSchema }),
   deleteCustomer: validation({ params: customerParamsSchema }),
+  updateMonthlyFee: validation({
+    params: customerParamsSchema,
+    body: updateMonthlyFeeRequestSchema,
+  }),
   closeLead: validation({ params: leadParamsSchema, body: closeLeadRequestSchema }),
 };
 

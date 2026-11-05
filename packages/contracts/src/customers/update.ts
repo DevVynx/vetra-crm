@@ -22,3 +22,8 @@ export type CreateCustomerRequest = z.infer<typeof createCustomerRequestSchema>;
 
 export const createCustomerResponseSchema = leadSummarySchema;
 export type CreateCustomerResponse = z.infer<typeof createCustomerResponseSchema>;
+
+export const updateMonthlyFeeRequestSchema = z.object({
+  monthlyFeeInCents: z.number().int().positive().nullable(),
+});
+export type UpdateMonthlyFeeRequest = z.infer<typeof updateMonthlyFeeRequestSchema>;

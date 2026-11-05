@@ -14,6 +14,7 @@ export type DealFormValues = {
   received: string;
   installments: string;
   dueAt: Date;
+  monthlyFee: string;
 };
 
 export const emptyDealValues = (): DealFormValues => ({
@@ -21,6 +22,7 @@ export const emptyDealValues = (): DealFormValues => ({
   received: "",
   installments: "1",
   dueAt: inDays(7),
+  monthlyFee: "",
 });
 
 const receivedOf = (text: string) => (text.trim() === "" ? 0 : (parseCurrencyToCents(text) ?? 0));
@@ -42,6 +44,7 @@ export function toDealPayment(values: DealFormValues): DealPaymentRequest | null
     receivedInCents,
     installmentsCount,
     firstInstallmentDueAt: installmentsCount > 0 ? values.dueAt.toISOString() : undefined,
+    monthlyFeeInCents: parseCurrencyToCents(values.monthlyFee) ?? undefined,
   };
 }
 
@@ -142,6 +145,31 @@ export function DealFields({ autoFocus = false }: { autoFocus?: boolean }) {
           </FieldDescription>
         </Field>
       )}
+
+      <Field data-invalid={Boolean(errors.monthlyFee)}>
+        <FieldLabel htmlFor="deal-monthly-fee">
+          Mensalidade <span className="text-muted-foreground font-normal">(opcional)</span>
+        </FieldLabel>
+        <Input
+          id="deal-monthly-fee"
+          inputMode="decimal"
+          placeholder="R$ 0,00"
+          aria-invalid={Boolean(errors.monthlyFee)}
+          {...masked(
+            register("monthlyFee", {
+              validate: (text) =>
+                text.trim() === "" ||
+                parseCurrencyToCents(text) !== null ||
+                "Informe um valor maior que zero.",
+            }),
+            maskCurrency
+          )}
+        />
+        <FieldError errors={[errors.monthlyFee]} />
+        <FieldDescription>
+          Valor fixo por mês, como manutenção. Aparece no Recorrente do Painel.
+        </FieldDescription>
+      </Field>
 
       {remaining > 0 && installments > 0 && (
         <Field>

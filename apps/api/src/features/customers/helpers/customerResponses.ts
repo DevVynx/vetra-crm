@@ -34,4 +34,5 @@ export const fromDealPayment = (payment: DealPaymentRequest): DealPayment => ({
   firstInstallmentDueAt: payment.firstInstallmentDueAt
     ? new Date(payment.firstInstallmentDueAt)
     : null,
+  monthlyFeeInCents: payment.monthlyFeeInCents ?? null,
 });

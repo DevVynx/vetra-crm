@@ -18,6 +18,7 @@ export async function createCustomerController(
     receivedInCents,
     installmentsCount,
     firstInstallmentDueAt,
+    monthlyFeeInCents,
     ...contact
   } = req.body;
   const lead = await customerServices.createCustomer({
@@ -28,6 +29,7 @@ export async function createCustomerController(
       receivedInCents,
       installmentsCount,
       firstInstallmentDueAt,
+      monthlyFeeInCents,
     }),
   });
   res.status(201).json(createCustomerResponseSchema.parse(toLeadSummary(lead)));

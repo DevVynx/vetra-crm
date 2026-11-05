@@ -5,3 +5,4 @@ export * from "./getCustomer";
 export * from "./getCustomerFilterOptions";
 export * from "./listCustomers";
 export * from "./updateCustomer";
+export * from "./updateMonthlyFee";

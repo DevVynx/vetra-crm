@@ -5,6 +5,7 @@ import { getCustomer } from "./getCustomer";
 import { listCustomerFieldValues } from "./listCustomerFieldValues";
 import { listCustomers } from "./listCustomers";
 import { updateCustomer } from "./updateCustomer";
+import { updateMonthlyFee } from "./updateMonthlyFee";
 
 export type { CustomerDetail } from "./getCustomer";
 
@@ -16,4 +17,5 @@ export const customerServices = {
   listCustomerFieldValues,
   listCustomers,
   updateCustomer,
+  updateMonthlyFee,
 };

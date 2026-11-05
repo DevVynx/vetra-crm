@@ -26,6 +26,7 @@ export type DealPayment = {
   receivedInCents: number;
   installmentsCount: number;
   firstInstallmentDueAt: Date | null;
+  monthlyFeeInCents: number | null;
 };
 
 // Same calendar day of the following months in UTC; short months clamp to their last day.
@@ -76,7 +77,13 @@ function open(
   now: Date
 ): { deal: Deal; installments: Installment[] } {
   ensureValidPayment(payment);
-  const { closedValueInCents, receivedInCents, installmentsCount, firstInstallmentDueAt } = payment;
+  const {
+    closedValueInCents,
+    receivedInCents,
+    installmentsCount,
+    firstInstallmentDueAt,
+    monthlyFeeInCents,
+  } = payment;
   const remaining = closedValueInCents - receivedInCents;
   const installments: Installment[] = [];
 
@@ -107,7 +114,7 @@ function open(
     closedAt: now,
     closedValueInCents,
     document,
-    monthlyFeeInCents: null,
+    monthlyFeeInCents,
   };
   return { deal, installments };
 }

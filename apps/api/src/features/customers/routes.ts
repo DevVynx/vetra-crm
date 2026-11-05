@@ -9,6 +9,7 @@ import {
   getCustomerFilterOptionsController,
   listCustomersController,
   updateCustomerController,
+  updateMonthlyFeeController,
 } from "./controllers";
 import v from "./validators";
 
@@ -26,3 +27,4 @@ customersRouter.get(customersRoutes.byId, v.getCustomer, getCustomerController);
 customersRouter.patch(customersRoutes.byId, v.updateCustomer, updateCustomerController);
 customersRouter.delete(customersRoutes.byId, v.deleteCustomer, deleteCustomerController);
 customersRouter.post(customersRoutes.closeLead, v.closeLead, closeLeadController);
+customersRouter.patch(customersRoutes.monthlyFee, v.updateMonthlyFee, updateMonthlyFeeController);

@@ -117,7 +117,7 @@ export function CustomerDetailPage() {
             document={customer.document}
             showDemo={false}
           />
-          <BillingCard billing={customer.billing} />
+          <BillingCard customerId={customer.id} billing={customer.billing} />
           <ProjectMetricsCard metrics={customer.projectMetrics} />
         </>
       }
