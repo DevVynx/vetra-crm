@@ -3,6 +3,7 @@ import { v7 as uuidv7 } from "uuid";
 
 export type WhatsappMessageDirection = "inbound" | "outbound";
 export type WhatsappMessageType = "text" | "audio" | "image" | "video" | "document" | "other";
+export type WhatsappMessageStatus = "sent" | "delivered" | "read";
 
 export type WhatsappAccount = {
   id: string;
@@ -27,6 +28,7 @@ export type WhatsappMessage = {
   externalId: string;
   direction: WhatsappMessageDirection;
   type: WhatsappMessageType;
+  status: WhatsappMessageStatus | null;
   content: string | null;
   sentAt: Date;
 };
@@ -56,13 +58,14 @@ const isLidChat = (chatId: string): boolean => chatId.endsWith("@lid");
 
 const chatIdOfPhone = (phone: string): string => `${phone}@c.us`;
 
-// WhatsApp ids usually come without the ninth digit, while people type it, so both must match.
-function canonicalPhoneOf(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  const withCountry = digits.length === 10 || digits.length === 11 ? `55${digits}` : digits;
+// Always a full international number. In Brazil, WhatsApp ids carry the ninth digit only in some
+// regions, while people always type it, so both forms must match. Other countries stay untouched.
+const canonicalPhoneOf = (phone: string): string =>
+  phone.replace(/\D/g, "").replace(BRAZILIAN_MOBILE_WITH_NINTH_DIGIT, "55$1$2");
 
-  return withCountry.replace(BRAZILIAN_MOBILE_WITH_NINTH_DIGIT, "55$1$2");
-}
+// A search made only of phone characters also looks for a number, whatever its format.
+const phoneDigitsOfSearch = (search: string): string | null =>
+  /^[\d\s()+-]+$/.test(search) && /\d/.test(search) ? search.replace(/\D/g, "") : null;
 
 function messageTypeOf(mimetype: string | null | undefined): WhatsappMessageType {
   if (!mimetype) return "other";
@@ -75,6 +78,16 @@ function messageTypeOf(mimetype: string | null | undefined): WhatsappMessageType
 
 // The same message can come as `true_<chat>_<id>` or as the plain id, depending on the source.
 const externalIdOf = (messageId: string): string => messageId.split("_").at(-1) ?? messageId;
+
+const STATUS_BY_ACK: Record<string, WhatsappMessageStatus> = {
+  SERVER: "sent",
+  DEVICE: "delivered",
+  READ: "read",
+  PLAYED: "read",
+};
+
+const messageStatusOf = (ackName: string | null | undefined): WhatsappMessageStatus | null =>
+  (ackName && STATUS_BY_ACK[ackName]) || null;
 
 const safePhotoUrl = (url: string | null | undefined): string | null =>
   url?.startsWith("https://") ? url : null;
@@ -131,7 +144,9 @@ export const whatsappDomain = {
   historyStart,
   isIndividualChat,
   isLidChat,
+  messageStatusOf,
   messageTypeOf,
+  phoneDigitsOfSearch,
   phoneOfChatId,
   safePhotoUrl,
   unreadChangeOf,

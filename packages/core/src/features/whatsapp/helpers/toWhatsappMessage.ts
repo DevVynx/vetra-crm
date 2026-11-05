@@ -13,6 +13,7 @@ export function toWhatsappMessage(message: WahaMessage): WhatsappMessage | null 
     externalId: whatsappDomain.externalIdOf(message.id),
     direction: message.fromMe ? "outbound" : "inbound",
     type: message.hasMedia ? whatsappDomain.messageTypeOf(message.media?.mimetype) : "text",
+    status: message.fromMe ? whatsappDomain.messageStatusOf(message.ackName) : null,
     content,
     sentAt: new Date(message.timestamp * SECOND_IN_MS),
   });

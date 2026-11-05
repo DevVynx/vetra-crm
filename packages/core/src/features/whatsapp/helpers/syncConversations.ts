@@ -40,6 +40,16 @@ async function importChat({
   }
 }
 
+// Someone can read a message while Vetra is off and never answer, so the chat brings nothing new
+// and this is the only way the blue ticks would ever show.
+async function refreshLastMessageStatus({ lastMessage }: WahaChatOverview): Promise<void> {
+  const status = lastMessage?.fromMe ? whatsappDomain.messageStatusOf(lastMessage.ackName) : null;
+  if (!status || !lastMessage?.id) return;
+
+  const externalId = whatsappDomain.externalIdOf(lastMessage.id);
+  if (await whatsappRepositories.advanceMessageStatus(externalId, status)) notifyWhatsappChange();
+}
+
 async function syncChat(chat: WahaChatOverview, isFullImport: boolean, now: Date): Promise<number> {
   if (!whatsappDomain.isIndividualChat(chat.id) || !chat.lastMessage) return 0;
 
@@ -65,6 +75,8 @@ async function syncChat(chat: WahaChatOverview, isFullImport: boolean, now: Date
       countsAsUnread: false,
     });
   }
+
+  await refreshLastMessageStatus(chat);
 
   const storedUntil = stored?.lastMessageAt;
   if (storedUntil && lastMessageAt <= storedUntil) return 0;

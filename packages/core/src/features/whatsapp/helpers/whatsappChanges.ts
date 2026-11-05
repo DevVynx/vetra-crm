@@ -7,17 +7,28 @@ const emitter = new EventEmitter();
 // One listener per open browser tab, so the default warning at 10 doesn't apply.
 emitter.setMaxListeners(0);
 
-let pendingNotification: NodeJS.Timeout | null = null;
+let quietWindow: NodeJS.Timeout | null = null;
+let changedDuringWindow = false;
 
-// An import saves thousands of messages, which must not become thousands of refetches.
+// The first change goes out right away, so a new message shows at once. What follows inside the
+// window becomes one signal: an import saves thousands of messages, not thousands of refetches.
 export function notifyWhatsappChange(): void {
-  if (pendingNotification) return;
+  if (quietWindow) {
+    changedDuringWindow = true;
+    return;
+  }
 
-  pendingNotification = setTimeout(() => {
-    pendingNotification = null;
-    emitter.emit(CHANGE_EVENT);
+  emitter.emit(CHANGE_EVENT);
+
+  quietWindow = setTimeout(() => {
+    quietWindow = null;
+
+    if (changedDuringWindow) {
+      changedDuringWindow = false;
+      notifyWhatsappChange();
+    }
   }, NOTIFY_WINDOW_MS);
-  pendingNotification.unref();
+  quietWindow.unref();
 }
 
 export function addWhatsappChangeListener(listener: () => void): void {

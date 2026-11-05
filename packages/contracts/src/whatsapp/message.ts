@@ -13,10 +13,15 @@ export const whatsappMessageTypeSchema = z.enum([
 ]);
 export type WhatsappMessageType = z.infer<typeof whatsappMessageTypeSchema>;
 
+export const whatsappMessageStatusSchema = z.enum(["sent", "delivered", "read"]);
+export type WhatsappMessageStatus = z.infer<typeof whatsappMessageStatusSchema>;
+
 export const whatsappMessageSchema = z.object({
   id: z.string(),
   direction: whatsappMessageDirectionSchema,
   type: whatsappMessageTypeSchema,
+  // Only for what was sent; it stays at delivered when the person turned read receipts off.
+  status: whatsappMessageStatusSchema.nullable(),
   content: z.string().nullable(),
   sentAt: z.iso.datetime(),
 });

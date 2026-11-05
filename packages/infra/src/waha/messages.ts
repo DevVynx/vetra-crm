@@ -9,6 +9,7 @@ export const wahaMessageSchema = z.object({
   id: z.string(),
   timestamp: z.number(),
   fromMe: z.boolean(),
+  ackName: z.string().nullish(),
   from: z.string().nullish(),
   to: z.string().nullish(),
   body: z.string().nullish(),
@@ -33,7 +34,14 @@ const chatOverviewSchema = z.object({
   id: z.string(),
   name: z.string().nullish(),
   picture: z.string().nullish(),
-  lastMessage: z.object({ timestamp: z.number() }).nullish(),
+  lastMessage: z
+    .object({
+      id: z.string().nullish(),
+      timestamp: z.number(),
+      fromMe: z.boolean().nullish(),
+      ackName: z.string().nullish(),
+    })
+    .nullish(),
 });
 export type WahaChatOverview = z.infer<typeof chatOverviewSchema>;
 

@@ -51,6 +51,12 @@ export class UnprocessableEntityError extends HttpError {
   }
 }
 
+export class TooManyRequestsError extends HttpError {
+  constructor(message: string) {
+    super(429, message);
+  }
+}
+
 export class InternalServerError extends HttpError {
   constructor(message: string) {
     super(500, message);
