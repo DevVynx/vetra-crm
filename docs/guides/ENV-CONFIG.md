@@ -20,7 +20,7 @@ constraints are covered in `WEB-VITE-OVERVIEW.md`, not here.
 
 ## Same shape on both sides
 
-Both `client` and `server` expose:
+Every variant (`client`, `server` and `waha`) exposes:
 
 - `envConfig.get()` — lazily loads once, caches the result. Application code always
   calls this, never `process.env`/`import.meta.env` directly outside these files.
@@ -39,9 +39,17 @@ usually shouldn't be.
 ## Adding a new variable
 
 1. Add it to `.env.example` at the repo root, with a short comment.
-2. Add it to the relevant `ClientConfig`/`ServerConfig` type and `load()` function —
-   whichever variant (client or server) actually owns the need for it.
+2. Add it to the relevant `ClientConfig`/`ServerConfig`/`WahaConfig` type and `load()` function —
+   whichever variant actually owns the need for it.
 3. If a build/tooling script needs to see it before the app boots, make sure that
    script's `env:load` (`dotenv-cli`) step actually loads the root `.env` — check the
    `package.json` script, don't assume it's automatic. See `WEB-VITE-OVERVIEW.md` if
    the variable needs to reach the browser specifically — that has its own rules.
+
+## The WAHA variables
+
+`WAHA_URL` and `WAHA_API_KEY` are required, and only the API reads them (through
+`@vetra/env/waha`, used by `packages/infra`). Database commands work without them. The key
+reaches WAHA through `compose.yaml`, so after changing it the service has to be recreated
+(`docker compose up -d waha`). The key must never reach a log, an error message or an API
+response: the WebSocket URL carries it, so it is built and used in one place and never printed.

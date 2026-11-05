@@ -55,3 +55,32 @@ pnpm db:seed                                                      # fill the dat
 Always pass `--name`, so the file says what it does instead of getting Drizzle's random
 name. Never hand-edit a generated migration file under `migrations/` — change the schema
 and regenerate instead.
+
+## Data migrations
+
+When existing rows must change, generate an empty migration with `db:generate --custom
+--name=<what_it_does>` and write the SQL in it. It is the one case where the file is written
+by hand. Add a column in steps when it must end up `NOT NULL` and unique: add it nullable,
+fill it in a custom migration, then require it. Run each on a copy first, and apply to real
+data only with the owner's OK.
+
+## Derived columns stay in step through one function
+
+`leads.phone_key` is the phone in a form that compares equal with and without the Brazilian
+ninth digit. It is derived, so every write goes through `contactChangeOf`, and a custom
+migration fills it with the same rule written in SQL. Change the rule in both places, or in
+neither. A unique index on it is what really guarantees one number per lead or customer.
+
+## Subqueries need qualified columns
+
+A single-table `select` in Drizzle drops the table name from its columns, so a correlated
+subquery that refers to the outer row must use `qualified(column)`. Without it, the subquery
+silently compares against its own table.
+
+## WhatsApp tables
+
+`whatsapp_conversations` and `whatsapp_messages` hold everything imported from the connected
+account, including personal conversations. There is no link column to leads: a conversation is
+linked by comparing `phone_key` at read time. Photos are stored as URLs only, and a message
+keeps the full WAHA id because its edit, delete and reply calls need it. Deleting a message
+drops its text and its quote. `pnpm db:seed` never creates conversations.

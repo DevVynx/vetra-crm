@@ -7,15 +7,16 @@ adding a new error anywhere in the API/domain layers, not just when something br
 ## Two hierarchies, on purpose
 
 **Domain errors** (`packages/core/src/shared/errors`): `DomainError` (abstract) →
-category subclasses `NotFoundError`, `ConflictError`, `InvariantViolationError`.
+category subclasses `NotFoundError`, `ConflictError`, `InvariantViolationError`,
+`RateLimitedError` and `ServiceUnavailableError`.
 A concrete error (e.g. a future `LeadNotFoundError`) always
 `extends` a _category_, never `DomainError` directly and never plain `Error`.
 
 **HTTP errors** (`apps/api/src/shared/http/errors.ts`): `HttpError` (base, carries
 `status` and an optional `ValidationIssue[]`) → one subclass per status code
 (`BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`,
-`ConflictError`, `UnprocessableEntityError`, `InternalServerError`,
-`BadGatewayError`).
+`ConflictError`, `UnprocessableEntityError`, `TooManyRequestsError`,
+`InternalServerError`, `BadGatewayError`, `ServiceUnavailableError`).
 
 These two hierarchies intentionally reuse some names (`NotFoundError`,
 `ConflictError` exist on both sides, meaning different things) — that's not a naming
@@ -39,6 +40,20 @@ category the moment it's defined — **zero registry changes needed** for the co
 case. Only add an entry to the registry when one _specific_ concrete error needs a
 different HTTP status than its category's default (the registry currently maps at the
 category level only; nothing needs a per-error override yet).
+
+## Categories for things outside our control
+
+`ServiceUnavailableError` (503) is for a dependency that isn't there, like WAHA being off.
+`RateLimitedError` (429) is for a limit someone else imposes, like WhatsApp restricting
+messages to new contacts. The web shows Portuguese text for both, and never the raw message.
+
+`packages/infra` has its own plain errors (`WahaUnavailableError`, `WahaSendRestrictedError`,
+`WahaRequestRejectedError`), because it must not know the domain. The domain wraps them in
+`helpers/callWaha.ts`, the only place that translates: a refusal from WhatsApp on an edit or a
+delete (`WahaRequestRejectedError`) becomes an `InvariantViolationError` (422), while WAHA being
+off becomes `ServiceUnavailableError`. So the same status can mean different things per
+route, and the web picks its message by the action (`whatsappErrorMessage` and
+`whatsappMessageActionErrorMessage`).
 
 ## Where errors are thrown — no try/catch to translate
 

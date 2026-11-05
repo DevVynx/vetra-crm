@@ -40,8 +40,9 @@ from the package's `index.ts`.
 ## 4. Infra — `packages/infra`, only if needed
 
 Most features won't touch this. Only add something here if the feature needs a
-technical capability the domain layer shouldn't own directly (e.g. a WhatsApp or AI
-API client).
+technical capability the domain layer shouldn't own directly. The WAHA client (WhatsApp)
+lives there, and an AI client would too. It returns plain data and throws its own errors;
+the domain wraps them (see `ERROR-HANDLING.md`).
 
 ## 5. Route constants — `packages/routes/src/<name>.ts`
 

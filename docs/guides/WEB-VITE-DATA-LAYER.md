@@ -90,3 +90,14 @@ user gets the fallback. Never render a raw error object or a raw Zod code as UI 
 `refetchOnReconnect: false`, and a 5-minute `staleTime` as global defaults. A query
 that overrides one of these needs a specific reason for that resource, not a
 copy-pasted override.
+
+## Server signals (SSE)
+
+For things that change on their own, like WhatsApp messages, the API sends a signal over
+Server-Sent Events and the web **refetches with its normal queries**. The signal carries no
+data, so nothing sensitive travels over it and shapes stay defined in one place. The hook that
+owns the connection reconnects by itself after an error response, which the browser never
+retries on its own, and refetches whenever the connection returns. A slow interval refetch stays
+as a safety net for a lost signal. Query keys of one area share a prefix
+(`whatsappQueryKeys.all`), so one invalidation refreshes the list, the thread, the lead card and
+the Painel together.
