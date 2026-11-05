@@ -388,6 +388,29 @@ export async function updateAudioDetails(
     );
 }
 
+// Only fills an empty one: what Vetra already knows about the audio is not overwritten.
+export async function fillAudioWaveform(
+  conversationId: string,
+  { externalId, mediaWaveform }: Pick<WhatsappMessage, "externalId" | "mediaWaveform">
+): Promise<boolean> {
+  if (!mediaWaveform) return false;
+
+  const updated = await db
+    .update(whatsappMessagesTable)
+    .set({ mediaWaveform })
+    .where(
+      and(
+        eq(whatsappMessagesTable.conversationId, conversationId),
+        eq(whatsappMessagesTable.externalId, externalId),
+        eq(whatsappMessagesTable.type, "audio"),
+        isNull(whatsappMessagesTable.mediaWaveform)
+      )
+    )
+    .returning({ id: whatsappMessagesTable.id });
+
+  return updated.length > 0;
+}
+
 export async function markMessagePlayed(
   where: { id: string } | { externalId: string }
 ): Promise<boolean> {

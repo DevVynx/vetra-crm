@@ -66,7 +66,16 @@ async function saveLiveMessage(message: WahaMessage): Promise<void> {
   if (!conversation) return;
 
   const saved = await whatsappRepositories.saveMessages(conversation.id, [toSave], true);
-  if (saved > 0) notifyWhatsappChange();
+  if (saved > 0) return notifyWhatsappChange();
+
+  // The echo of an audio Vetra sent: it is stored already, but only WAHA knows the bars, which it
+  // works out from the converted file. WhatsApp shows those, so Vetra does too.
+  if (
+    toSave.type === "audio" &&
+    (await whatsappRepositories.fillAudioWaveform(conversation.id, toSave))
+  ) {
+    notifyWhatsappChange();
+  }
 }
 
 async function applyEvent(event: WahaEvent): Promise<void> {
