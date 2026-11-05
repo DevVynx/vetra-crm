@@ -89,7 +89,11 @@ Not documented, and only a real file can answer:
 
 - A player in the bubble: play and pause, progress and duration, from `seconds`.
 - Seeking works from the downloaded file.
-- Voice messages (`PTT`) and audio files look different.
+- Voice messages (`PTT`) and audio files look different: a microphone or a note icon.
+- The length (`seconds`) and the voice mark come with the message and are stored in `media_seconds` and `is_voice`, so the length shows before the file is opened. Audio stored before that is filled in once per account, reading again only the conversations that have audio with no length, with the same reader the sticker repair uses.
+- Only one audio plays at a time, and the file is asked for once, on the first play.
+- A voice message looks like WhatsApp's: the play button, the bars with a dot that follows the position and can be clicked to seek, the length under them, and the contact's photo at the right with a microphone. The bars come from the `waveform` WAHA gives (bytes in base64), stored in `media_waveform`; without it a flat line shows.
+- The microphone is gray until the audio was listened to, and blue after. For what the user sent, WAHA's `PLAYED` receipt says so. For what was received, it turns blue when the user plays it in Vetra, or when WAHA reports it played on the phone. Playing in Vetra is marked only in Vetra: WhatsApp is not told, so the person who sent it does not see it as listened. `is_played` only ever goes up.
 
 ---
 
