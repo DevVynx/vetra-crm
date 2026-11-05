@@ -2,12 +2,14 @@ import {
   ConflictError as DomainConflictError,
   InvariantViolationError,
   NotFoundError as DomainNotFoundError,
+  ServiceUnavailableError as DomainServiceUnavailableError,
 } from "@vetra/core";
 
 import {
   ConflictError as HttpConflictError,
   HttpError,
   NotFoundError as HttpNotFoundError,
+  ServiceUnavailableError as HttpServiceUnavailableError,
   UnprocessableEntityError as HttpUnprocessableEntityError,
 } from "@/shared/http/errors";
 
@@ -22,4 +24,5 @@ export const domainErrorRegistry = new Map<ErrorConstructor, HttpErrorFactory>([
   [DomainNotFoundError, (error) => new HttpNotFoundError(error.message)],
   [DomainConflictError, (error) => new HttpConflictError(error.message)],
   [InvariantViolationError, (error) => new HttpUnprocessableEntityError(error.message)],
+  [DomainServiceUnavailableError, (error) => new HttpServiceUnavailableError(error.message)],
 ]);

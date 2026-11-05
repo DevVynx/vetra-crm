@@ -7,11 +7,19 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix"
+  },
+  "dependencies": {
+    "@vetra/env": "workspace:*",
+    "zod": "^4.6.1"
   },
   "devDependencies": {
-    "@vetra/tsconfig": "workspace:*",
     "@types/node": "22.20.2",
+    "@vetra/eslint-config": "workspace:*",
+    "@vetra/tsconfig": "workspace:*",
+    "eslint": "10.9.1",
     "typescript": "7.0.2"
   }
 }

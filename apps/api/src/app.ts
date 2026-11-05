@@ -13,6 +13,7 @@ import { profileRouter } from "@/features/profile/routes";
 import { projectsRouter } from "@/features/projects/routes";
 import { searchRouter } from "@/features/search/routes";
 import { stagesRouter } from "@/features/stages/routes";
+import { whatsappRouter } from "@/features/whatsapp/routes";
 import { handleGlobalError } from "@/shared/middlewares/handleGlobalError";
 import { notFoundHandler } from "@/shared/middlewares/notFoundHandler";
 import { rejectForeignHost } from "@/shared/middlewares/rejectForeignHost";
@@ -50,6 +51,7 @@ app.use("/api", profileRouter);
 app.use("/api", projectsRouter);
 app.use("/api", searchRouter);
 app.use("/api", stagesRouter);
+app.use("/api", whatsappRouter);
 
 app.use(notFoundHandler);
 app.use(handleGlobalError);

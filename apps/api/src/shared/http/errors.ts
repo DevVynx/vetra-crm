@@ -62,3 +62,9 @@ export class BadGatewayError extends HttpError {
     super(502, message);
   }
 }
+
+export class ServiceUnavailableError extends HttpError {
+  constructor(message: string) {
+    super(503, message);
+  }
+}

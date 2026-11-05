@@ -288,6 +288,9 @@ importers:
       '@vetra/database':
         specifier: workspace:*
         version: link:../database
+      '@vetra/infra':
+        specifier: workspace:*
+        version: link:../infra
       uuid:
         specifier: 14.0.3
         version: 14.0.3
@@ -337,13 +340,26 @@ importers:
         version: 14.0.3
 
   packages/infra:
+    dependencies:
+      '@vetra/env':
+        specifier: workspace:*
+        version: link:../config/env
+      zod:
+        specifier: ^4.6.1
+        version: 4.6.7
     devDependencies:
       '@types/node':
         specifier: 22.20.2
         version: 22.20.2
+      '@vetra/eslint-config':
+        specifier: workspace:*
+        version: link:../config/eslint
       '@vetra/tsconfig':
         specifier: workspace:*
         version: link:../config/typescript
+      eslint:
+        specifier: 10.9.1
+        version: 10.9.1(jiti@2.7.0)
       typescript:
         specifier: 7.0.2
         version: 7.0.2

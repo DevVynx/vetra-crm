@@ -8,4 +8,5 @@ export * from "./features/profile";
 export * from "./features/projects";
 export * from "./features/search";
 export * from "./features/stages";
+export * from "./features/whatsapp";
 export * from "./shared/errors";

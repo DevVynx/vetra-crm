@@ -13,6 +13,7 @@
   "dependencies": {
     "@vetra/contracts": "workspace:*",
     "@vetra/database": "workspace:*",
+    "@vetra/infra": "workspace:*",
     "uuid": "14.0.3"
   },
   "devDependencies": {
