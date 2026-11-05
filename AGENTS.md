@@ -16,7 +16,7 @@ This is a TypeScript monorepo (pnpm workspace + Turbo) containing:
 - **apps/web**: Vite + React 19 SPA, TanStack Router (file-based routing) + TanStack Query, Tailwind CSS + shadcn/ui. UI text is Portuguese, hardcoded (no i18n).
 - **packages/core**: the domain layer — domain modules, services, repositories, and the `DomainError` hierarchy. Framework-agnostic, no HTTP/DB knowledge.
 - **packages/contracts**: shared Zod schemas for request/response validation, consumed by every app
-- **packages/infra**: technical capabilities with no business logic (currently empty — reserved for things like a WhatsApp or AI client)
+- **packages/infra**: technical capabilities with no business logic (today the WAHA client for WhatsApp; a future AI client would go here too)
 - **packages/database**: Drizzle schema, migrations, and the configured DB client
 - **packages/routes**: shared, typed route path constants consumed by every app
 - **packages/config**: shared env validation (`client-vite`, `server`), plus ESLint, Prettier, and TypeScript base configs

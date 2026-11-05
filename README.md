@@ -26,6 +26,13 @@ instalação que já existia, adicione `WAHA_URL` e `WAHA_API_KEY` ao `.env`: se
 API não sobem, mas os comandos do banco continuam funcionando sem elas. Se trocar a chave depois,
 recrie o serviço com `docker compose up -d waha`.
 
+## Conectando o WhatsApp
+
+Com o app aberto, vá em **WhatsApp** e leia o QR Code com o celular. A conexão não é oficial,
+então existe algum risco de bloqueio do número, e a própria tela avisa. O WAHA usa cerca de
+400 a 750 MB de memória. As conversas importadas ficam no seu PostgreSQL, e desconectar não as
+apaga. Contas WhatsApp Business ainda não foram testadas.
+
 ## Estrutura
 
 - `apps/api` — API REST (Express 5)
