@@ -9,7 +9,7 @@ import {
   emptyContactValues,
   toCustomerRequest,
 } from "@/shared/utils/contactForm";
-import { maskPhone } from "@/shared/utils/masks";
+import { storedPhoneToInput } from "@/shared/utils/masks";
 
 import { useUpdateCustomer } from "../mutations/useUpdateCustomer";
 
@@ -25,7 +25,7 @@ export function EditCustomerSheet({ customer, open, onOpenChange }: EditCustomer
       ...emptyContactValues,
       businessName: customer.businessName,
       contactName: customer.contactName ?? "",
-      phone: maskPhone(customer.phone),
+      phone: storedPhoneToInput(customer.phone),
       document: customer.document ?? "",
       email: customer.email ?? "",
       niche: customer.niche,

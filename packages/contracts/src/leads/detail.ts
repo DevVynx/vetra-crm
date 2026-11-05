@@ -3,7 +3,7 @@ import { z } from "zod";
 import { demoUrlSchema, leadSummarySchema } from "./common";
 
 export const leadDetailSchema = leadSummarySchema.extend({
-  phone: z.string().regex(/^\d{10,15}$/),
+  phone: z.string().regex(/^\d{8,15}$/),
   email: z.email().nullable(),
   demoUrl: demoUrlSchema.nullable(),
   stageChangedAt: z.iso.datetime(),

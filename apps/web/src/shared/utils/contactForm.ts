@@ -26,8 +26,14 @@ const digitsOf = (value: string) => value.replace(/\D/g, "");
 
 export const normalizePhone = (value: string) => {
   const digits = digitsOf(value);
-  return digits.length <= 11 ? `55${digits}` : digits;
+  const hasCountryCode = value.trimStart().startsWith("+") || digits.length > 11;
+
+  return hasCountryCode ? digits : `55${digits}`;
 };
+
+export const isValidPhone = (value: string) => /^\d{8,15}$/.test(normalizePhone(value));
+
+export const INVALID_PHONE_MESSAGE = "Informe o número com DDD ou com + e o código do país.";
 
 // Addresses are often pasted without the protocol, as in "site.vercel.app".
 export const normalizeDemoUrl = (value: string) => {

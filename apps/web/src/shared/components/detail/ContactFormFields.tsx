@@ -7,8 +7,9 @@ import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import {
   type ContactFormValues,
+  INVALID_PHONE_MESSAGE,
+  isValidPhone,
   normalizeDemoUrl,
-  normalizePhone,
 } from "@/shared/utils/contactForm";
 import { maskDocument, masked, maskNoSpaces, maskPhone } from "@/shared/utils/masks";
 
@@ -57,8 +58,7 @@ export function ContactFormFields({
           aria-invalid={Boolean(errors.phone)}
           {...masked(
             register("phone", {
-              validate: (value) =>
-                /^\d{10,15}$/.test(normalizePhone(value)) || "Informe o número com DDD.",
+              validate: (value) => isValidPhone(value) || INVALID_PHONE_MESSAGE,
             }),
             maskPhone
           )}

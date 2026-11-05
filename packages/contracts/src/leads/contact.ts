@@ -7,7 +7,7 @@ export const leadContactFieldsSchema = z.object({
   contactName: z.string().trim().max(120).nullable(),
   niche: z.string().trim().min(1).max(60),
   city: z.string().trim().min(1).max(60),
-  phone: z.string().regex(/^\d{10,15}$/),
+  phone: z.string().regex(/^\d{8,15}$/),
   email: z.email().nullable(),
 });
 

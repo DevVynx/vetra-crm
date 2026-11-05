@@ -1,3 +1,5 @@
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+
 import { maskCurrency } from "./masks";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -44,9 +46,19 @@ export function formatCompactCurrency(valueInCents: number): string {
   return compactCurrencyFormatter.format(valueInCents / 100);
 }
 
+// In Brazil, WhatsApp ids carry the ninth digit only in some regions, but every mobile number has
+// it, so it is always shown. Landlines start with 2 to 5 and never have it.
+function formatBrazilianPhone(area: string, number: string): string {
+  const full = /^[6-9]/.test(number) && number.length === 8 ? `9${number}` : number;
+
+  return `+55 (${area}) ${full.slice(0, -4)}-${full.slice(-4)}`;
+}
+
 export function formatPhone(phone: string): string {
-  const match = /^55(\d{2})(\d{4,5})(\d{4})$/.exec(phone);
-  return match ? `+55 (${match[1]}) ${match[2]}-${match[3]}` : phone;
+  const brazilian = /^55(\d{2})(\d{8,9})$/.exec(phone);
+  if (brazilian?.[1] && brazilian[2]) return formatBrazilianPhone(brazilian[1], brazilian[2]);
+
+  return parsePhoneNumberFromString(`+${phone}`)?.formatInternational() ?? `+${phone}`;
 }
 
 export function parseCurrencyToCents(text: string): number | null {

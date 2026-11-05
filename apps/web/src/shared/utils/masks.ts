@@ -2,8 +2,14 @@ import type { UseFormRegisterReturn } from "react-hook-form";
 
 const digitsOf = (value: string) => value.replace(/\D/g, "");
 
+export const PHONE_MAX_DIGITS = 15;
+
+// Brazilian by default; a leading + opens it to any country.
 export function maskPhone(value: string): string {
   let digits = digitsOf(value);
+  const isForeign = value.trimStart().startsWith("+") && !digits.startsWith("55");
+  if (isForeign) return `+${digits.slice(0, PHONE_MAX_DIGITS)}`;
+
   if (digits.length > 11 && digits.startsWith("55")) digits = digits.slice(2);
   digits = digits.slice(0, 11);
 
@@ -14,6 +20,10 @@ export function maskPhone(value: string): string {
   if (rest.length <= split) return `(${area}) ${rest}`;
   return `(${area}) ${rest.slice(0, split)}-${rest.slice(split)}`;
 }
+
+// A stored number always has its country code, so anything but Brazil needs the + to stay foreign.
+export const storedPhoneToInput = (phone: string): string =>
+  maskPhone(phone.startsWith("55") ? phone : `+${phone}`);
 
 // CPF up to 11 digits, CNPJ beyond that.
 export function maskDocument(value: string): string {
