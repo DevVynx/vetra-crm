@@ -23,6 +23,7 @@ type ConfirmDialogProps = {
   destructive?: boolean;
   isPending?: boolean;
   confirmDisabled?: boolean;
+  ignoreEscape?: boolean;
   onConfirm: () => void;
   children?: ReactNode;
 };
@@ -36,11 +37,18 @@ export function ConfirmDialog({
   destructive = false,
   isPending = false,
   confirmDisabled = false,
+  ignoreEscape = false,
   onConfirm,
   children,
 }: ConfirmDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(nextOpen, details) => {
+        if (ignoreEscape && details.reason === "escape-key") return;
+        onOpenChange(nextOpen);
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           {destructive && (
