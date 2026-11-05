@@ -18,6 +18,19 @@ export function whatsappErrorMessage(error: unknown, fallback: string): string {
   return getErrorMessage(error, fallback);
 }
 
+const FILE_MESSAGES_BY_STATUS: Record<number, string> = {
+  409: "O WhatsApp está desconectado. Conecte de novo para enviar arquivos.",
+  422: "O arquivo passa do limite de 25 MB.",
+  429: "O WhatsApp limitou novas conversas neste número. Aguarde um tempo antes de tentar de novo.",
+  503: "O serviço do WhatsApp está indisponível. Verifique se o Docker está rodando.",
+};
+
+export function whatsappSendFileErrorMessage(error: unknown): string {
+  const status = isAxiosError(error) ? error.response?.status : undefined;
+
+  return (status && FILE_MESSAGES_BY_STATUS[status]) || "Não foi possível enviar o arquivo.";
+}
+
 const ACTION_MESSAGES_BY_STATUS: Record<number, string> = {
   409: "O WhatsApp está desconectado. Conecte de novo para fazer isso.",
   422: "O WhatsApp não permitiu essa ação. Editar e apagar só funcionam por um tempo depois do envio.",

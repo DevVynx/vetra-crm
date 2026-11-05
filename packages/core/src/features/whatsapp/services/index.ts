@@ -21,6 +21,7 @@ import { markWhatsappMessagePlayed } from "./markWhatsappMessagePlayed";
 import { openLeadConversation } from "./openLeadConversation";
 import { openWhatsappConversation } from "./openWhatsappConversation";
 import { resolveWhatsappAccountChange } from "./resolveWhatsappAccountChange";
+import { sendWhatsappMedia } from "./sendWhatsappMedia";
 import { sendWhatsappMessage } from "./sendWhatsappMessage";
 import { startWhatsappSync } from "./startWhatsappSync";
 
@@ -46,6 +47,7 @@ export const whatsappServices = {
   openWhatsappConversation,
   removeWhatsappChangeListener,
   resolveWhatsappAccountChange,
+  sendWhatsappMedia,
   sendWhatsappMessage,
   startWhatsappSync,
 };

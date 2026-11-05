@@ -6,6 +6,7 @@ import {
   listWhatsappMessagesQuerySchema,
   openWhatsappConversationRequestSchema,
   resolveWhatsappAccountChangeRequestSchema,
+  sendWhatsappMediaQuerySchema,
   sendWhatsappMessageRequestSchema,
   whatsappConversationParamsSchema,
   whatsappMessageParamsSchema,
@@ -29,6 +30,10 @@ const v = {
   markRead: validation({ params: whatsappConversationParamsSchema }),
   getMessageMedia: validation({ params: whatsappMessageParamsSchema }),
   markMessagePlayed: validation({ params: whatsappMessageParamsSchema }),
+  sendMedia: validation({
+    params: whatsappConversationParamsSchema,
+    query: sendWhatsappMediaQuerySchema,
+  }),
   editMessage: validation({
     params: whatsappMessageParamsSchema,
     body: editWhatsappMessageRequestSchema,

@@ -7,7 +7,14 @@ import {
   getPhoneIdOfLid,
   getProfilePictureUrl,
 } from "./messages";
-import { deleteMessage, editText, findChatIdOfPhone, markChatAsRead, sendText } from "./send";
+import {
+  deleteMessage,
+  editText,
+  findChatIdOfPhone,
+  markChatAsRead,
+  sendMedia,
+  sendText,
+} from "./send";
 import {
   createSession,
   getQrCode,
@@ -20,7 +27,7 @@ import {
 export type { WahaEvent } from "./events";
 export type { WahaMediaFile } from "./media";
 export type { WahaChatOverview, WahaContact, WahaMessage } from "./messages";
-export type { WahaSentMessage } from "./send";
+export type { WahaMediaKind, WahaSentMessage } from "./send";
 export type { WahaQrCode, WahaSession } from "./session";
 export * from "./WahaMediaTooLargeError";
 export * from "./WahaMediaUnavailableError";
@@ -43,6 +50,7 @@ export const wahaClient = {
   getSession,
   logoutSession,
   markChatAsRead,
+  sendMedia,
   sendText,
   startSession,
   stopSession,

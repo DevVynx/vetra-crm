@@ -10,6 +10,9 @@ import {
 export const WHATSAPP_CONVERSATIONS_PAGE_SIZE = 30;
 export const WHATSAPP_MESSAGES_PAGE_SIZE = 50;
 export const WHATSAPP_MESSAGE_MAX_LENGTH = 4096;
+export const WHATSAPP_MEDIA_MAX_BYTES = 25 * 1024 * 1024;
+export const WHATSAPP_CAPTION_MAX_LENGTH = 1024;
+export const WHATSAPP_MAX_FILES_AT_ONCE = 10;
 
 export const whatsappConversationSchema = z.object({
   id: z.string(),
@@ -110,3 +113,17 @@ export const deleteWhatsappMessagesRequestSchema = z.object({
   ids: z.array(z.string()).min(1).max(WHATSAPP_DELETE_MAX_MESSAGES),
 });
 export type DeleteWhatsappMessagesRequest = z.infer<typeof deleteWhatsappMessagesRequestSchema>;
+
+// The file is the body of the request, as bytes; what describes it goes in the address. Its type
+// is here and not in the Content-Type, so a JSON file is never read by the API's JSON parser.
+export const sendWhatsappMediaQuerySchema = z.object({
+  filename: z.string().trim().min(1).max(150),
+  mimetype: z
+    .string()
+    .trim()
+    .max(100)
+    .regex(/^[\w.+-]+\/[\w.+-]+$/)
+    .default("application/octet-stream"),
+  caption: z.string().trim().max(WHATSAPP_CAPTION_MAX_LENGTH).optional(),
+});
+export type SendWhatsappMediaQuery = z.input<typeof sendWhatsappMediaQuerySchema>;

@@ -1,6 +1,8 @@
 import { whatsappRoutes } from "@vetra/routes";
 import { Router } from "express";
 
+import { rawFileBody } from "@/shared/middlewares/rawFileBody";
+
 import {
   connectWhatsappController,
   countWhatsappConversationsController,
@@ -21,6 +23,7 @@ import {
   openLeadConversationController,
   openWhatsappConversationController,
   resolveWhatsappAccountChangeController,
+  sendWhatsappMediaController,
   sendWhatsappMessageController,
   streamWhatsappEventsController,
 } from "./controllers";
@@ -105,4 +108,10 @@ whatsappRouter.post(
   whatsappRoutes.conversationMessagePlayed,
   v.markMessagePlayed,
   markWhatsappMessagePlayedController
+);
+whatsappRouter.post(
+  whatsappRoutes.conversationMessagesMedia,
+  rawFileBody,
+  v.sendMedia,
+  sendWhatsappMediaController
 );

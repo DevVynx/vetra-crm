@@ -175,6 +175,22 @@ function mediaServingOf(mimetype: string | null): { contentType: string; isInlin
     : { contentType: "application/octet-stream", isInline: false };
 }
 
+// What WhatsApp shows as a photo or a video; anything else goes as a document with its own name.
+// A GIF and a QuickTime video are documents too, since WhatsApp only plays them as MP4.
+type SendKind = "image" | "video" | "file";
+
+function sendKindOf(mimetype: string): SendKind {
+  if (["image/jpeg", "image/png", "image/webp"].includes(mimetype)) return "image";
+  if (mimetype === "video/mp4") return "video";
+  return "file";
+}
+
+const MESSAGE_TYPE_BY_SEND_KIND: Record<SendKind, WhatsappMessageType> = {
+  image: "image",
+  video: "video",
+  file: "document",
+};
+
 const MAX_FILENAME_LENGTH = 150;
 
 // Goes into a header: no control characters, no path, no quotes.
@@ -259,7 +275,9 @@ export const whatsappDomain = {
   phoneDigitsOfSearch,
   phoneOfChatId,
   replySnippetOf,
+  MESSAGE_TYPE_BY_SEND_KIND,
   safeFilenameOf,
+  sendKindOf,
   safePhotoUrl,
   savedNameOfContact,
   unreadChangeOf,

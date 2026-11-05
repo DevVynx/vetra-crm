@@ -9,6 +9,8 @@ import { QuotedMessage } from "@/shared/components/whatsapp/MessageBubble";
 
 import { useEditWhatsappMessage } from "../mutations/useEditWhatsappMessage";
 import { useSendWhatsappMessage } from "../mutations/useSendWhatsappMessage";
+import { AttachButton } from "./AttachButton";
+import { useThreadAttachments } from "./ThreadAttachments";
 
 type MessageComposerProps = {
   conversationId: string;
@@ -28,10 +30,12 @@ export function MessageComposer({
   const [text, setText] = useState("");
   const send = useSendWhatsappMessage(conversationId);
   const edit = useEditWhatsappMessage(conversationId);
-  const isPending = send.isPending || edit.isPending;
+  const attachments = useThreadAttachments();
+  const hasFiles = !editing && attachments.files.length > 0;
+  const isPending = send.isPending || edit.isPending || attachments.isSending;
   const hasText = text.trim().length > 0;
   const isChanged = !editing || text.trim() !== editing.content;
-  const canSend = isConnected && hasText && isChanged && !isPending;
+  const canSend = isConnected && !isPending && ((hasText && isChanged) || hasFiles);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Not on touch screens, where the keyboard would open by itself and cover the messages.
@@ -57,13 +61,17 @@ export function MessageComposer({
     onDone();
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (!canSend) return;
     textareaRef.current?.focus();
     const finish = () => {
       setText("");
       onDone();
     };
+
+    // Files go first; the text only follows when they all went.
+    if (hasFiles && !(await attachments.send())) return;
+    if (!hasText) return;
 
     // The text only clears once sent, so a failure never loses what was written.
     if (editing) edit.mutate({ messageId: editing.id, text: text.trim() }, { onSuccess: finish });
@@ -75,7 +83,7 @@ export function MessageComposer({
     if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
 
     event.preventDefault();
-    submit();
+    void submit();
   };
 
   const context = editing ? (
@@ -113,6 +121,7 @@ export function MessageComposer({
         </div>
       )}
       <div className="flex items-end gap-2 p-3">
+        <AttachButton />
         <Textarea
           ref={textareaRef}
           aria-label="Mensagem"
@@ -129,9 +138,9 @@ export function MessageComposer({
         />
         <Button
           size="icon"
-          aria-label={editing ? "Salvar edição" : "Enviar mensagem"}
+          aria-label={editing ? "Salvar edição" : hasFiles ? "Enviar arquivos" : "Enviar mensagem"}
           disabled={!canSend}
-          onClick={submit}
+          onClick={() => void submit()}
         >
           {isPending ? <Spinner /> : <SendHorizontalIcon />}
         </Button>

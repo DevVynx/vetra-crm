@@ -18,9 +18,11 @@ import { useIsPageActive } from "@/shared/hooks/useIsPageActive";
 import { useDeleteWhatsappMessages } from "../mutations/useDeleteWhatsappMessages";
 import { useMarkWhatsappConversationRead } from "../mutations/useMarkWhatsappConversationRead";
 import { useWhatsappConversation } from "../queries/useWhatsappConversation";
+import { AttachmentTray } from "./AttachmentTray";
 import { ConversationActions } from "./ConversationActions";
 import { MessageComposer } from "./MessageComposer";
 import { SelectionBar } from "./SelectionBar";
+import { ThreadAttachments } from "./ThreadAttachments";
 import { ThreadMessages } from "./ThreadMessages";
 
 type ConversationThreadProps = {
@@ -83,96 +85,99 @@ export function ConversationThread({ conversationId, isConnected }: Conversation
   const subtitle = conversation ? conversationSubtitle(conversation) : null;
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <header className="flex items-center gap-3 border-b p-3">
-        <Button
-          className="md:hidden"
-          size="icon-sm"
-          variant="ghost"
-          aria-label="Voltar para as conversas"
-          nativeButton={false}
-          render={<Link to="/whatsapp" />}
-        >
-          <ArrowLeftIcon />
-        </Button>
-        {isPending ? (
-          <>
-            <Skeleton className="size-10 rounded-full" />
-            <Skeleton className="h-4 w-40" />
-          </>
-        ) : (
-          <>
-            <BusinessAvatar
-              name={name}
-              photoUrl={conversation?.photoUrl ?? undefined}
-              className="size-10 shrink-0"
-            />
-            <div className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-sm font-medium">{name}</span>
-              {subtitle && (
-                <span className="text-muted-foreground truncate text-xs">{subtitle}</span>
-              )}
-            </div>
-            {conversation && <ConversationActions conversation={conversation} />}
-          </>
-        )}
-      </header>
+    <ThreadAttachments conversationId={conversationId} isConnected={isConnected}>
+      <div className="flex h-full min-h-0 flex-col">
+        <header className="flex items-center gap-3 border-b p-3">
+          <Button
+            className="md:hidden"
+            size="icon-sm"
+            variant="ghost"
+            aria-label="Voltar para as conversas"
+            nativeButton={false}
+            render={<Link to="/whatsapp" />}
+          >
+            <ArrowLeftIcon />
+          </Button>
+          {isPending ? (
+            <>
+              <Skeleton className="size-10 rounded-full" />
+              <Skeleton className="h-4 w-40" />
+            </>
+          ) : (
+            <>
+              <BusinessAvatar
+                name={name}
+                photoUrl={conversation?.photoUrl ?? undefined}
+                className="size-10 shrink-0"
+              />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-sm font-medium">{name}</span>
+                {subtitle && (
+                  <span className="text-muted-foreground truncate text-xs">{subtitle}</span>
+                )}
+              </div>
+              {conversation && <ConversationActions conversation={conversation} />}
+            </>
+          )}
+        </header>
 
-      <ThreadMessages
-        key={conversationId}
-        conversationId={conversationId}
-        isConnected={isConnected}
-        contact={conversation && { name, photoUrl: conversation.photoUrl }}
-        selection={selection}
-        onToggleSelection={toggleSelection}
-        actions={{
-          onReply: (message) => {
-            setEditing(null);
-            setReply(message);
-          },
-          onEdit: (message) => {
-            setReply(null);
-            setEditing(message);
-          },
-          onDelete: (message) => setToDelete([message.id]),
-          onSelect: (message) => setSelection(new Set([message.id])),
-        }}
-      />
-      {selection ? (
-        <SelectionBar
-          count={selection.size}
-          isConnected={isConnected}
-          onCancel={() => setSelection(null)}
-          onDelete={() => setToDelete([...selection])}
-        />
-      ) : (
-        <MessageComposer
-          key={`composer-${conversationId}`}
+        <ThreadMessages
+          key={conversationId}
           conversationId={conversationId}
           isConnected={isConnected}
-          reply={reply}
-          editing={editing}
-          onDone={() => {
-            setReply(null);
-            setEditing(null);
+          contact={conversation && { name, photoUrl: conversation.photoUrl }}
+          selection={selection}
+          onToggleSelection={toggleSelection}
+          actions={{
+            onReply: (message) => {
+              setEditing(null);
+              setReply(message);
+            },
+            onEdit: (message) => {
+              setReply(null);
+              setEditing(message);
+            },
+            onDelete: (message) => setToDelete([message.id]),
+            onSelect: (message) => setSelection(new Set([message.id])),
           }}
         />
-      )}
-      <ConfirmDialog
-        open={toDelete !== null}
-        onOpenChange={(open) => !open && setToDelete(null)}
-        title={
-          toDelete?.length === 1
-            ? "Apagar mensagem para todos?"
-            : `Apagar ${toDelete?.length} mensagens para todos?`
-        }
-        description="Ela some para você e para a pessoa no WhatsApp. Isso não pode ser desfeito."
-        confirmLabel="Apagar para todos"
-        destructive
-        isPending={deleteMessages.isPending}
-        ignoreEscape={deleteMessages.isPending}
-        onConfirm={confirmDelete}
-      />
-    </div>
+        {!selection && <AttachmentTray />}
+        {selection ? (
+          <SelectionBar
+            count={selection.size}
+            isConnected={isConnected}
+            onCancel={() => setSelection(null)}
+            onDelete={() => setToDelete([...selection])}
+          />
+        ) : (
+          <MessageComposer
+            key={`composer-${conversationId}`}
+            conversationId={conversationId}
+            isConnected={isConnected}
+            reply={reply}
+            editing={editing}
+            onDone={() => {
+              setReply(null);
+              setEditing(null);
+            }}
+          />
+        )}
+        <ConfirmDialog
+          open={toDelete !== null}
+          onOpenChange={(open) => !open && setToDelete(null)}
+          title={
+            toDelete?.length === 1
+              ? "Apagar mensagem para todos?"
+              : `Apagar ${toDelete?.length} mensagens para todos?`
+          }
+          description="Ela some para você e para a pessoa no WhatsApp. Isso não pode ser desfeito."
+          confirmLabel="Apagar para todos"
+          destructive
+          isPending={deleteMessages.isPending}
+          ignoreEscape={deleteMessages.isPending}
+          onConfirm={confirmDelete}
+        />
+      </div>
+    </ThreadAttachments>
   );
 }

@@ -10,6 +10,7 @@ import {
 import { WahaSendRestrictedError } from "./WahaSendRestrictedError";
 
 const SEND_TIMEOUT_MS = 30_000;
+const SEND_MEDIA_TIMEOUT_MS = 90_000;
 // WhatsApp's limits on new contacts: reachout timelock and message capping.
 const RESTRICTION_CODES = /\b(?:463|475)\b/;
 
@@ -69,3 +70,50 @@ export async function deleteMessage(chatId: string, messageId: string): Promise<
 
 export const markChatAsRead = (chatId: string) =>
   wahaCommand(`/api/${WAHA_SESSION}/chats/${encodeURIComponent(chatId)}/messages/read`, {});
+
+export type WahaMediaKind = "image" | "video" | "file";
+
+const SEND_MEDIA_PATHS: Record<WahaMediaKind, string> = {
+  image: "/api/sendImage",
+  video: "/api/sendVideo",
+  file: "/api/sendFile",
+};
+
+type SendMediaInput = {
+  chatId: string;
+  kind: WahaMediaKind;
+  file: { content: Buffer; mimetype: string; filename: string };
+  caption: string | undefined;
+};
+
+// Only an image and a video take a caption.
+export async function sendMedia({
+  chatId,
+  kind,
+  file,
+  caption,
+}: SendMediaInput): Promise<WahaSentMessage | null> {
+  const response = await wahaFetch(
+    SEND_MEDIA_PATHS[kind],
+    "POST",
+    {
+      session: WAHA_SESSION,
+      chatId,
+      file: {
+        mimetype: file.mimetype,
+        filename: file.filename,
+        data: file.content.toString("base64"),
+      },
+      ...(caption && kind !== "file" ? { caption } : {}),
+    },
+    SEND_MEDIA_TIMEOUT_MS
+  );
+
+  if (!response.ok && RESTRICTION_CODES.test(await response.clone().text())) {
+    throw new WahaSendRestrictedError();
+  }
+
+  const { id, timestamp } = await parseWahaResponse(response, sentMessageSchema);
+
+  return id ? { id, sentAtSeconds: timestamp ?? null } : null;
+}

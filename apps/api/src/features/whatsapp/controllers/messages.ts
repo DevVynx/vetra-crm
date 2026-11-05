@@ -5,6 +5,7 @@ import {
 import { whatsappServices } from "@vetra/core";
 import type { Response } from "express";
 
+import { BadRequestError } from "@/shared/http/errors";
 import type { ValidatedRequest } from "@/shared/http/validation";
 
 import { toWhatsappMessage } from "../helpers/whatsappResponses";
@@ -85,5 +86,24 @@ export async function markWhatsappMessagePlayedController(
   res: Response
 ) {
   await whatsappServices.markWhatsappMessagePlayed(req.params.id, req.params.messageId);
+  res.status(204).send();
+}
+
+export async function sendWhatsappMediaController(
+  req: ValidatedRequest<typeof v.sendMedia>,
+  res: Response
+) {
+  const content: unknown = req.body;
+  if (!Buffer.isBuffer(content) || content.length === 0) {
+    throw new BadRequestError("The request has no file.");
+  }
+
+  await whatsappServices.sendWhatsappMedia({
+    conversationId: req.params.id,
+    content,
+    mimetype: req.query.mimetype,
+    filename: req.query.filename,
+    caption: req.query.caption,
+  });
   res.status(204).send();
 }

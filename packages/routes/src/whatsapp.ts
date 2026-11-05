@@ -12,6 +12,7 @@ export const whatsappRoutes = {
   conversationMessages: "/whatsapp/conversations/:id/messages",
   conversationRead: "/whatsapp/conversations/:id/read",
   conversationMessageDelete: "/whatsapp/conversations/:id/messages/delete",
+  conversationMessagesMedia: "/whatsapp/conversations/:id/messages/media",
   conversationMessageById: "/whatsapp/conversations/:id/messages/:messageId",
   conversationMessageMedia: "/whatsapp/conversations/:id/messages/:messageId/media",
   conversationMessagePlayed: "/whatsapp/conversations/:id/messages/:messageId/played",
