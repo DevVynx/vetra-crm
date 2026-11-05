@@ -56,3 +56,26 @@ export async function deleteWhatsappMessagesController(
   await whatsappServices.deleteWhatsappMessages(req.params.id, req.body.ids);
   res.status(204).send();
 }
+
+export async function getWhatsappMessageMediaController(
+  req: ValidatedRequest<typeof v.getMessageMedia>,
+  res: Response
+) {
+  const { content, contentType, isInline, filename } =
+    await whatsappServices.getWhatsappMessageMedia(req.params.id, req.params.messageId);
+
+  const disposition = `${isInline ? "inline" : "attachment"}; filename="${encodeURIComponent(filename)}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
+
+  res
+    .status(200)
+    .set({
+      "Content-Type": contentType,
+      "Content-Length": String(content.length),
+      "Content-Disposition": disposition,
+      // A file sent by a stranger must never run in the page, whatever it claims to be.
+      "X-Content-Type-Options": "nosniff",
+      "Content-Security-Policy": "default-src 'none'; sandbox",
+      "Cache-Control": "no-store",
+    })
+    .send(content);
+}

@@ -27,6 +27,7 @@ const v = {
     body: sendWhatsappMessageRequestSchema,
   }),
   markRead: validation({ params: whatsappConversationParamsSchema }),
+  getMessageMedia: validation({ params: whatsappMessageParamsSchema }),
   editMessage: validation({
     params: whatsappMessageParamsSchema,
     body: editWhatsappMessageRequestSchema,

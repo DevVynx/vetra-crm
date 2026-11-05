@@ -10,6 +10,7 @@ import { disconnectWhatsapp } from "./disconnectWhatsapp";
 import { editWhatsappMessage } from "./editWhatsappMessage";
 import { getLeadConversation } from "./getLeadConversation";
 import { getWhatsappConversation } from "./getWhatsappConversation";
+import { getWhatsappMessageMedia } from "./getWhatsappMessageMedia";
 import { getWhatsappQrCode } from "./getWhatsappQrCode";
 import { getWhatsappStatus } from "./getWhatsappStatus";
 import { listAwaitingWhatsappConversations } from "./listAwaitingWhatsappConversations";
@@ -32,6 +33,7 @@ export const whatsappServices = {
   editWhatsappMessage,
   getLeadConversation,
   getWhatsappConversation,
+  getWhatsappMessageMedia,
   getWhatsappQrCode,
   getWhatsappStatus,
   listAwaitingWhatsappConversations,

@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/shared/utils/cn";
 import { formatDayLabel, formatTime } from "@/shared/utils/date";
 
+import { MessageMedia, OPENABLE_MEDIA_TYPES } from "./MessageMedia";
 import { MessageStatusIcon } from "./MessageStatusIcon";
 import { nonTextMessageLabels } from "./messageTypeLabels";
 
@@ -12,6 +13,8 @@ type MessageBubbleProps = {
   message: WhatsappMessage;
   compact?: boolean;
   actions?: ReactNode;
+  // Where the file is asked for: only the thread opens media, the lead's card just names it.
+  conversationId?: string;
 };
 
 function MessageMeta({ message, compact }: { message: WhatsappMessage; compact: boolean }) {
@@ -50,9 +53,18 @@ export function QuotedMessage({ replyTo }: { replyTo: NonNullable<WhatsappMessag
   );
 }
 
-export function MessageBubble({ message, compact = false, actions }: MessageBubbleProps) {
+export function MessageBubble({
+  message,
+  compact = false,
+  actions,
+  conversationId,
+}: MessageBubbleProps) {
   const isOutbound = message.direction === "outbound";
   const nonText = message.type === "text" ? null : nonTextMessageLabels[message.type];
+  const isOpenable =
+    Boolean(conversationId) &&
+    !compact &&
+    (OPENABLE_MEDIA_TYPES as readonly string[]).includes(message.type);
   const meta = <MessageMeta message={message} compact={compact} />;
   // An invisible copy reserves the room at the end of the last line, so the text flows around the
   // time like on WhatsApp: beside it when it fits, and on a line of its own when it doesn't.
@@ -86,7 +98,13 @@ export function MessageBubble({ message, compact = false, actions }: MessageBubb
           </p>
         ) : (
           <>
-            {nonText && (
+            {isOpenable && conversationId && (
+              <>
+                <MessageMedia conversationId={conversationId} message={message} />
+                {!message.content && <span aria-hidden className="block h-3" />}
+              </>
+            )}
+            {nonText && !isOpenable && (
               <span className="text-muted-foreground flex items-center gap-1.5">
                 <nonText.icon className="size-3.5" />
                 {nonText.label}

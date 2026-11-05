@@ -1,5 +1,7 @@
 export * from "./WhatsappActionRejectedError";
 export * from "./WhatsappConversationNotFoundError";
+export * from "./WhatsappMediaTooLargeError";
+export * from "./WhatsappMediaUnavailableError";
 export * from "./WhatsappMessageActionNotAllowedError";
 export * from "./WhatsappMessageNotFoundError";
 export * from "./WhatsappNoAccountChangeError";

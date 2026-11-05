@@ -23,6 +23,8 @@ export const whatsappMessageSchema = z.object({
   // Only for what was sent; it stays at delivered when the person turned read receipts off.
   status: whatsappMessageStatusSchema.nullable(),
   content: z.string().nullable(),
+  // Only for documents it says something useful; the file itself is asked for when opened.
+  mediaFilename: z.string().nullable(),
   replyTo: z
     .object({
       content: z.string().nullable(),

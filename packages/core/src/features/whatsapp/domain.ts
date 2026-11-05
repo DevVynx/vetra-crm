@@ -33,6 +33,7 @@ export type WhatsappMessage = {
   type: WhatsappMessageType;
   status: WhatsappMessageStatus | null;
   content: string | null;
+  mediaFilename: string | null;
   wahaId: string | null;
   replyToExternalId: string | null;
   replyToContent: string | null;
@@ -43,7 +44,7 @@ export type WhatsappMessage = {
 
 type MessageExtras = Pick<
   WhatsappMessage,
-  "wahaId" | "replyToExternalId" | "replyToContent" | "editedAt" | "deletedAt"
+  "wahaId" | "mediaFilename" | "replyToExternalId" | "replyToContent" | "editedAt" | "deletedAt"
 >;
 
 const HISTORY_DAYS = 365;
@@ -120,6 +121,7 @@ function createMessage(
   return {
     id: uuidv7(),
     wahaId: null,
+    mediaFilename: null,
     replyToExternalId: null,
     replyToContent: null,
     editedAt: null,
@@ -127,6 +129,40 @@ function createMessage(
     ...input,
   };
 }
+
+// Only these types may be shown by the browser. Anything else, html and svg included, is a
+// download with a generic type, so a file sent by a stranger can never run in the page.
+const INLINE_MEDIA_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "video/mp4",
+  "video/webm",
+  "audio/ogg",
+  "audio/mpeg",
+  "audio/mp4",
+  "audio/aac",
+  "audio/webm",
+]);
+
+function mediaServingOf(mimetype: string | null): { contentType: string; isInline: boolean } {
+  const type = (mimetype ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
+
+  return INLINE_MEDIA_TYPES.has(type)
+    ? { contentType: type, isInline: true }
+    : { contentType: "application/octet-stream", isInline: false };
+}
+
+const MAX_FILENAME_LENGTH = 150;
+
+// Goes into a header: no control characters, no path, no quotes.
+const safeFilenameOf = (filename: string | null): string =>
+  (filename ?? "")
+
+    .replace(/[\u0000-\u001f\u007f"\\/]/g, "")
+    .trim()
+    .slice(0, MAX_FILENAME_LENGTH) || "arquivo";
 
 const replySnippetOf = (content: string | null): string | null =>
   content ? content.slice(0, REPLY_SNIPPET_LENGTH) : null;
@@ -189,10 +225,12 @@ export const whatsappDomain = {
   isIndividualChat,
   isLidChat,
   messageStatusOf,
+  mediaServingOf,
   messageTypeOf,
   phoneDigitsOfSearch,
   phoneOfChatId,
   replySnippetOf,
+  safeFilenameOf,
   safePhotoUrl,
   savedNameOfContact,
   unreadChangeOf,

@@ -10,6 +10,7 @@ import {
   editWhatsappMessageController,
   getLeadConversationController,
   getWhatsappConversationController,
+  getWhatsappMessageMediaController,
   getWhatsappQrCodeController,
   getWhatsappStatusController,
   listAwaitingWhatsappConversationsController,
@@ -93,4 +94,9 @@ whatsappRouter.patch(
   whatsappRoutes.conversationMessageById,
   v.editMessage,
   editWhatsappMessageController
+);
+whatsappRouter.get(
+  whatsappRoutes.conversationMessageMedia,
+  v.getMessageMedia,
+  getWhatsappMessageMediaController
 );

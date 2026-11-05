@@ -15,6 +15,7 @@ export function toWhatsappMessage(message: WahaMessage): WhatsappMessage | null 
     type: message.hasMedia ? whatsappDomain.messageTypeOf(message.media?.mimetype) : "text",
     status: message.fromMe ? whatsappDomain.messageStatusOf(message.ackName) : null,
     content,
+    mediaFilename: message.hasMedia ? (message.media?.filename ?? null) : null,
     wahaId: message.id,
     replyToExternalId: message.replyTo?.id ? whatsappDomain.externalIdOf(message.replyTo.id) : null,
     replyToContent: whatsappDomain.replySnippetOf(message.replyTo?.body ?? null),

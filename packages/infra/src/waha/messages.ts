@@ -14,7 +14,14 @@ export const wahaMessageSchema = z.object({
   to: z.string().nullish(),
   body: z.string().nullish(),
   hasMedia: z.boolean().nullish(),
-  media: z.object({ mimetype: z.string().nullish() }).nullish(),
+  media: z
+    .object({
+      url: z.string().nullish(),
+      mimetype: z.string().nullish(),
+      filename: z.string().nullish(),
+      error: z.unknown().nullish(),
+    })
+    .nullish(),
   replyTo: z.object({ id: z.string().nullish(), body: z.string().nullish() }).nullish(),
   _data: z
     .object({

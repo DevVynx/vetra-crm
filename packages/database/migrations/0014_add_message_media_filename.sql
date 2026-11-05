@@ -1,0 +1,1 @@
+ALTER TABLE "whatsapp_messages" ADD COLUMN "media_filename" text;

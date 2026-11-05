@@ -143,6 +143,7 @@ const messageColumns = {
   type: whatsappMessagesTable.type,
   status: whatsappMessagesTable.status,
   content: whatsappMessagesTable.content,
+  mediaFilename: whatsappMessagesTable.mediaFilename,
   wahaId: whatsappMessagesTable.wahaId,
   replyToExternalId: whatsappMessagesTable.replyToExternalId,
   replyToContent: whatsappMessagesTable.replyToContent,

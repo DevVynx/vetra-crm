@@ -98,6 +98,7 @@ export function ThreadMessages({
             <div className="min-w-0 flex-1">
               <MessageBubble
                 message={message}
+                conversationId={conversationId}
                 actions={
                   selection ? undefined : (
                     <MessageMenu message={message} isConnected={isConnected} {...actions} />

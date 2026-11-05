@@ -68,6 +68,8 @@ export const whatsappMessagesTable = pgTable(
     type: whatsappMessageTypeEnum().notNull(),
     status: whatsappMessageStatusEnum(),
     content: text(),
+    // The file itself is never stored; only its name, which WAHA gives with the message.
+    mediaFilename: text(),
     // WAHA's edit, delete and reply calls need its full id, and external_id keeps only the last part.
     wahaId: text(),
     replyToExternalId: text(),
