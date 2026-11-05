@@ -36,7 +36,7 @@ Out of scope:
 - Selecting which contacts appear.
 - Pairing code login. The connection is QR Code only.
 - Several accounts at the same time.
-- Edited and deleted messages, reactions, read ticks of sent messages, and calls.
+- Showing edits and deletions made from the phone, reactions, and calls.
 - Searching conversations in the Ctrl+K palette.
 
 ---
@@ -49,7 +49,7 @@ Stop after each step for the user to validate it.
 2. **Connection.** Compose service, env, WAHA client, status, QR Code, disconnect, indicator, Configurações row and warning.
 3. **Storage and sync.** Tables, 12-month import, live updates, catch-up, account change and photos.
 4. **WhatsApp tab.** List, thread, sending, new conversation and mark as read.
-5. **CRM integration.** Linking, "Criar lead", stage control, "Último contato", lead card, Painel, buttons and avatars.
+5. **CRM integration and message actions.** Linking, "Tornar lead", stage control, "Último contato", lead card, Painel, buttons, avatars, the thread header actions and the message menu (see "Message actions").
 6. **Documentation.** Decisions log and guides (see Technical Notes).
 
 ### Results of step 1
@@ -59,7 +59,7 @@ Validated on WAHA 2026.10.1 with GOWS, on the free image, with the user's regula
 - **Connection:** QR Code reaches `WORKING`, and a container restart returns to `WORKING` with no new scan. `PASSKEY_REQUIRED` didn't appear. Logging out returns the session to `SCAN_QR_CODE`, so disconnecting also has to stop it.
 - **Events:** the API-side WebSocket (`/ws`) works and reconnects after a restart. `message.any` covers messages sent from the phone and received ones.
 - **History:** `FULL_SYNC_DAYS_LIMIT=365` isn't a strict cut, because older messages still arrived. The import must filter by date, and `filter.timestamp.gte` works.
-- **Incomplete history:** the sync brought fewer individual conversations than the account has. The user chose not to re-pair with `WAHA_GOWS_DEVICE_REQUIRE_FULL_SYNC=true` for now and to judge by the real screen. If conversations are missing, that is the first thing to try.
+- **History coverage:** the user compared the imported list with the phone on the real screen and no conversation seemed to be missing, so `WAHA_GOWS_DEVICE_REQUIRE_FULL_SYNC=true` wasn't needed.
 - **Pagination:** a single chat can have thousands of messages, so the import must page with no per-chat cap.
 - **Identity:** live events use `@lid` in `from` and in `Info.Chat`, with the phone in `Info.SenderAlt` or `Info.RecipientAlt`, while `/chats` lists the same person as `@c.us`. Messages must never be attributed through `from` alone, and `@lid` and `@c.us` must resolve to one conversation. No chat appeared as `@lid` in `/chats`.
 - **Ninth digit:** most Brazilian ids come without it, so the canonical phone is required.
@@ -122,14 +122,15 @@ Shown as plain informative text, in muted style, never in red, and never blockin
 - The API listens to `message.any` and `session.status` over WebSocket and reconnects with backoff.
 - WebSocket events aren't replayed, so on API start and on every reconnection the API catches up by reading messages newer than the last stored one.
 - The API tells the web that something changed through SSE (`GET /whatsapp/events`). The event carries only a signal, never text, names or numbers, and the web then refetches with its normal queries.
-- The browser reconnects SSE by itself, and the list and open thread also refetch every 30 seconds as a safety net. The status badge keeps polling every 5 seconds.
+- The browser only retries SSE after a dropped connection and gives up for good after an error response, so the web reconnects by itself in that case, and refetches whenever the connection returns. The list and open thread also refetch every 30 seconds as a safety net. The status badge keeps polling every 5 seconds.
 
 ### Conversation and lead
 
 - A conversation links to a lead or customer only when the phone number matches. There is no other inference: no number match means no link.
 - **A WhatsApp contact is not assumed to be a lead.** The account may hold family, friends and other personal contacts. They stay as plain conversations, and no lead is ever created automatically.
 - **A phone number is unique across leads and customers**, so a conversation links to at most one person. A customer is a lead with a deal, so the link is the same.
-- Matching uses a canonical phone: digits only, assuming country code 55 for 10 or 11 digits, and treating Brazilian mobile numbers with and without the ninth digit as equal. The rule lives in `domain.ts`.
+- Matching uses a canonical phone: the full international number in digits, treating Brazilian mobile numbers with and without the ninth digit as equal. Nothing is assumed about the country at this level, since WhatsApp ids already carry it. The rule lives in `domain.ts`.
+- Numbers from any country are supported. Forms assume Brazil unless the number starts with +, and the screen always shows the ninth digit on Brazilian mobile numbers, since WhatsApp ids only carry it in some regions.
 - The link is recalculated when a conversation is created, and when a lead is created, has its phone edited or is restored by "Desfazer".
 - Deleting a lead keeps the conversation, which becomes an unknown number.
 - An `@lid` contact with no resolvable phone appears by name, can receive messages, and doesn't link automatically.
@@ -142,16 +143,64 @@ Shown as plain informative text, in muted style, never in red, and never blockin
 - A sent message can't be recalled, so it has no "Desfazer" toast.
 - WhatsApp restrictions (`463` and `475`, limits on new contacts) become a clear message in Portuguese saying to wait. They never restart or log out the session, as WAHA's guide warns.
 
+### Message actions
+
+Delivered in step 5, working like WhatsApp Web.
+
+**Thread header**
+
+- Shortcut buttons at the top of the thread, and a three dots button at the far right that opens a dropdown with only the essentials, including **closing the conversation**, which returns to the empty state.
+
+**Menu on each message**
+
+- Hovering a message shows a down arrow. Clicking it opens a dropdown with: **Responder**, **Copiar**, **Encaminhar** and **Apagar**.
+- **Encaminhar** is optional: it only goes in if it turns out easy to build.
+- **Selecting messages:** select one or more messages to delete them.
+
+**Replies**
+
+- A message that answers another one shows the quoted message above its text, in received and sent messages alike.
+- **Responder** shows the quoted message above the text box, with a way to cancel, and sends through `reply_to`.
+
+What WAHA's docs say, not yet verified with a real account:
+
+- **Reply:** `POST /api/sendText` accepts `reply_to` with the message id. Received messages bring `replyTo` with `id`, `participant`, `body`, `hasMedia` and `media`; `id` and `participant` may be absent depending on the engine, and no GOWS note exists, so the quote must work from `body` alone.
+- **Delete:** `DELETE /api/{session}/chats/{chatId}/messages/{messageId}`, listed for GOWS. The docs don't say whether it deletes for everyone or only for you, or any time limit. This needs a real test by the user before "Apagar" is promised.
+- **Forward:** `POST /api/forwardMessage` with `chatId`, `messageId` and `session`, only to chats you talked to before, otherwise it may fail. It is small to add, but needs a screen to choose the chat.
+- **Message id:** these calls need the id in WAHA's format, while `whatsapp_messages.external_id` keeps only its last part, so the format must be checked or the full id stored.
+- **Deleted by the other person:** `message.revoked` brings `before` and `after`, in case showing it enters the scope later.
+
+What the code already has for the CRM part:
+
+- `phoneKey` on `leads` touches `createLead`, `updateLead`, `createCustomer` and `updateCustomer`, reusing `canonicalPhoneOf`. Existing duplicates must be checked before the unique index.
+- `LeadStageStepper` already wires `useChangeLeadStage` and `CloseLeadSheet`, which the stage control can reuse. Those live in `features/leads`, so they move to `shared` once WhatsApp needs them.
+- `conversationSummarySchema` and `leadConversationSchema` predate this work and should give way to `whatsappConversationSchema`.
+- Linking writes to real data as soon as a running API reloads, so its migration and first run need the user's OK.
+  Decided with the user:
+
+- **Apagar** deletes for everyone on WhatsApp. The docs don't state the scope or a time limit, so the behavior is confirmed by the user on a conversation of their own.
+- The action for an unknown number is called **Tornar lead**.
+- The header changes with the contact: a lead can change stage, a customer can't.
+- Migrations of this step may be applied to the real database. Tests still never use the real account or database.
+
+To confirm with the user when step 5 starts:
+
+- The exact shortcuts for each kind of contact.
+- Whether reply data has to be imported again for messages already stored, since `replyTo` isn't kept today.
+### Read ticks
+
+Sent messages show one gray tick when sent, two when delivered and two blue when read, from WAHA's `message.ack`. The first import brings them along with each message. Messages imported before this existed stay without ticks, which the user accepted since it only affects the development data. A status never moves backward. If the person turned read receipts off, the `READ` ack never comes, so it stays at two gray ticks, exactly like on WhatsApp.
+
 ### Mark as read
 
-Opening a conversation marks it as read in Vetra and on WhatsApp. A failure on WAHA's side doesn't get in the way of reading it, and catch-up reconciles the count.
+Opening a conversation marks it as read in Vetra and on WhatsApp, only while the window is in focus. A failure on WAHA's side doesn't get in the way of reading it, and catch-up reconciles the count.
 
 ### Stage from the conversation
 
 - The thread header shows only the current stage as a badge. Clicking opens the stage menu.
 - Choosing Fechado opens `CloseLeadSheet`. Archiving opens the existing archive dialog. Other stages apply directly with the usual "Desfazer" toast. All the rules of VET-9 still apply.
 - A linked lead has a "Ver lead" link; a customer has only "Ver cliente", with no stage control.
-- An unknown number has "Criar lead", which opens the lead form with the number and the WhatsApp name filled in.
+- An unknown number has "Tornar lead", which opens the lead form with the number and the WhatsApp name filled in.
 
 ### Último contato
 
@@ -190,6 +239,9 @@ The only automatic effect on a lead: any message, sent or received, moves `lastC
 - If disconnected, a discreet notice with "Conectar" above the panes.
 - **List:** search by name or number, "Nova conversa" button, items with avatar, name, last message preview, relative time and unread count, newest first. 30 per page, loading more on scroll.
 - **Thread:** header with avatar, name, number and the stage control; messages grouped by day; the latest 50, loading older ones on scroll up; a text box with `Enter` to send and `Shift+Enter` for a new line.
+- **Composer:** focused when a conversation opens, except on touch screens, where the keyboard would cover the messages. It stays read-only while sending, keeping the focus, so nothing typed meanwhile looks like part of what was sent.
+- **Bubbles:** the time and the ticks sit inside the bubble, at its bottom right corner, WhatsApp style.
+- **No conversation open:** a small illustration made of message bubbles, a short explanation and "Nova conversa" while connected.
 - **Media messages:** a label with its icon ("Imagem", "Áudio", "Vídeo", "Documento", "Mídia") plus the caption when there is one.
 - **Nova conversa:** a dialog with the number, which opens the existing conversation if there is one, or an empty thread otherwise.
 - **States:** loading, empty list, no search results, import in progress, send error. Errors go through `getErrorMessage`.
@@ -274,9 +326,10 @@ New routes in `packages/routes` (`whatsappRoutes`) and contracts in `packages/co
 - `GET /whatsapp/qr`: the QR Code proxied by the API.
 - `POST /whatsapp/disconnect`
 - `POST /whatsapp/account-change`: `replace` or `cancel`, when the number differs.
-- `GET /whatsapp/conversations`: `q`, cursor or page, lightweight items.
+- `GET /whatsapp/conversations`: `q` and page, lightweight items.
 - `POST /whatsapp/conversations`: opens or creates one from a number.
-- `GET /whatsapp/conversations/:id/messages`: paginated from the latest.
+- `GET /whatsapp/conversations/:id`: one conversation, including one with no messages yet.
+- `GET /whatsapp/conversations/:id/messages`: newest first, each page continuing from the `before` message.
 - `POST /whatsapp/conversations/:id/messages`: sends text.
 - `POST /whatsapp/conversations/:id/read`
 - `GET /whatsapp/conversations/awaiting`: for the Painel, declared before `/:id`.
@@ -354,7 +407,7 @@ No automated tests, as in VET-9, VET-10 and VET-11. Each step is verified over H
 - Conversations link automatically to leads and customers only by phone number, including numbers without the ninth digit. Editing a phone relinks, and deleting a lead keeps the conversation.
 - Contacts that match no number stay as plain conversations, and no lead is created automatically.
 - A number already used by a lead or customer can't be used again, and the screen explains why.
-- "Criar lead" opens the form filled in. The stage changes from the thread, with Fechado and archive using their existing flows.
+- "Tornar lead" opens the form filled in. The stage changes from the thread, with Fechado and archive using their existing flows.
 - "Último contato" follows the messages and never moves backward. No stage changes automatically.
 - Photos appear from their URL only, and fall back to initials when missing or expired.
 - The lead's card, the Painel and every WhatsApp button use real data and open the right conversation.
