@@ -12,6 +12,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
+import { Spinner } from "@/shared/components/ui/spinner";
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -59,6 +60,7 @@ export function ConfirmDialog({
             disabled={isPending || confirmDisabled}
             onClick={onConfirm}
           >
+            {isPending && <Spinner />}
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
