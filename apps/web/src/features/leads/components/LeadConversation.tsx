@@ -7,11 +7,11 @@ import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { MessageBubble } from "@/shared/components/whatsapp/MessageBubble";
 import { cn } from "@/shared/utils/cn";
 
 import { useLeadConversation } from "../queries/useLeadConversation";
 import { conversationStateOf } from "../utils/conversationState";
-import { MessageBubble } from "./MessageBubble";
 
 export function LeadConversation({ leadId }: { leadId: string }) {
   const { data, isPending } = useLeadConversation(leadId);
@@ -60,7 +60,7 @@ export function LeadConversation({ leadId }: { leadId: string }) {
           </div>
           <div className="flex flex-col gap-2">
             {conversation.messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
+              <MessageBubble key={message.id} message={message} compact />
             ))}
           </div>
         </div>

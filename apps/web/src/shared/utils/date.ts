@@ -5,6 +5,7 @@ import {
   formatDistanceToNowStrict,
   isToday,
   isTomorrow,
+  isYesterday,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -23,6 +24,13 @@ export function formatDayLabel(date: Date): string {
 
 export function formatTime(date: Date): string {
   return format(inProfileZone(date), "HH:mm");
+}
+
+export function formatConversationTime(date: Date): string {
+  const zoned = inProfileZone(date);
+  if (isToday(zoned)) return format(zoned, "HH:mm");
+  if (isYesterday(zoned)) return "Ontem";
+  return format(zoned, "dd/MM/yy");
 }
 
 export function formatRelative(date: Date): string {

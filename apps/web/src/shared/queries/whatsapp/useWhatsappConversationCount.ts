@@ -3,7 +3,8 @@ import type { WhatsappConversationCountResponse } from "@vetra/contracts";
 import { whatsappRoutes } from "@vetra/routes";
 
 import api from "@/shared/lib/axios/api";
-import { whatsappQueryKeys } from "@/shared/queries/whatsapp/keys";
+
+import { whatsappQueryKeys } from "./keys";
 
 export function useWhatsappConversationCount() {
   return useQuery({

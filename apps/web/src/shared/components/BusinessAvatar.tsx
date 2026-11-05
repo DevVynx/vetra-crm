@@ -1,3 +1,5 @@
+import { UserIcon } from "lucide-react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 
 type BusinessAvatarProps = {
@@ -15,11 +17,13 @@ const getInitials = (name: string) =>
     .join("");
 
 export function BusinessAvatar({ name, photoUrl, className }: BusinessAvatarProps) {
+  const initials = getInitials(name);
+
   return (
     <Avatar className={className}>
-      {photoUrl && <AvatarImage src={photoUrl} alt="" />}
+      {photoUrl && <AvatarImage src={photoUrl} alt="" referrerPolicy="no-referrer" />}
       <AvatarFallback className="bg-primary/15 text-primary font-semibold">
-        {getInitials(name)}
+        {initials || <UserIcon className="size-1/2" />}
       </AvatarFallback>
     </Avatar>
   );

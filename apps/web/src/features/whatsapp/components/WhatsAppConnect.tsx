@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import type { WhatsappConnectionStatus } from "@vetra/contracts";
-import { InfoIcon } from "lucide-react";
+import { ArrowLeftIcon, InfoIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
+import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 
 import { WhatsAppQrArea } from "./WhatsAppQrArea";
@@ -25,11 +26,20 @@ const STEPS: ReactNode[] = [
 
 type WhatsAppConnectProps = {
   status: WhatsappConnectionStatus | undefined;
+  onBack?: (() => void) | undefined;
 };
 
-export function WhatsAppConnect({ status }: WhatsAppConnectProps) {
+export function WhatsAppConnect({ status, onBack }: WhatsAppConnectProps) {
   return (
-    <div className="flex min-h-full items-center justify-center p-4 md:p-6">
+    <div className="flex min-h-full flex-col items-center justify-center gap-3 p-4 md:p-6">
+      {onBack && (
+        <div className="w-full max-w-3xl">
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            <ArrowLeftIcon />
+            Voltar para as conversas
+          </Button>
+        </div>
+      )}
       <Card className="w-full max-w-3xl gap-0 py-0">
         <div className="flex flex-col gap-8 p-6 md:flex-row md:items-center md:justify-between md:p-8">
           <div className="flex flex-col gap-6">

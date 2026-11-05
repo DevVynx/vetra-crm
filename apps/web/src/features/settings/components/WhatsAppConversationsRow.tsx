@@ -2,9 +2,9 @@ import { useState } from "react";
 
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { Button } from "@/shared/components/ui/button";
+import { useWhatsappConversationCount } from "@/shared/queries/whatsapp/useWhatsappConversationCount";
 
 import { useDeleteWhatsappConversations } from "../mutations/useDeleteWhatsappConversations";
-import { useWhatsappConversationCount } from "../queries/useWhatsappConversationCount";
 import { SettingsRow } from "./SettingsRow";
 
 const describeCount = (count: number) =>
