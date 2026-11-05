@@ -5,6 +5,7 @@ import { Input } from "@/shared/components/ui/input";
 import { useUpdateProfile } from "@/shared/mutations/profile/useUpdateProfile";
 import { useProfile } from "@/shared/queries/profile/useProfile";
 
+import { ProfilePhotoField } from "./ProfilePhotoField";
 import { SettingsRow } from "./SettingsRow";
 import { SettingsSection } from "./SettingsSection";
 import { TimeZoneField } from "./TimeZoneField";
@@ -43,6 +44,12 @@ export function ProfileSettings() {
     <SettingsSection title="Perfil">
       <SettingsRow title="Nome" description="Usado na saudação do Painel.">
         {profile && <NameField key={profile.name} savedName={profile.name} />}
+      </SettingsRow>
+      <SettingsRow
+        title="Foto"
+        description="Aparece nos registros dos clientes e nos áudios que você envia no WhatsApp."
+      >
+        <ProfilePhotoField />
       </SettingsRow>
       <SettingsRow title="Fuso horário" description="Usado nas datas e nos períodos do Painel.">
         {profile && <TimeZoneField savedTimeZone={profile.timeZone} />}

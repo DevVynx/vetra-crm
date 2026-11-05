@@ -1,0 +1,1 @@
+export { profilePhotoStorage } from "./profilePhoto";

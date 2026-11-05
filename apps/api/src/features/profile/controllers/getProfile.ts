@@ -10,6 +10,6 @@ export async function getProfileController(
   _req: ValidatedRequest<typeof v.getProfile>,
   res: Response<GetProfileResponse>
 ) {
-  const profile = await profileServices.getProfile();
+  const profile = await profileServices.getProfileWithPhoto();
   res.json(getProfileResponseSchema.parse(profile));
 }

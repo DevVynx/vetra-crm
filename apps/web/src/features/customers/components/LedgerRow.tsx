@@ -14,6 +14,7 @@ import { ActionsMenu } from "@/shared/components/ActionsMenu";
 import { BusinessAvatar } from "@/shared/components/BusinessAvatar";
 import { Badge } from "@/shared/components/ui/badge";
 import { useProfile } from "@/shared/queries/profile/useProfile";
+import { useProfilePhotoUrl } from "@/shared/queries/profile/useProfilePhotoUrl";
 import { cn } from "@/shared/utils/cn";
 import { formatChipDate, formatChipDateTime } from "@/shared/utils/date";
 import { formatCurrency } from "@/shared/utils/format";
@@ -41,6 +42,7 @@ export function LedgerRow({ customerId, entry }: { customerId: string; entry: Le
   const [isEditing, setIsEditing] = useState(false);
   const { remove } = useLedgerEntryActions(customerId);
   const { data: profile } = useProfile();
+  const profilePhotoUrl = useProfilePhotoUrl();
   const isRevenue = entry.type === "revenue";
   const isConfirmed = entry.status === "confirmed";
 
@@ -68,7 +70,11 @@ export function LedgerRow({ customerId, entry }: { customerId: string; entry: Le
       </div>
 
       <div className="col-start-3 row-start-1 mr-4 ml-2 flex items-center gap-2 @4xl:col-start-4">
-        <BusinessAvatar name={profile?.name ?? ""} className="size-6 text-[10px]" />
+        <BusinessAvatar
+          name={profile?.name ?? ""}
+          photoUrl={profilePhotoUrl}
+          className="size-6 text-[10px]"
+        />
         <span
           title="Data em que o registro foi criado"
           className="text-muted-foreground text-xs tabular-nums"

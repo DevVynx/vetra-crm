@@ -7,6 +7,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { useMarkWhatsappMessagePlayed } from "@/shared/mutations/whatsapp/useMarkWhatsappMessagePlayed";
 import { useProfile } from "@/shared/queries/profile/useProfile";
+import { useProfilePhotoUrl } from "@/shared/queries/profile/useProfilePhotoUrl";
 import { useWhatsappMediaFile } from "@/shared/queries/whatsapp/useWhatsappMediaFile";
 import { cn } from "@/shared/utils/cn";
 
@@ -59,6 +60,7 @@ export function AudioPlayer({ conversationId, message, contact }: AudioPlayerPro
   const file = useWhatsappMediaFile({ conversationId, messageId: message.id });
   const markPlayed = useMarkWhatsappMessagePlayed(conversationId);
   const { data: profile } = useProfile();
+  const profilePhotoUrl = useProfilePhotoUrl();
   const audioRef = useRef<HTMLAudioElement>(null);
   const hasMarkedPlayed = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -70,12 +72,11 @@ export function AudioPlayer({ conversationId, message, contact }: AudioPlayerPro
   const duration = message.mediaSeconds ?? loadedDuration ?? 0;
   const progress = duration > 0 ? Math.min(position / duration, 1) : 0;
   const hasStarted = isPlaying || position > 0;
-  // The photo is the sender's: the contact's for what arrived, and for what the user sent, their
-  // initials, until the profile has a photo of its own.
+  // The photo is the sender's: the contact's for what arrived, and the profile's for what the user sent.
   const sender =
     message.direction === "inbound"
       ? { name: contact?.name ?? "", photoUrl: contact?.photoUrl ?? undefined }
-      : { name: profile?.name ?? "", photoUrl: undefined };
+      : { name: profile?.name ?? "", photoUrl: profilePhotoUrl };
 
   useEffect(() => {
     if (file.objectUrl && wantsToPlay) {

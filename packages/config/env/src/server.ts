@@ -5,6 +5,7 @@ export type ServerConfig = {
   API_PORT: number;
   FRONTEND_URL: string;
   DATABASE_URL: string;
+  STORAGE_DIR: string;
 };
 
 function load(): ServerConfig {
@@ -13,6 +14,7 @@ function load(): ServerConfig {
     API_PORT: Number(process.env.API_PORT ?? 8000),
     FRONTEND_URL: requireEnv("FRONTEND_URL"),
     DATABASE_URL: requireEnv("DATABASE_URL"),
+    STORAGE_DIR: process.env.STORAGE_DIR ?? "storage",
   };
 }
 

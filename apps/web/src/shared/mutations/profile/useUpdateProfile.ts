@@ -1,5 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Profile, UpdateProfileRequest, UpdateProfileResponse } from "@vetra/contracts";
+import type {
+  GetProfileResponse,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+} from "@vetra/contracts";
 import { profileRoutes } from "@vetra/routes";
 import { toast } from "sonner";
 
@@ -10,7 +14,7 @@ import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
-  const profileQuery = useQueryUtils<Profile>(profileQueryKeys.all);
+  const profileQuery = useQueryUtils<GetProfileResponse>(profileQueryKeys.all);
 
   return useMutation({
     mutationFn: async (request: UpdateProfileRequest) =>
