@@ -63,7 +63,7 @@ Validated on WAHA 2026.10.1 with GOWS, on the free image, with the user's regula
 - **Pagination:** a single chat can have thousands of messages, so the import must page with no per-chat cap.
 - **Identity:** live events use `@lid` in `from` and in `Info.Chat`, with the phone in `Info.SenderAlt` or `Info.RecipientAlt`, while `/chats` lists the same person as `@c.us`. Messages must never be attributed through `from` alone, and `@lid` and `@c.us` must resolve to one conversation. No chat appeared as `@lid` in `/chats`.
 - **Ninth digit:** most Brazilian ids come without it, so the canonical phone is required.
-- **Unread:** WAHA exposes no unread count, so Vetra has to compute it. Inbound messages get a `message.ack` with `READ`, but only with the conversation open on the phone so far. **Still open:** confirming this on a conversation left unopened (test in step 4).
+- **Unread:** WAHA exposes no unread count, so Vetra has to compute it. Reading a conversation on the phone sends a `message.ack` with `READ`, confirmed on a conversation left unopened until then.
 - **Photos:** `/chats/overview` already returns `picture` as an `https` URL, with no call per contact. The URL lasted about 10 days in the sample, so refreshing once a day is enough.
 - **Media:** with downloads off, `media.mimetype` stays available and `media.url` doesn't come. No media file was kept in the container. WAHA does keep its own copy of the messages in the session volume.
 - **Usage:** about 400 to 750 MB of RAM and almost no CPU when idle, below the documented recommendation.
@@ -94,7 +94,11 @@ Vetra stores the connected number. If the scanned number differs and conversatio
 - **Apagar e importar:** deletes the old conversations and imports the new account.
 - **Cancelar:** disconnects the new number and keeps the old conversations.
 
-The deletion is permanent, so the dialog says so. Two accounts are never mixed.
+The deletion is permanent, so the dialog says so. Two accounts are never mixed. `Esc` does nothing in this dialog, so the choice only happens through its buttons.
+
+### Deleting the conversations
+
+Configurações has an "Apagar conversas" action, with confirmation, shown only while conversations exist. It is available only while disconnected, because the next sync would import everything again otherwise. It deletes the conversations, the messages and the stored account, so the next connection is a first import for any number. Nothing changes on the phone.
 
 ### Warning on the connection screen
 
@@ -107,14 +111,18 @@ Shown as plain informative text, in muted style, never in red, and never blockin
 
 - Only individual conversations. `@g.us`, `@newsletter`, `status@broadcast` and broadcast lists are ignored in the import, in live events and in catch-up.
 - Messages from the last 12 months at the time of the import. Nothing is pruned afterwards.
-- The import runs in the background and shows progress on the tab. The app stays usable.
+- The import runs in the background and the tab says it is running, while the list fills up. The app stays usable.
+- WAHA keeps receiving history for a while after pairing, so the import repeats every minute until new messages stop arriving, instead of running once.
+- Empty messages with no text and no media, such as system notices, are not stored.
+- WAHA exposes no unread state for old messages, so history starts as read and only messages arriving from then on count as unread.
 - Importing is idempotent. Repeating it, or receiving a message through both import and live event, never duplicates it.
 
 ### Staying up to date
 
 - The API listens to `message.any` and `session.status` over WebSocket and reconnects with backoff.
 - WebSocket events aren't replayed, so on API start and on every reconnection the API catches up by reading messages newer than the last stored one.
-- The web refreshes status, list and open thread by polling.
+- The API tells the web that something changed through SSE (`GET /whatsapp/events`). The event carries only a signal, never text, names or numbers, and the web then refetches with its normal queries.
+- The browser reconnects SSE by itself, and the list and open thread also refetch every 30 seconds as a safety net. The status badge keeps polling every 5 seconds.
 
 ### Conversation and lead
 
@@ -235,14 +243,14 @@ The only automatic effect on a lead: any message, sent or received, moves `lastC
 
 `whatsapp_accounts` (a single row):
 
-- `id`, `phone`, `connectedAt`, `createdAt`, `updatedAt`
+- `id`, `phone`, `connectedAt`, `historyImportedAt` (nullable, empty until the first import settles), `createdAt`, `updatedAt`
 
 `whatsapp_conversations`:
 
 - `id`, `chatId` (unique), `phone` (nullable, for an unresolved `@lid`), `phoneKey` (canonical, nullable, indexed)
 - `leadId` (nullable, `onDelete: "set null"`, indexed)
 - `contactName` (nullable), `photoUrl` (nullable), `photoFetchedAt` (nullable)
-- `unreadCount`, `lastMessageAt` (indexed), `lastMessagePreview`, `lastMessageDirection`
+- `unreadCount`, `lastMessageAt` (nullable, indexed). The preview and direction of the last message are read from the message itself, not stored twice.
 - `createdAt`, `updatedAt`
 
 `whatsapp_messages`:
@@ -258,11 +266,14 @@ All dates are `timestamptz`, following `DATABASE.md`. Deletes are hard deletes. 
 
 New routes in `packages/routes` (`whatsappRoutes`) and contracts in `packages/contracts/src/whatsapp`:
 
-- `GET /whatsapp/status`: `connected | disconnected | connecting | awaiting_qr | unavailable`, the number, the import progress.
+- `GET /whatsapp/status`: `connected | disconnected | connecting | awaiting_qr | unavailable`, the number, whether an import is running, and a pending account change.
+- `GET /whatsapp/events`: SSE stream of change signals.
+- `GET /whatsapp/conversations/count`: how many conversations are stored.
+- `DELETE /whatsapp/conversations`: deletes the conversations, the messages and the account. Returns `409` while connected and `503` if WAHA can't confirm the connection state.
 - `POST /whatsapp/connect`: starts the session (idempotent).
 - `GET /whatsapp/qr`: the QR Code proxied by the API.
 - `POST /whatsapp/disconnect`
-- `POST /whatsapp/account-change`: `confirm` or `cancel`, when the number differs.
+- `POST /whatsapp/account-change`: `replace` or `cancel`, when the number differs.
 - `GET /whatsapp/conversations`: `q`, cursor or page, lightweight items.
 - `POST /whatsapp/conversations`: opens or creates one from a number.
 - `GET /whatsapp/conversations/:id/messages`: paginated from the latest.
@@ -277,6 +288,8 @@ New domain errors in the registry:
 
 - `WhatsappNotConnectedError` (`409`)
 - `WhatsappNotAwaitingQrError` (`409`)
+- `WhatsappNoAccountChangeError` (`409`)
+- `WhatsappStillConnectedError` (`409`)
 - `WhatsappUnavailableError` (`503`, under a new `ServiceUnavailableError` category)
 - `WhatsappNumberNotFoundError` (`422`)
 - `WhatsappSendRestrictedError` (`429`)
@@ -349,15 +362,6 @@ No automated tests, as in VET-9, VET-10 and VET-11. Each step is verified over H
 - Connecting a different number requires confirmation, and accounts never mix.
 - WAHA only listens on `127.0.0.1`, and neither the API key nor message content appears in logs.
 - `pnpm format`, `pnpm check-types`, `pnpm lint` and `pnpm build` pass, with no console errors.
-
----
-
-## Open Questions
-
-To be answered by the user before step 3:
-
-1. **Technical defaults.** Suggested: polling every 5 seconds, 30 conversations and 50 messages per page, 4,096 characters per message.
-2. **Warning wording.** Written as "não nos responsabilizamos", with no company name. The name to use, if any, is still to be confirmed.
 
 ---
 
