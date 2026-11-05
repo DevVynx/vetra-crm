@@ -1,5 +1,8 @@
 import { type Lead, type LeadContact, leadDomain } from "../../leads/domain";
-import { ensurePhoneIsAvailable } from "../../leads/services/ensurePhoneIsAvailable";
+import {
+  ensurePhoneIsAvailable,
+  withUniquePhone,
+} from "../../leads/services/ensurePhoneIsAvailable";
 import { stageDomain } from "../../stages/domain";
 import { stageRepositories } from "../../stages/repositories";
 import { customerDomain, type DealPayment } from "../domain";
@@ -25,7 +28,7 @@ export async function createCustomer({
   const now = new Date();
   const lead = leadDomain.createClosed(contact, closingStage, now);
   const { deal, installments } = customerDomain.open(lead.id, document, payment, now);
-  await customerRepositories.insertCustomer(lead, deal, installments);
+  await withUniquePhone(() => customerRepositories.insertCustomer(lead, deal, installments));
 
   return lead;
 }

@@ -38,7 +38,8 @@ export const isValidPhone = (value: string) => /^\d{8,15}$/.test(normalizePhone(
 
 export const INVALID_PHONE_MESSAGE = "Informe o número com DDD ou com + e o código do país.";
 
-// Saving a contact only conflicts with another one when the number is already taken.
+// On these routes the only 409 the API sends is a number already taken: stage changes and closing,
+// where other conflicts come from, don't go through them.
 export const contactErrorMessage = (error: unknown, fallback: string) =>
   isAxiosError(error) && error.response?.status === 409
     ? "Esse número já está em outro lead ou cliente."

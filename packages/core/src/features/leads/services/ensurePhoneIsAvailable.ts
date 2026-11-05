@@ -1,3 +1,5 @@
+import { isUniqueViolation } from "@vetra/database";
+
 import { canonicalPhoneOf } from "../../../shared/phone";
 import { LeadPhoneAlreadyExistsError } from "../errors";
 import { leadRepositories } from "../repositories";
@@ -7,4 +9,14 @@ export async function ensurePhoneIsAvailable(phone: string, ownerId?: string): P
   const owner = await leadRepositories.findLeadIdByPhoneKey(canonicalPhoneOf(phone));
 
   if (owner && owner !== ownerId) throw new LeadPhoneAlreadyExistsError();
+}
+
+// The check above can lose a race against another request, and then the unique index answers.
+export async function withUniquePhone<Result>(run: () => Promise<Result>): Promise<Result> {
+  try {
+    return await run();
+  } catch (error) {
+    if (isUniqueViolation(error, "leads_phone_key_idx")) throw new LeadPhoneAlreadyExistsError();
+    throw error;
+  }
 }

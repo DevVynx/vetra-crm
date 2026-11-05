@@ -13,5 +13,6 @@ export type Database = typeof db;
 export type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
 export * from "./qualified";
+export * from "./uniqueViolation";
 export * from "./schema";
 export * from "drizzle-orm";
