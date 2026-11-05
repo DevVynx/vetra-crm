@@ -1,4 +1,4 @@
-import { wahaClient, WahaSendRestrictedError } from "@vetra/infra";
+import { wahaClient, WahaSendRestrictedError, type WahaSentMessage } from "@vetra/infra";
 
 import { whatsappDomain } from "../domain";
 import {
@@ -17,7 +17,7 @@ async function sendThroughWaha(
   chatId: string,
   text: string,
   replyToWahaId: string | undefined
-): Promise<string | null> {
+): Promise<WahaSentMessage | null> {
   try {
     return await callWaha(() => wahaClient.sendText(chatId, text, replyToWahaId));
   } catch (error) {
@@ -33,6 +33,8 @@ async function findMessageToReply(conversationId: string, messageId: string) {
 
   return message;
 }
+
+const SECOND_IN_MS = 1_000;
 
 type SendWhatsappMessageInput = {
   conversationId: string;
@@ -54,22 +56,23 @@ export async function sendWhatsappMessage({
     : null;
   const replyToWahaId = reply ? whatsappDomain.wahaIdOf(reply, conversation.chatId) : undefined;
 
-  const messageId = await sendThroughWaha(conversation.chatId, text, replyToWahaId);
-  if (!messageId) return;
+  const sent = await sendThroughWaha(conversation.chatId, text, replyToWahaId);
+  if (!sent) return;
 
   await whatsappRepositories.saveMessages(
     conversation.id,
     [
       whatsappDomain.createMessage({
-        externalId: whatsappDomain.externalIdOf(messageId),
-        wahaId: messageId,
+        externalId: whatsappDomain.externalIdOf(sent.id),
+        wahaId: sent.id,
         replyToExternalId: reply?.externalId ?? null,
         replyToContent: whatsappDomain.replySnippetOf(reply?.content ?? null),
         direction: "outbound",
         type: "text",
         status: "sent",
         content: text,
-        sentAt: new Date(),
+        // WhatsApp's own time, so the order with what arrives next doesn't depend on this clock.
+        sentAt: sent.sentAtSeconds ? new Date(sent.sentAtSeconds * SECOND_IN_MS) : new Date(),
       }),
     ],
     true

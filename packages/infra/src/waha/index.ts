@@ -20,6 +20,7 @@ import {
 export type { WahaEvent } from "./events";
 export type { WahaMediaFile } from "./media";
 export type { WahaChatOverview, WahaContact, WahaMessage } from "./messages";
+export type { WahaSentMessage } from "./send";
 export type { WahaQrCode, WahaSession } from "./session";
 export * from "./WahaMediaTooLargeError";
 export * from "./WahaMediaUnavailableError";

@@ -26,14 +26,16 @@ export async function findChatIdOfPhone(phone: string): Promise<string | null> {
   return numberExists ? (chatId ?? null) : null;
 }
 
-const sentMessageSchema = z.object({ id: z.string().nullish() });
+const sentMessageSchema = z.object({ id: z.string().nullish(), timestamp: z.number().nullish() });
+
+export type WahaSentMessage = { id: string; sentAtSeconds: number | null };
 
 // The live event of this same message also arrives, so a missing id here loses nothing.
 export async function sendText(
   chatId: string,
   text: string,
   replyTo?: string
-): Promise<string | null> {
+): Promise<WahaSentMessage | null> {
   const response = await wahaFetch(
     "/api/sendText",
     "POST",
@@ -45,7 +47,9 @@ export async function sendText(
     throw new WahaSendRestrictedError();
   }
 
-  return (await parseWahaResponse(response, sentMessageSchema)).id ?? null;
+  const { id, timestamp } = await parseWahaResponse(response, sentMessageSchema);
+
+  return id ? { id, sentAtSeconds: timestamp ?? null } : null;
 }
 
 const messagePath = (chatId: string, messageId: string) =>
