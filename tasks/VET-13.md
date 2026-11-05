@@ -38,6 +38,8 @@ Looked at with the user's account, reading only the shape of messages, never the
 - The field does exist: a sticker that replied to a view-once photo carried the quoted image with `viewOnce: true`. So it only shows up inside a reply.
 - The likely cause is that WhatsApp doesn't deliver view-once messages to linked devices. That is why the feature was dropped.
 
+A sticker is told by its own message kind (`stickerMessage`, `Info.MediaType` of `user_created_sticker`), not by its `image/webp` file, which some photos share. It has a type of its own, `sticker`, shown as "Figurinha" and opened like an image. Stickers stored before that were images; a repair runs once per account, reading again only the conversations that have an image with no caption, and corrects the ones WAHA says are stickers.
+
 Also found: a voice message carries `PTT: true`, its duration (`seconds`) and a `waveform`, and arrives with `Info.MediaType` set to `ptt`. A sticker arrives as `stickerMessage`, `image/webp`.
 
 ---
