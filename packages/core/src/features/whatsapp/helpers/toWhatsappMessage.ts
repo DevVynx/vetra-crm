@@ -20,13 +20,20 @@ export function toWhatsappMessage(message: WahaMessage): WhatsappMessage | null 
   const content = message.body?.trim() ? message.body : null;
   if (!content && !message.hasMedia) return null;
 
+  const type = typeOf(message);
+  const audio = type === "audio" ? message._data?.Message?.audioMessage : null;
+
   return whatsappDomain.createMessage({
     externalId: whatsappDomain.externalIdOf(message.id),
     direction: message.fromMe ? "outbound" : "inbound",
-    type: typeOf(message),
+    type,
     status: message.fromMe ? whatsappDomain.messageStatusOf(message.ackName) : null,
     content,
     mediaFilename: message.hasMedia ? (message.media?.filename ?? null) : null,
+    mediaSeconds: audio?.seconds ?? null,
+    isVoice: audio?.PTT === true,
+    mediaWaveform: audio?.waveform ?? null,
+    isPlayed: type === "audio" && message.ackName === "PLAYED",
     wahaId: message.id,
     replyToExternalId: message.replyTo?.id ? whatsappDomain.externalIdOf(message.replyTo.id) : null,
     replyToContent: whatsappDomain.replySnippetOf(message.replyTo?.body ?? null),

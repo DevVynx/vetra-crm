@@ -17,6 +17,7 @@ import {
   listWhatsappConversationsController,
   listWhatsappMessagesController,
   markWhatsappConversationReadController,
+  markWhatsappMessagePlayedController,
   openLeadConversationController,
   openWhatsappConversationController,
   resolveWhatsappAccountChangeController,
@@ -99,4 +100,9 @@ whatsappRouter.get(
   whatsappRoutes.conversationMessageMedia,
   v.getMessageMedia,
   getWhatsappMessageMediaController
+);
+whatsappRouter.post(
+  whatsappRoutes.conversationMessagePlayed,
+  v.markMessagePlayed,
+  markWhatsappMessagePlayedController
 );

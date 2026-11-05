@@ -8,12 +8,17 @@ import { Spinner } from "@/shared/components/ui/spinner";
 import { useWhatsappMediaFile } from "@/shared/queries/whatsapp/useWhatsappMediaFile";
 import { cn } from "@/shared/utils/cn";
 
+import { AudioPlayer } from "./AudioPlayer";
+import { MediaProblem } from "./MediaProblem";
+import type { MessageContact } from "./messageContact";
+
 type MessageMediaProps = {
   conversationId: string;
   message: WhatsappMessage;
+  contact?: MessageContact | undefined;
 };
 
-export const OPENABLE_MEDIA_TYPES = ["image", "sticker", "video", "document"] as const;
+export const OPENABLE_MEDIA_TYPES = ["image", "sticker", "video", "document", "audio"] as const;
 
 const FALLBACK_FILENAME = "arquivo";
 
@@ -26,17 +31,6 @@ function startDownload(url: string, filename: string) {
   link.href = url;
   link.download = filename;
   link.click();
-}
-
-function Problem({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 text-xs">
-      <span>{message}</span>
-      <Button size="xs" variant="outline" onClick={onRetry}>
-        Tentar de novo
-      </Button>
-    </div>
-  );
 }
 
 function OpenTile({ icon: Icon, label, isLoading, onOpen }: OpenTileProps) {
@@ -60,13 +54,13 @@ type OpenTileProps = {
   onOpen: () => void;
 };
 
-export function MessageMedia({ conversationId, message }: MessageMediaProps) {
+function FileMedia({ conversationId, message }: Omit<MessageMediaProps, "contact">) {
   const file = useWhatsappMediaFile({ conversationId, messageId: message.id });
   const [isEnlarged, setIsEnlarged] = useState(false);
   const retry = () => file.open();
 
   if (file.errorMessage && !file.objectUrl)
-    return <Problem message={file.errorMessage} onRetry={retry} />;
+    return <MediaProblem message={file.errorMessage} onRetry={retry} />;
 
   if (message.type === "document") {
     const filename = message.mediaFilename ?? "Documento";
@@ -138,5 +132,15 @@ export function MessageMedia({ conversationId, message }: MessageMediaProps) {
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+export function MessageMedia(props: MessageMediaProps) {
+  const { contact, ...file } = props;
+
+  return file.message.type === "audio" ? (
+    <AudioPlayer {...file} contact={contact} />
+  ) : (
+    <FileMedia {...file} />
   );
 }

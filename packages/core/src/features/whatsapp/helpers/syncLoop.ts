@@ -2,6 +2,7 @@ import { wahaClient } from "@vetra/infra";
 
 import { whatsappDomain } from "../domain";
 import { whatsappRepositories } from "../repositories";
+import { fillAudioDetails } from "./fillAudioDetails";
 import { repairStickerTypes } from "./repairStickerTypes";
 import { syncConversations } from "./syncConversations";
 import { notifyWhatsappChange } from "./whatsappChanges";
@@ -80,6 +81,10 @@ async function runOnce(): Promise<boolean> {
   if (!account.stickersRepairedAt) {
     await repairStickerTypes();
     await whatsappRepositories.markStickersRepaired(new Date());
+  }
+  if (!account.audioDetailsFilledAt) {
+    await fillAudioDetails();
+    await whatsappRepositories.markAudioDetailsFilled(new Date());
   }
   runs += 1;
   quietRuns = imported > 0 ? 0 : quietRuns + 1;

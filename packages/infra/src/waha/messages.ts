@@ -34,7 +34,18 @@ export const wahaMessageSchema = z.object({
           MediaType: z.string().nullish(),
         })
         .nullish(),
-      Message: z.object({ stickerMessage: z.unknown().optional() }).nullish(),
+      Message: z
+        .object({
+          stickerMessage: z.unknown().optional(),
+          audioMessage: z
+            .object({
+              seconds: z.number().nullish(),
+              PTT: z.boolean().nullish(),
+              waveform: z.string().nullish(),
+            })
+            .nullish(),
+        })
+        .nullish(),
     })
     .nullish(),
 });

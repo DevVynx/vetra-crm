@@ -113,6 +113,27 @@
       "when": 1793912807594,
       "tag": "0015_add_sticker_message_type",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793914024051,
+      "tag": "0016_add_audio_details",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793915108501,
+      "tag": "0017_add_audio_waveform_and_played",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793915114700,
+      "tag": "0018_refill_audio_details",
+      "breakpoints": true
     }
   ]
 }

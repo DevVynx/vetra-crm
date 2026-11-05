@@ -28,6 +28,7 @@ const v = {
   }),
   markRead: validation({ params: whatsappConversationParamsSchema }),
   getMessageMedia: validation({ params: whatsappMessageParamsSchema }),
+  markMessagePlayed: validation({ params: whatsappMessageParamsSchema }),
   editMessage: validation({
     params: whatsappMessageParamsSchema,
     body: editWhatsappMessageRequestSchema,

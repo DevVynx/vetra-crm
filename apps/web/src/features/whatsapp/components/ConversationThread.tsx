@@ -122,6 +122,7 @@ export function ConversationThread({ conversationId, isConnected }: Conversation
         key={conversationId}
         conversationId={conversationId}
         isConnected={isConnected}
+        contact={conversation && { name, photoUrl: conversation.photoUrl }}
         selection={selection}
         onToggleSelection={toggleSelection}
         actions={{

@@ -79,3 +79,11 @@ export async function getWhatsappMessageMediaController(
     })
     .send(content);
 }
+
+export async function markWhatsappMessagePlayedController(
+  req: ValidatedRequest<typeof v.markMessagePlayed>,
+  res: Response
+) {
+  await whatsappServices.markWhatsappMessagePlayed(req.params.id, req.params.messageId);
+  res.status(204).send();
+}

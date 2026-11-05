@@ -17,6 +17,7 @@ import { listAwaitingWhatsappConversations } from "./listAwaitingWhatsappConvers
 import { listWhatsappConversations } from "./listWhatsappConversations";
 import { listWhatsappMessages } from "./listWhatsappMessages";
 import { markWhatsappConversationRead } from "./markWhatsappConversationRead";
+import { markWhatsappMessagePlayed } from "./markWhatsappMessagePlayed";
 import { openLeadConversation } from "./openLeadConversation";
 import { openWhatsappConversation } from "./openWhatsappConversation";
 import { resolveWhatsappAccountChange } from "./resolveWhatsappAccountChange";
@@ -40,6 +41,7 @@ export const whatsappServices = {
   listWhatsappConversations,
   listWhatsappMessages,
   markWhatsappConversationRead,
+  markWhatsappMessagePlayed,
   openLeadConversation,
   openWhatsappConversation,
   removeWhatsappChangeListener,

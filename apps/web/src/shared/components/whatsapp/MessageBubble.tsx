@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/shared/utils/cn";
 import { formatDayLabel, formatTime } from "@/shared/utils/date";
 
+import type { MessageContact } from "./messageContact";
 import { MessageMedia, OPENABLE_MEDIA_TYPES } from "./MessageMedia";
 import { MessageStatusIcon } from "./MessageStatusIcon";
 import { nonTextMessageLabels } from "./messageTypeLabels";
@@ -15,6 +16,7 @@ type MessageBubbleProps = {
   actions?: ReactNode;
   // Where the file is asked for: only the thread opens media, the lead's card just names it.
   conversationId?: string;
+  contact?: MessageContact | undefined;
 };
 
 function MessageMeta({ message, compact }: { message: WhatsappMessage; compact: boolean }) {
@@ -58,6 +60,7 @@ export function MessageBubble({
   compact = false,
   actions,
   conversationId,
+  contact,
 }: MessageBubbleProps) {
   const isOutbound = message.direction === "outbound";
   const nonText = message.type === "text" ? null : nonTextMessageLabels[message.type];
@@ -100,7 +103,7 @@ export function MessageBubble({
           <>
             {isOpenable && conversationId && (
               <>
-                <MessageMedia conversationId={conversationId} message={message} />
+                <MessageMedia conversationId={conversationId} message={message} contact={contact} />
                 {!message.content && <span aria-hidden className="block h-3" />}
               </>
             )}

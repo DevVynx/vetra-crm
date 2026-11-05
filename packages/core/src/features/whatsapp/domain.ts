@@ -14,6 +14,7 @@ export type WhatsappAccount = {
   connectedAt: Date;
   historyImportedAt: Date | null;
   stickersRepairedAt: Date | null;
+  audioDetailsFilledAt: Date | null;
 };
 
 export type WhatsappConversation = {
@@ -36,6 +37,10 @@ export type WhatsappMessage = {
   status: WhatsappMessageStatus | null;
   content: string | null;
   mediaFilename: string | null;
+  mediaSeconds: number | null;
+  isVoice: boolean;
+  mediaWaveform: string | null;
+  isPlayed: boolean;
   wahaId: string | null;
   replyToExternalId: string | null;
   replyToContent: string | null;
@@ -46,7 +51,16 @@ export type WhatsappMessage = {
 
 type MessageExtras = Pick<
   WhatsappMessage,
-  "wahaId" | "mediaFilename" | "replyToExternalId" | "replyToContent" | "editedAt" | "deletedAt"
+  | "wahaId"
+  | "mediaFilename"
+  | "mediaSeconds"
+  | "isVoice"
+  | "mediaWaveform"
+  | "isPlayed"
+  | "replyToExternalId"
+  | "replyToContent"
+  | "editedAt"
+  | "deletedAt"
 >;
 
 const HISTORY_DAYS = 365;
@@ -124,6 +138,10 @@ function createMessage(
     id: uuidv7(),
     wahaId: null,
     mediaFilename: null,
+    mediaSeconds: null,
+    isVoice: false,
+    mediaWaveform: null,
+    isPlayed: false,
     replyToExternalId: null,
     replyToContent: null,
     editedAt: null,
@@ -146,6 +164,7 @@ const INLINE_MEDIA_TYPES = new Set([
   "audio/mp4",
   "audio/aac",
   "audio/webm",
+  "audio/wav",
 ]);
 
 function mediaServingOf(mimetype: string | null): { contentType: string; isInline: boolean } {
@@ -206,6 +225,7 @@ function createAccount(phone: string, now: Date): WhatsappAccount {
     connectedAt: now,
     historyImportedAt: null,
     stickersRepairedAt: now,
+    audioDetailsFilledAt: now,
   };
 }
 

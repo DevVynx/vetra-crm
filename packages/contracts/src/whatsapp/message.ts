@@ -26,6 +26,12 @@ export const whatsappMessageSchema = z.object({
   content: z.string().nullable(),
   // Only for documents it says something useful; the file itself is asked for when opened.
   mediaFilename: z.string().nullable(),
+  // Of an audio: its length in seconds, and whether it is a voice message.
+  mediaSeconds: z.number().int().nonnegative().nullable(),
+  isVoice: z.boolean(),
+  // The bars of a voice message, bytes in base64.
+  mediaWaveform: z.string().nullable(),
+  isPlayed: z.boolean(),
   replyTo: z
     .object({
       content: z.string().nullable(),

@@ -104,11 +104,14 @@ async function applyEvent(event: WahaEvent): Promise<void> {
   const status = whatsappDomain.messageStatusOf(ackName);
   if (status === null) return;
 
+  const isNowPlayed =
+    ackName === "PLAYED" && (await whatsappRepositories.markMessagePlayed({ externalId }));
+
   const changed = fromMe
     ? await whatsappRepositories.advanceMessageStatus(externalId, status)
     : status === "read" && (await whatsappRepositories.markConversationReadByMessage(externalId));
 
-  if (changed) notifyWhatsappChange();
+  if (changed || isNowPlayed) notifyWhatsappChange();
 }
 
 export function handleWahaEvent(event: WahaEvent): void {

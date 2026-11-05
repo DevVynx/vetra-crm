@@ -7,6 +7,7 @@ import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { MessageBubble } from "@/shared/components/whatsapp/MessageBubble";
+import type { MessageContact } from "@/shared/components/whatsapp/messageContact";
 import { useOnVisible } from "@/shared/hooks/useOnVisible";
 import { cn } from "@/shared/utils/cn";
 import { formatDayLabel } from "@/shared/utils/date";
@@ -21,6 +22,7 @@ const startsNewDay = (message: WhatsappMessage, older: WhatsappMessage | undefin
 type ThreadMessagesProps = {
   conversationId: string;
   isConnected: boolean;
+  contact: MessageContact | undefined;
   actions: MessageActions;
   selection: ReadonlySet<string> | null;
   onToggleSelection: (message: WhatsappMessage) => void;
@@ -33,6 +35,7 @@ const isSelectable = (message: WhatsappMessage) =>
 export function ThreadMessages({
   conversationId,
   isConnected,
+  contact,
   actions,
   selection,
   onToggleSelection,
@@ -99,6 +102,7 @@ export function ThreadMessages({
               <MessageBubble
                 message={message}
                 conversationId={conversationId}
+                contact={contact}
                 actions={
                   selection ? undefined : (
                     <MessageMenu message={message} isConnected={isConnected} {...actions} />

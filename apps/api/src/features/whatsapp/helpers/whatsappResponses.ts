@@ -18,6 +18,10 @@ export const toWhatsappMessage = (row: MessageRow): WhatsappMessage => ({
   status: row.status,
   content: row.content,
   mediaFilename: row.mediaFilename,
+  mediaSeconds: row.mediaSeconds,
+  isVoice: row.isVoice,
+  mediaWaveform: row.mediaWaveform,
+  isPlayed: row.isPlayed,
   replyTo:
     row.replyToExternalId || row.replyToContent
       ? { content: row.replyToContent, direction: row.replyToDirection }

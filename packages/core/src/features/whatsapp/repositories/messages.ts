@@ -6,6 +6,7 @@ import {
   inArray,
   isNull,
   leadsTable,
+  or,
   qualified,
   sql,
   type Transaction,
@@ -45,6 +46,29 @@ async function advanceKnownStatuses(
   `);
 }
 
+// An audio listened to while Vetra was off only shows it when it is delivered again.
+async function markKnownMessagesPlayed(
+  tx: Transaction,
+  conversationId: string,
+  messages: WhatsappMessage[]
+): Promise<void> {
+  const played = messages
+    .filter((message) => message.isPlayed)
+    .map((message) => message.externalId);
+  if (played.length === 0) return;
+
+  await tx
+    .update(whatsappMessagesTable)
+    .set({ isPlayed: true })
+    .where(
+      and(
+        eq(whatsappMessagesTable.conversationId, conversationId),
+        inArray(whatsappMessagesTable.externalId, played),
+        eq(whatsappMessagesTable.isPlayed, false)
+      )
+    );
+}
+
 // Both the import and the live events deliver the same messages, so a repeated one is skipped,
 // and only what was really new moves the conversation forward.
 export async function saveMessages(
@@ -56,6 +80,7 @@ export async function saveMessages(
 
   return db.transaction(async (tx) => {
     await advanceKnownStatuses(tx, conversationId, messages);
+    await markKnownMessagesPlayed(tx, conversationId, messages);
 
     const inserted = await tx
       .insert(whatsappMessagesTable)
@@ -144,6 +169,10 @@ const messageColumns = {
   status: whatsappMessagesTable.status,
   content: whatsappMessagesTable.content,
   mediaFilename: whatsappMessagesTable.mediaFilename,
+  mediaSeconds: whatsappMessagesTable.mediaSeconds,
+  isVoice: whatsappMessagesTable.isVoice,
+  mediaWaveform: whatsappMessagesTable.mediaWaveform,
+  isPlayed: whatsappMessagesTable.isPlayed,
   wahaId: whatsappMessagesTable.wahaId,
   replyToExternalId: whatsappMessagesTable.replyToExternalId,
   replyToContent: whatsappMessagesTable.replyToContent,
@@ -307,4 +336,71 @@ export async function markMessagesAsStickers(
     .returning({ id: whatsappMessagesTable.id });
 
   return updated.length;
+}
+
+// Audio stored before its length and voice mark were kept, read again from its oldest one on.
+export async function findConversationsWithAudioMissingDetails(): Promise<
+  ConversationWithUntypedImages[]
+> {
+  return db
+    .select({
+      conversationId: whatsappMessagesTable.conversationId,
+      chatId: whatsappConversationsTable.chatId,
+      since: sql<Date>`min(${whatsappMessagesTable.sentAt})`.mapWith(whatsappMessagesTable.sentAt),
+    })
+    .from(whatsappMessagesTable)
+    .innerJoin(
+      whatsappConversationsTable,
+      eq(whatsappConversationsTable.id, whatsappMessagesTable.conversationId)
+    )
+    .where(
+      and(
+        eq(whatsappMessagesTable.type, "audio"),
+        or(isNull(whatsappMessagesTable.mediaSeconds), isNull(whatsappMessagesTable.mediaWaveform)),
+        isNull(whatsappMessagesTable.deletedAt)
+      )
+    )
+    .groupBy(whatsappMessagesTable.conversationId, whatsappConversationsTable.chatId);
+}
+
+export async function updateAudioDetails(
+  conversationId: string,
+  message: Pick<
+    WhatsappMessage,
+    "externalId" | "mediaSeconds" | "isVoice" | "mediaWaveform" | "isPlayed"
+  >
+): Promise<void> {
+  await db
+    .update(whatsappMessagesTable)
+    .set({
+      mediaSeconds: message.mediaSeconds,
+      isVoice: message.isVoice,
+      mediaWaveform: message.mediaWaveform,
+      // Only ever up: a listened audio never goes back to unheard.
+      ...(message.isPlayed ? { isPlayed: true } : {}),
+    })
+    .where(
+      and(
+        eq(whatsappMessagesTable.conversationId, conversationId),
+        eq(whatsappMessagesTable.externalId, message.externalId),
+        eq(whatsappMessagesTable.type, "audio")
+      )
+    );
+}
+
+export async function markMessagePlayed(
+  where: { id: string } | { externalId: string }
+): Promise<boolean> {
+  const target =
+    "id" in where
+      ? eq(whatsappMessagesTable.id, where.id)
+      : eq(whatsappMessagesTable.externalId, where.externalId);
+
+  const updated = await db
+    .update(whatsappMessagesTable)
+    .set({ isPlayed: true })
+    .where(and(target, eq(whatsappMessagesTable.isPlayed, false)))
+    .returning({ id: whatsappMessagesTable.id });
+
+  return updated.length > 0;
 }

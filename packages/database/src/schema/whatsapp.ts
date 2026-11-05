@@ -1,4 +1,4 @@
-import { index, integer, pgEnum, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgEnum, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
 
 import { createdAtColumn, instantColumn, updatedAtColumn, uuidPrimaryKeyColumn } from "./common";
 
@@ -31,6 +31,8 @@ export const whatsappAccountsTable = pgTable("whatsapp_accounts", {
   historyImportedAt: instantColumn("history_imported_at"),
   // Stickers used to be stored as images; this is when the old ones were corrected.
   stickersRepairedAt: instantColumn("stickers_repaired_at"),
+  // The same for the duration and the voice mark of audio, which were not kept before.
+  audioDetailsFilledAt: instantColumn("audio_details_filled_at"),
   createdAt: createdAtColumn(),
   updatedAt: updatedAtColumn(),
 });
@@ -73,6 +75,13 @@ export const whatsappMessagesTable = pgTable(
     content: text(),
     // The file itself is never stored; only its name, which WAHA gives with the message.
     mediaFilename: text(),
+    // Of an audio, as WAHA gives them with the message: its length, and whether it is a voice message.
+    mediaSeconds: integer(),
+    isVoice: boolean().notNull().default(false),
+    // The bars of a voice message, as WAHA gives them: bytes in base64.
+    mediaWaveform: text(),
+    // Whether the audio was listened to: by the person, for what was sent, or by the user.
+    isPlayed: boolean().notNull().default(false),
     // WAHA's edit, delete and reply calls need its full id, and external_id keeps only the last part.
     wahaId: text(),
     replyToExternalId: text(),
