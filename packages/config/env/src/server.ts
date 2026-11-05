@@ -1,3 +1,5 @@
+import { requireEnv } from "./requireEnv";
+
 export type ServerConfig = {
   NODE_ENV: "development" | "production" | "test";
   API_PORT: number;
@@ -6,21 +8,11 @@ export type ServerConfig = {
 };
 
 function load(): ServerConfig {
-  const get = (key: string) => {
-    const value = process.env[key];
-
-    if (!value || value.trim() === "") {
-      throw new Error(`Env ${key} is empty or not defined`);
-    }
-
-    return value;
-  };
-
   return {
     NODE_ENV: (process.env.NODE_ENV ?? "development") as ServerConfig["NODE_ENV"],
     API_PORT: Number(process.env.API_PORT ?? 8000),
-    FRONTEND_URL: get("FRONTEND_URL"),
-    DATABASE_URL: get("DATABASE_URL"),
+    FRONTEND_URL: requireEnv("FRONTEND_URL"),
+    DATABASE_URL: requireEnv("DATABASE_URL"),
   };
 }
 

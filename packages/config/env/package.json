@@ -5,7 +5,8 @@
   "private": true,
   "exports": {
     "./client-vite": "./src/client-vite.ts",
-    "./server": "./src/server.ts"
+    "./server": "./src/server.ts",
+    "./waha": "./src/waha.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit"

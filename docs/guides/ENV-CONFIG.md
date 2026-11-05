@@ -5,13 +5,15 @@ adding a new environment variable or touching `packages/config/env`.
 
 ## Split by domain, not by runtime
 
-`packages/config/env` has a **client** variant (`client-vite`, for `apps/web`) and
-a **server** variant (`apps/api`, `packages/database`). It's a **domain** split: the
-client variant is whatever the web app itself needs to do its job (e.g. the API's
-URL); `server` is backend-only concerns (`DATABASE_URL`). The web app
-should never need to import `server` just to get its own API URL, even though
-nothing stops it technically — pulling in unrelated backend secrets into the web
-app's dependency graph is the thing this split avoids.
+`packages/config/env` has a **client** variant (`client-vite`, for `apps/web`), a
+**server** variant (`apps/api`, `packages/database`) and a **waha** variant (the WhatsApp
+service, for `packages/infra`). It's a **domain** split: the client variant is whatever
+the web app itself needs to do its job (e.g. the API's URL); `server` is backend-only
+concerns (`DATABASE_URL`). The web app should never need to import `server` just to get
+its own API URL, even though nothing stops it technically — pulling in unrelated backend
+secrets into the web app's dependency graph is the thing this split avoids. For the same
+reason, database commands don't need the WAHA variables: only the API checks them, when
+it boots.
 
 The client variant's read mechanism (`import.meta.env`) and its Vite-specific
 constraints are covered in `WEB-VITE-OVERVIEW.md`, not here.
