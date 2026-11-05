@@ -18,14 +18,28 @@ together. Load this guide for any task that touches `apps/api/src/app.ts`,
 
 `app.ts` wires things in this order, and new middleware should respect it:
 
-1. `express.json()` — body parsing must happen before anything that reads `req.body`.
-2. `cors({ origin: FRONTEND_URL })` — only the web app's own origin. There is no
+1. `rejectForeignHost` and `rejectForeignOrigin` — see "Protecting a local API" below.
+2. `express.json()` — body parsing must happen before anything that reads `req.body`.
+3. `cors({ origin: FRONTEND_URL })` — only the web app's own origin. There is no
    authentication, so don't widen this.
-3. `helmet(...)`.
-4. Feature routers, mounted under `/api`.
-5. `notFoundHandler` — catches anything no router matched.
-6. `handleGlobalError` — **must be last**. It's the only place a thrown error becomes
+4. `helmet(...)`.
+5. Feature routers, mounted under `/api`.
+6. `notFoundHandler` — catches anything no router matched.
+7. `handleGlobalError` — **must be last**. It's the only place a thrown error becomes
    an HTTP response (see `ERROR-HANDLING.md`).
+
+## Protecting a local API
+
+The API has no authentication and holds private conversations, and any site open in the
+user's browser can reach `127.0.0.1`. Listening only on that address isn't enough:
+
+- **`rejectForeignOrigin`:** CORS only stops a site from reading the response. A POST with
+  no JSON body needs no preflight, so it would still run. Any request with effects that
+  carries another `Origin` gets a `403`. Requests with no `Origin`, like a local script,
+  aren't from a site and stay allowed.
+- **`rejectForeignHost`:** with DNS rebinding, a site points its own domain at
+  `127.0.0.1` and becomes same-origin with the API. Only `127.0.0.1:<port>` and
+  `localhost:<port>` are accepted as `Host`.
 
 ## Env access
 

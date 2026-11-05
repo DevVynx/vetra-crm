@@ -15,10 +15,15 @@ import { searchRouter } from "@/features/search/routes";
 import { stagesRouter } from "@/features/stages/routes";
 import { handleGlobalError } from "@/shared/middlewares/handleGlobalError";
 import { notFoundHandler } from "@/shared/middlewares/notFoundHandler";
+import { rejectForeignHost } from "@/shared/middlewares/rejectForeignHost";
+import { rejectForeignOrigin } from "@/shared/middlewares/rejectForeignOrigin";
 
 export const app: Express = express();
 
 const { FRONTEND_URL } = envConfig.get();
+
+app.use(rejectForeignHost);
+app.use(rejectForeignOrigin);
 
 app.use(express.json());
 
