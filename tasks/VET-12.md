@@ -134,7 +134,8 @@ Shown as plain informative text, in muted style, never in red, and never blockin
 - The link is recalculated when a conversation is created, and when a lead is created, has its phone edited or is restored by "Desfazer".
 - Deleting a lead keeps the conversation, which becomes an unknown number.
 - An `@lid` contact with no resolvable phone appears by name, can receive messages, and doesn't link automatically.
-- The shown name is the lead's contact or business name when linked, then the WhatsApp agenda name, then the push name, then the formatted number.
+- The shown name is the lead or customer's contact name when linked, or the business name when the contact is empty, then the name saved in the user's agenda, then the formatted number. There is no separate name field for a conversation: filling the contact means talking to that person, and leaving it empty means talking to the company. The other name shows below it, or the number when there is none.
+- Someone who is neither a lead nor in the agenda stays as a number. To give them a name, save them on the phone or use "Tornar lead". The name a person gave their own profile isn't shown or searched, since the user only trusts names they chose. It is only used for a hidden `@lid` contact with no number. The agenda comes from WAHA's contacts list, read on every sync; a contact saved on the phone shows up on the next one.
 
 ### Sending
 
@@ -149,7 +150,8 @@ Delivered in step 5, working like WhatsApp Web.
 
 **Thread header**
 
-- Shortcut buttons at the top of the thread, and a three dots button at the far right that opens a dropdown with only the essentials, including **closing the conversation**, which returns to the empty state.
+- The actions next to the name depend on the contact: **Tornar lead** for an unknown number, the stage badge and **Ver lead** for a lead, and only **Ver cliente** for a customer.
+- A three dots button at the far right opens a dropdown with only the essentials: for now, **Fechar conversa**, which returns to the empty state.
 
 **Menu on each message**
 
@@ -185,8 +187,8 @@ What the code already has for the CRM part:
 
 To confirm with the user when step 5 starts:
 
-- The exact shortcuts for each kind of contact.
 - Whether reply data has to be imported again for messages already stored, since `replyTo` isn't kept today.
+
 ### Read ticks
 
 Sent messages show one gray tick when sent, two when delivered and two blue when read, from WAHA's `message.ack`. The first import brings them along with each message. Messages imported before this existed stay without ticks, which the user accepted since it only affects the development data. A status never moves backward. If the person turned read receipts off, the `READ` ack never comes, so it stays at two gray ticks, exactly like on WhatsApp.
@@ -199,8 +201,8 @@ Opening a conversation marks it as read in Vetra and on WhatsApp, only while the
 
 - The thread header shows only the current stage as a badge. Clicking opens the stage menu.
 - Choosing Fechado opens `CloseLeadSheet`. Archiving opens the existing archive dialog. Other stages apply directly with the usual "Desfazer" toast. All the rules of VET-9 still apply.
-- A linked lead has a "Ver lead" link; a customer has only "Ver cliente", with no stage control.
-- An unknown number has "Tornar lead", which opens the lead form with the number and the WhatsApp name filled in.
+- A linked lead has the stage badge and "Ver lead"; a customer has only "Ver cliente", with no stage control.
+- An unknown number has "Tornar lead", which opens the lead form with the number filled in and the WhatsApp profile name as an editable suggestion in the contact field.
 
 ### Último contato
 
