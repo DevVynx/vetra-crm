@@ -10,6 +10,7 @@ import { formatPhone } from "@/shared/utils/format";
 import { useDisconnectWhatsapp } from "../mutations/useDisconnectWhatsapp";
 import { SettingsRow } from "./SettingsRow";
 import { SettingsSection } from "./SettingsSection";
+import { WhatsAppConversationsRow } from "./WhatsAppConversationsRow";
 
 function describeConnection(status: WhatsappConnectionStatus | undefined, phone?: string | null) {
   if (status !== "connected") return "Desconectado";
@@ -41,6 +42,7 @@ export function WhatsAppSettings() {
           </Button>
         )}
       </SettingsRow>
+      <WhatsAppConversationsRow isConnected={isConnected} />
 
       <ConfirmDialog
         open={confirming}
