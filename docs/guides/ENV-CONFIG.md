@@ -46,6 +46,10 @@ usually shouldn't be.
    `package.json` script, don't assume it's automatic. See `WEB-VITE-OVERVIEW.md` if
    the variable needs to reach the browser specifically — that has its own rules.
 
+## The storage folder
+
+`STORAGE_DIR` is optional (default `storage`, read from where the API runs) and belongs to the `server` variant. It is where the API keeps the few files it owns, today only the profile photo (`profile-photo.webp`), written through `@vetra/infra`. It is outside git. Change it only to keep the files somewhere else; a relative path moves with the folder the API is started from.
+
 ## The WAHA variables
 
 `WAHA_URL` and `WAHA_API_KEY` are required, and only the API reads them (through
