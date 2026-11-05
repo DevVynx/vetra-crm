@@ -17,6 +17,13 @@ export const whatsappMessageTypeEnum = pgEnum("whatsapp_message_type", [
   "other",
 ]);
 
+// Declared in order of progress: Postgres compares enum values by this order.
+export const whatsappMessageStatusEnum = pgEnum("whatsapp_message_status", [
+  "sent",
+  "delivered",
+  "read",
+]);
+
 export const whatsappAccountsTable = pgTable("whatsapp_accounts", {
   id: uuidPrimaryKeyColumn(),
   phone: text().notNull(),
@@ -60,6 +67,7 @@ export const whatsappMessagesTable = pgTable(
     externalId: text().notNull(),
     direction: whatsappMessageDirectionEnum().notNull(),
     type: whatsappMessageTypeEnum().notNull(),
+    status: whatsappMessageStatusEnum(),
     content: text(),
     sentAt: instantColumn("sent_at").notNull(),
     createdAt: createdAtColumn(),
