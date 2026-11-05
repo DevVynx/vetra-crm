@@ -2,6 +2,7 @@ import { type WahaChatOverview, wahaClient } from "@vetra/infra";
 
 import { whatsappDomain } from "../domain";
 import { whatsappRepositories } from "../repositories";
+import { type Agenda, loadAgenda } from "./loadAgenda";
 import { toWhatsappMessage } from "./toWhatsappMessage";
 import { notifyWhatsappChange } from "./whatsappChanges";
 
@@ -50,7 +51,12 @@ async function refreshLastMessageStatus({ lastMessage }: WahaChatOverview): Prom
   if (await whatsappRepositories.advanceMessageStatus(externalId, status)) notifyWhatsappChange();
 }
 
-async function syncChat(chat: WahaChatOverview, isFullImport: boolean, now: Date): Promise<number> {
+async function syncChat(
+  chat: WahaChatOverview,
+  agenda: Agenda | null,
+  isFullImport: boolean,
+  now: Date
+): Promise<number> {
   if (!whatsappDomain.isIndividualChat(chat.id) || !chat.lastMessage) return 0;
 
   const lastMessageAt = new Date(chat.lastMessage.timestamp * SECOND_IN_MS);
@@ -58,13 +64,16 @@ async function syncChat(chat: WahaChatOverview, isFullImport: boolean, now: Date
   const historyStart = whatsappDomain.historyStart(now);
   if (!stored && lastMessageAt < historyStart) return 0;
 
+  const agendaEntry = agenda?.get(chat.id);
   const conversation = await whatsappRepositories.saveConversationFromOverview(
     whatsappDomain.createConversation({
       chatId: chat.id,
-      contactName: chat.name ?? null,
+      contactName: agendaEntry?.profileName ?? stored?.contactName ?? chat.name ?? null,
+      savedName: agendaEntry?.savedName ?? null,
       photoUrl: whatsappDomain.safePhotoUrl(chat.picture),
       photoFetchedAt: now,
-    })
+    }),
+    agenda !== null
   );
 
   if (isFullImport) {
@@ -91,13 +100,14 @@ async function syncChat(chat: WahaChatOverview, isFullImport: boolean, now: Date
 
 // Reads every chat from the overview, so one run is both the first import and the catch-up.
 export async function syncConversations(isFullImport: boolean, now: Date): Promise<number> {
+  const agenda = await loadAgenda();
   let imported = 0;
 
   for (let offset = 0; ; offset += OVERVIEW_PAGE_SIZE) {
     const chats = await wahaClient.getChatsOverview(OVERVIEW_PAGE_SIZE, offset);
 
     for (const chat of chats) {
-      const importedFromChat = await syncChat(chat, isFullImport, now);
+      const importedFromChat = await syncChat(chat, agenda, isFullImport, now);
       imported += importedFromChat;
       if (importedFromChat > 0) notifyWhatsappChange();
     }

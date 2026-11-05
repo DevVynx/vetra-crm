@@ -45,6 +45,15 @@ const chatOverviewSchema = z.object({
 });
 export type WahaChatOverview = z.infer<typeof chatOverviewSchema>;
 
+const contactSchema = z.object({
+  id: z.string(),
+  number: z.string().nullish(),
+  name: z.string().nullish(),
+  pushname: z.string().nullish(),
+  isMyContact: z.boolean().nullish(),
+});
+export type WahaContact = z.infer<typeof contactSchema>;
+
 const unknownListSchema = z.array(z.unknown());
 
 // One malformed item must not throw away the whole page of a long history.
@@ -64,6 +73,22 @@ export async function getChatsOverview(limit: number, offset: number): Promise<W
   );
 
   return parseItems(await parseWahaResponse(response, unknownListSchema), chatOverviewSchema);
+}
+
+export async function getContacts(limit: number, offset: number): Promise<WahaContact[]> {
+  const query = new URLSearchParams({
+    session: WAHA_SESSION,
+    limit: String(limit),
+    offset: String(offset),
+  });
+  const response = await wahaFetch(
+    `/api/contacts/all?${query}`,
+    "GET",
+    undefined,
+    LONG_REQUEST_TIMEOUT_MS
+  );
+
+  return parseItems(await parseWahaResponse(response, unknownListSchema), contactSchema);
 }
 
 type GetChatMessagesInput = {

@@ -18,6 +18,7 @@ async function createConversationFor(phone: string) {
   const created = whatsappDomain.createConversation({
     chatId,
     contactName: null,
+    savedName: null,
     photoUrl: null,
     photoFetchedAt: null,
   });

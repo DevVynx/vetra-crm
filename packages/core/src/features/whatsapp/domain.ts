@@ -18,6 +18,7 @@ export type WhatsappConversation = {
   phone: string | null;
   phoneKey: string | null;
   contactName: string | null;
+  savedName: string | null;
   photoUrl: string | null;
   photoFetchedAt: Date | null;
   lastMessageAt: Date | null;
@@ -89,6 +90,11 @@ const STATUS_BY_ACK: Record<string, WhatsappMessageStatus> = {
 const messageStatusOf = (ackName: string | null | undefined): WhatsappMessageStatus | null =>
   (ackName && STATUS_BY_ACK[ackName]) || null;
 
+// A name only counts as being in the agenda when WhatsApp doesn't say the opposite: for someone
+// not saved, some engines fill the same field with the name of the person's profile.
+const savedNameOfContact = (contact: { name?: string | null; isMyContact?: boolean | null }) =>
+  contact.isMyContact !== false && contact.name?.trim() ? contact.name.trim() : null;
+
 const safePhotoUrl = (url: string | null | undefined): string | null =>
   url?.startsWith("https://") ? url : null;
 
@@ -101,6 +107,7 @@ function createMessage(input: Omit<WhatsappMessage, "id">): WhatsappMessage {
 type CreateConversationInput = {
   chatId: string;
   contactName: string | null;
+  savedName: string | null;
   photoUrl: string | null;
   photoFetchedAt: Date | null;
 };
@@ -149,5 +156,6 @@ export const whatsappDomain = {
   phoneDigitsOfSearch,
   phoneOfChatId,
   safePhotoUrl,
+  savedNameOfContact,
   unreadChangeOf,
 };

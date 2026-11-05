@@ -2,6 +2,7 @@ import { subscribeToEvents } from "./events";
 import {
   getChatMessages,
   getChatsOverview,
+  getContacts,
   getPhoneIdOfLid,
   getProfilePictureUrl,
 } from "./messages";
@@ -16,7 +17,7 @@ import {
 } from "./session";
 
 export type { WahaEvent } from "./events";
-export type { WahaChatOverview, WahaMessage } from "./messages";
+export type { WahaChatOverview, WahaContact, WahaMessage } from "./messages";
 export type { WahaQrCode, WahaSession } from "./session";
 export * from "./WahaSendRestrictedError";
 export * from "./WahaUnavailableError";
@@ -26,6 +27,7 @@ export const wahaClient = {
   findChatIdOfPhone,
   getChatMessages,
   getChatsOverview,
+  getContacts,
   getPhoneIdOfLid,
   getProfilePictureUrl,
   getQrCode,

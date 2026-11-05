@@ -40,6 +40,7 @@ async function conversationFor(
   const created = whatsappDomain.createConversation({
     chatId,
     contactName: pushName,
+    savedName: null,
     photoUrl: null,
     photoFetchedAt: null,
   });

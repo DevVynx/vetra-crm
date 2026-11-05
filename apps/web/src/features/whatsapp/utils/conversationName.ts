@@ -3,7 +3,9 @@ import type { WhatsappConversation } from "@vetra/contracts";
 import { formatPhone } from "@/shared/utils/format";
 
 export function conversationName(conversation: WhatsappConversation): string {
-  if (conversation.contactName) return conversation.contactName;
+  if (conversation.savedName) return conversation.savedName;
+  if (conversation.phone) return formatPhone(conversation.phone);
 
-  return conversation.phone ? formatPhone(conversation.phone) : "Contato sem número";
+  // Only a hidden @lid contact has no number, and the profile name is all there is to tell them apart.
+  return conversation.contactName ?? "Contato sem número";
 }

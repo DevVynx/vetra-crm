@@ -26,6 +26,7 @@ export type WhatsappConversationRow = {
   id: string;
   phone: string | null;
   contactName: string | null;
+  savedName: string | null;
   photoUrl: string | null;
   unreadCount: number;
   lastMessageAt: Date | null;
@@ -43,6 +44,7 @@ const conversationColumns = {
   phone: whatsappConversationsTable.phone,
   phoneKey: whatsappConversationsTable.phoneKey,
   contactName: whatsappConversationsTable.contactName,
+  savedName: whatsappConversationsTable.savedName,
   photoUrl: whatsappConversationsTable.photoUrl,
   photoFetchedAt: whatsappConversationsTable.photoFetchedAt,
   lastMessageAt: whatsappConversationsTable.lastMessageAt,
@@ -52,6 +54,7 @@ const conversationRowColumns = {
   id: whatsappConversationsTable.id,
   phone: whatsappConversationsTable.phone,
   contactName: whatsappConversationsTable.contactName,
+  savedName: whatsappConversationsTable.savedName,
   photoUrl: whatsappConversationsTable.photoUrl,
   unreadCount: whatsappConversationsTable.unreadCount,
   lastMessageAt: whatsappConversationsTable.lastMessageAt,
@@ -78,7 +81,7 @@ function matchesSearch(q: string) {
   const digits = whatsappDomain.phoneDigitsOfSearch(q);
 
   return or(
-    containsSql(sql`${whatsappConversationsTable.contactName}`, q),
+    containsSql(sql`${whatsappConversationsTable.savedName}`, q),
     ...(digits
       ? [
           containsSql(sql`${whatsappConversationsTable.phone}`, digits),
@@ -178,8 +181,10 @@ export async function insertConversationIfNew(
   return inserted.length > 0;
 }
 
+// When the agenda couldn't be read, the name already saved stays: nobody left the agenda.
 export async function saveConversationFromOverview(
-  conversation: WhatsappConversation
+  conversation: WhatsappConversation,
+  isAgendaKnown: boolean
 ): Promise<WhatsappConversation> {
   const [saved] = await db
     .insert(whatsappConversationsTable)
@@ -188,6 +193,7 @@ export async function saveConversationFromOverview(
       target: whatsappConversationsTable.chatId,
       set: {
         contactName: sql`coalesce(excluded.contact_name, ${whatsappConversationsTable.contactName})`,
+        ...(isAgendaKnown ? { savedName: conversation.savedName } : {}),
         photoUrl: conversation.photoUrl,
         photoFetchedAt: conversation.photoFetchedAt,
       },
