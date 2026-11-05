@@ -1,4 +1,7 @@
 import type { UpdateCustomerRequest, UpdateLeadRequest } from "@vetra/contracts";
+import { isAxiosError } from "axios";
+
+import { getErrorMessage } from "./getErrorMessage";
 
 export type ContactFormValues = {
   businessName: string;
@@ -34,6 +37,12 @@ export const normalizePhone = (value: string) => {
 export const isValidPhone = (value: string) => /^\d{8,15}$/.test(normalizePhone(value));
 
 export const INVALID_PHONE_MESSAGE = "Informe o número com DDD ou com + e o código do país.";
+
+// Saving a contact only conflicts with another one when the number is already taken.
+export const contactErrorMessage = (error: unknown, fallback: string) =>
+  isAxiosError(error) && error.response?.status === 409
+    ? "Esse número já está em outro lead ou cliente."
+    : getErrorMessage(error, fallback);
 
 // Addresses are often pasted without the protocol, as in "site.vercel.app".
 export const normalizeDemoUrl = (value: string) => {

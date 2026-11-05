@@ -30,11 +30,20 @@ export type WhatsappConversationRow = {
   photoUrl: string | null;
   unreadCount: number;
   lastMessageAt: Date | null;
+  lead: {
+    id: string;
+    businessName: string;
+    contactName: string | null;
+    stage: string;
+    stoppedAtStage: string | null;
+    isCustomer: boolean;
+  } | null;
   lastMessage: {
     direction: WhatsappMessageDirection;
     type: WhatsappMessageType;
     status: WhatsappMessageStatus | null;
     content: string | null;
+    isDeleted: boolean;
   } | null;
 };
 
@@ -58,9 +67,23 @@ const conversationRowColumns = {
   photoUrl: whatsappConversationsTable.photoUrl,
   unreadCount: whatsappConversationsTable.unreadCount,
   lastMessageAt: whatsappConversationsTable.lastMessageAt,
+  // Read through the number instead of stored, so it can't go stale when a lead is created, gets
+  // another phone or is deleted. Conversations with no phone never match; see VET-12.md.
+  lead: sql<WhatsappConversationRow["lead"]>`(
+    select json_build_object(
+      'id', l.id,
+      'businessName', l.business_name,
+      'contactName', l.contact_name,
+      'stage', l.stage_id,
+      'stoppedAtStage', l.stopped_at_stage_id,
+      'isCustomer', exists(select 1 from deals d where d.lead_id = l.id)
+    )
+    from leads l
+    where l.phone_key = ${qualified(whatsappConversationsTable.phoneKey)}
+  )`,
   // Read from the message itself, so the preview can never disagree with the thread.
   lastMessage: sql<WhatsappConversationRow["lastMessage"]>`(
-    select json_build_object('direction', m.direction, 'type', m.type, 'status', m.status, 'content', left(m.content, ${PREVIEW_LENGTH}))
+    select json_build_object('direction', m.direction, 'type', m.type, 'status', m.status, 'content', left(m.content, ${PREVIEW_LENGTH}), 'isDeleted', m.deleted_at is not null)
     from whatsapp_messages m
     where m.conversation_id = ${qualified(whatsappConversationsTable.id)}
     order by m.sent_at desc, m.id desc
@@ -82,6 +105,11 @@ function matchesSearch(q: string) {
 
   return or(
     containsSql(sql`${whatsappConversationsTable.savedName}`, q),
+    sql`exists (
+      select 1 from leads l
+      where l.phone_key = ${qualified(whatsappConversationsTable.phoneKey)}
+        and (${containsSql(sql`l.business_name`, q)} or ${containsSql(sql`l.contact_name`, q)})
+    )`,
     ...(digits
       ? [
           containsSql(sql`${whatsappConversationsTable.phone}`, digits),
@@ -109,6 +137,42 @@ export async function findConversationsPage({
     .offset((page - 1) * pageSize);
 
   return { items: rows.slice(0, pageSize), hasMore: rows.length > pageSize };
+}
+
+export async function findAwaitingConversations(limit: number): Promise<WhatsappConversationRow[]> {
+  return db
+    .select(conversationRowColumns)
+    .from(whatsappConversationsTable)
+    .where(
+      and(
+        // Family and friends also write, but only leads and customers are work waiting on the user.
+        sql`exists (
+          select 1 from leads l
+          where l.phone_key = ${qualified(whatsappConversationsTable.phoneKey)}
+        )`,
+        sql`(
+          select m.direction from whatsapp_messages m
+          where m.conversation_id = ${qualified(whatsappConversationsTable.id)}
+          order by m.sent_at desc, m.id desc
+          limit 1
+        ) = 'inbound'`
+      )
+    )
+    .orderBy(desc(whatsappConversationsTable.lastMessageAt), desc(whatsappConversationsTable.id))
+    .limit(limit);
+}
+
+export async function findConversationRowByPhoneKey(
+  phoneKey: string
+): Promise<WhatsappConversationRow | null> {
+  const [row] = await db
+    .select(conversationRowColumns)
+    .from(whatsappConversationsTable)
+    .where(eq(whatsappConversationsTable.phoneKey, phoneKey))
+    .orderBy(sql`${whatsappConversationsTable.lastMessageAt} desc nulls last`)
+    .limit(1);
+
+  return row ?? null;
 }
 
 export async function findConversationRowById(id: string): Promise<WhatsappConversationRow | null> {
@@ -163,6 +227,25 @@ export async function findConversationByChatId(
     .select(conversationColumns)
     .from(whatsappConversationsTable)
     .where(eq(whatsappConversationsTable.chatId, chatId))
+    .limit(1);
+
+  return conversation ?? null;
+}
+
+// The same person can come under an id with or without the ninth digit, and stays one conversation.
+export async function findConversationOfChat(chatId: string): Promise<WhatsappConversation | null> {
+  const phoneKey = whatsappDomain.phoneKeyOfChatId(chatId);
+
+  const [conversation] = await db
+    .select(conversationColumns)
+    .from(whatsappConversationsTable)
+    .where(
+      or(
+        eq(whatsappConversationsTable.chatId, chatId),
+        phoneKey ? eq(whatsappConversationsTable.phoneKey, phoneKey) : undefined
+      )
+    )
+    .orderBy(sql`${whatsappConversationsTable.chatId} = ${chatId} desc`)
     .limit(1);
 
   return conversation ?? null;

@@ -33,7 +33,7 @@ async function conversationFor(
   chatId: string,
   message: WahaMessage
 ): Promise<WhatsappConversation | null> {
-  const existing = await whatsappRepositories.findConversationByChatId(chatId);
+  const existing = await whatsappRepositories.findConversationOfChat(chatId);
   if (existing) return existing;
 
   const pushName = message.fromMe ? null : (message._data?.Info?.PushName ?? null);
@@ -50,7 +50,7 @@ async function conversationFor(
     fetchConversationPhoto(created).catch(reportSyncFailure);
   }
 
-  return whatsappRepositories.findConversationByChatId(chatId);
+  return whatsappRepositories.findConversationOfChat(chatId);
 }
 
 async function saveLiveMessage(message: WahaMessage): Promise<void> {
@@ -78,6 +78,26 @@ async function applyEvent(event: WahaEvent): Promise<void> {
   }
 
   if (event.event === "message.any") return saveLiveMessage(event.payload);
+
+  if (event.event === "message.edited") {
+    const { editedMessageId, body } = event.payload;
+    if (!editedMessageId || body === null || body === undefined) return;
+
+    const externalId = whatsappDomain.externalIdOf(editedMessageId);
+    if (await whatsappRepositories.updateMessageContent({ externalId }, body)) {
+      notifyWhatsappChange();
+    }
+    return;
+  }
+
+  if (event.event === "message.revoked") {
+    const revokedId = event.payload.revokedMessageId ?? event.payload.after?.revokedMessageId;
+    if (!revokedId) return;
+
+    const externalId = whatsappDomain.externalIdOf(revokedId);
+    if (await whatsappRepositories.markMessageDeleted({ externalId })) notifyWhatsappChange();
+    return;
+  }
 
   const { id, fromMe, ackName } = event.payload;
   const externalId = whatsappDomain.externalIdOf(id);

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { ActiveFilters } from "@/shared/components/filters/ActiveFilters";
 import { FilterButton } from "@/shared/components/filters/FilterButton";
 import { useFilterController } from "@/shared/components/filters/useFilterController";
+import { CreateLeadSheet } from "@/shared/components/leads/CreateLeadSheet";
 import { Pagination } from "@/shared/components/Pagination";
 import { SearchField } from "@/shared/components/SearchField";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
@@ -28,7 +29,6 @@ import { useBulkChangeLeadStage } from "../mutations/useBulkChangeLeadStage";
 import { useLeadFilterOptions } from "../queries/useLeadFilterOptions";
 import { useLeadIds } from "../queries/useLeadIds";
 import { useLeads } from "../queries/useLeads";
-import { CreateLeadSheet } from "./CreateLeadSheet";
 import { LeadsBulkBar } from "./LeadsBulkBar";
 import { LeadsTable, LeadsTableSkeleton } from "./LeadsTable";
 

@@ -1,6 +1,8 @@
 import type { WhatsappConnectionStatus } from "@vetra/contracts";
 import { v7 as uuidv7 } from "uuid";
 
+import { canonicalPhoneOf } from "../../shared/phone";
+
 export type WhatsappMessageDirection = "inbound" | "outbound";
 export type WhatsappMessageType = "text" | "audio" | "image" | "video" | "document" | "other";
 export type WhatsappMessageStatus = "sent" | "delivered" | "read";
@@ -31,14 +33,23 @@ export type WhatsappMessage = {
   type: WhatsappMessageType;
   status: WhatsappMessageStatus | null;
   content: string | null;
+  wahaId: string | null;
+  replyToExternalId: string | null;
+  replyToContent: string | null;
+  editedAt: Date | null;
+  deletedAt: Date | null;
   sentAt: Date;
 };
+
+type MessageExtras = Pick<
+  WhatsappMessage,
+  "wahaId" | "replyToExternalId" | "replyToContent" | "editedAt" | "deletedAt"
+>;
 
 const HISTORY_DAYS = 365;
 const DAY_IN_MS = 86_400_000;
 const PHONE_CHAT_ID = /^(\d+)(?::\d+)?@(?:c\.us|s\.whatsapp\.net)$/;
 const INDIVIDUAL_CHAT_ID = /@(?:c\.us|s\.whatsapp\.net|lid)$/;
-const BRAZILIAN_MOBILE_WITH_NINTH_DIGIT = /^55(\d{2})9(\d{8})$/;
 
 const STATUS_BY_WAHA_STATUS: Record<string, WhatsappConnectionStatus> = {
   STARTING: "connecting",
@@ -59,10 +70,11 @@ const isLidChat = (chatId: string): boolean => chatId.endsWith("@lid");
 
 const chatIdOfPhone = (phone: string): string => `${phone}@c.us`;
 
-// Always a full international number. In Brazil, WhatsApp ids carry the ninth digit only in some
-// regions, while people always type it, so both forms must match. Other countries stay untouched.
-const canonicalPhoneOf = (phone: string): string =>
-  phone.replace(/\D/g, "").replace(BRAZILIAN_MOBILE_WITH_NINTH_DIGIT, "55$1$2");
+const phoneKeyOfChatId = (chatId: string): string | null => {
+  const phone = phoneOfChatId(chatId);
+
+  return phone && canonicalPhoneOf(phone);
+};
 
 // A search made only of phone characters also looks for a number, whatever its format.
 const phoneDigitsOfSearch = (search: string): string | null =>
@@ -100,9 +112,33 @@ const safePhotoUrl = (url: string | null | undefined): string | null =>
 
 const historyStart = (now: Date): Date => new Date(now.getTime() - HISTORY_DAYS * DAY_IN_MS);
 
-function createMessage(input: Omit<WhatsappMessage, "id">): WhatsappMessage {
-  return { id: uuidv7(), ...input };
+const REPLY_SNIPPET_LENGTH = 200;
+
+function createMessage(
+  input: Omit<WhatsappMessage, "id" | keyof MessageExtras> & Partial<MessageExtras>
+): WhatsappMessage {
+  return {
+    id: uuidv7(),
+    wahaId: null,
+    replyToExternalId: null,
+    replyToContent: null,
+    editedAt: null,
+    deletedAt: null,
+    ...input,
+  };
 }
+
+const replySnippetOf = (content: string | null): string | null =>
+  content ? content.slice(0, REPLY_SNIPPET_LENGTH) : null;
+
+// Messages stored by an import may only know their short id, which WAHA's calls don't accept.
+const wahaIdOf = (
+  message: Pick<WhatsappMessage, "wahaId" | "externalId" | "direction">,
+  chatId: string
+): string =>
+  message.wahaId?.includes("@")
+    ? message.wahaId
+    : `${message.direction === "outbound"}_${chatId}_${message.externalId}`;
 
 type CreateConversationInput = {
   chatId: string;
@@ -142,6 +178,7 @@ function unreadChangeOf(messages: Pick<WhatsappMessage, "direction" | "sentAt">[
 
 export const whatsappDomain = {
   canonicalPhoneOf,
+  phoneKeyOfChatId,
   chatIdOfPhone,
   connectionStatusOf,
   createAccount,
@@ -155,7 +192,9 @@ export const whatsappDomain = {
   messageTypeOf,
   phoneDigitsOfSearch,
   phoneOfChatId,
+  replySnippetOf,
   safePhotoUrl,
   savedNameOfContact,
   unreadChangeOf,
+  wahaIdOf,
 };

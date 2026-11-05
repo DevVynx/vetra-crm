@@ -3,12 +3,11 @@ import type { WhatsappConversation } from "@vetra/contracts";
 
 import { BusinessAvatar } from "@/shared/components/BusinessAvatar";
 import { Badge } from "@/shared/components/ui/badge";
+import { conversationName } from "@/shared/components/whatsapp/conversationName";
 import { MessageStatusIcon } from "@/shared/components/whatsapp/MessageStatusIcon";
 import { nonTextMessageLabels } from "@/shared/components/whatsapp/messageTypeLabels";
 import { cn } from "@/shared/utils/cn";
 import { formatConversationTime } from "@/shared/utils/date";
-
-import { conversationName } from "../utils/conversationName";
 
 function LastMessagePreview({ conversation }: { conversation: WhatsappConversation }) {
   const { lastMessage } = conversation;
@@ -23,8 +22,10 @@ function LastMessagePreview({ conversation }: { conversation: WhatsappConversati
       ) : (
         lastMessage.direction === "outbound" && <span className="shrink-0">Você:</span>
       )}
-      {nonText && <nonText.icon className="size-3.5 shrink-0" />}
-      <span className="truncate">{lastMessage.content ?? nonText?.label}</span>
+      {nonText && !lastMessage.isDeleted && <nonText.icon className="size-3.5 shrink-0" />}
+      <span className={cn("truncate", lastMessage.isDeleted && "italic")}>
+        {lastMessage.isDeleted ? "Mensagem apagada" : (lastMessage.content ?? nonText?.label)}
+      </span>
     </span>
   );
 }

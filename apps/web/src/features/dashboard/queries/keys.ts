@@ -10,6 +10,5 @@ export const dashboardQueryKeys = {
   conversionByNiche: (period: DashboardPeriod) =>
     ["dashboard", "conversion-by-niche", period] as const,
   nextActions: nextActionsQueryKeys.all,
-  awaitingConversations: ["conversations", "awaiting"] as const,
   leadsWithoutNextAction: nextActionsQueryKeys.leadsWithoutNextAction,
 };

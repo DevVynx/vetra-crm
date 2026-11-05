@@ -1,17 +1,18 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { GetLeadConversationResponse } from "@vetra/contracts";
+import { buildPath, whatsappRoutes } from "@vetra/routes";
 
-import { leadsQueryKeys } from "@/shared/queries/leads/keys";
-
-// WhatsApp is not connected yet (no API route): every lead answers "no conversation".
-const NOT_CONNECTED: GetLeadConversationResponse = { conversation: null };
-
-export const leadConversationQueryOptions = (leadId: string) =>
-  queryOptions({
-    queryKey: leadsQueryKeys.conversation(leadId),
-    queryFn: () => NOT_CONNECTED,
-  });
+import api from "@/shared/lib/axios/api";
+import { whatsappQueryKeys } from "@/shared/queries/whatsapp/keys";
 
 export function useLeadConversation(leadId: string) {
-  return useQuery(leadConversationQueryOptions(leadId));
+  return useQuery({
+    queryKey: whatsappQueryKeys.leadConversation(leadId),
+    queryFn: async () =>
+      (
+        await api.get<GetLeadConversationResponse>(
+          buildPath(whatsappRoutes.leadConversation, { id: leadId })
+        )
+      ).data,
+  });
 }

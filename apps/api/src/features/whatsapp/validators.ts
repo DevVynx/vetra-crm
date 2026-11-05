@@ -1,10 +1,14 @@
 import {
+  deleteWhatsappMessagesRequestSchema,
+  editWhatsappMessageRequestSchema,
+  leadParamsSchema,
   listWhatsappConversationsQuerySchema,
   listWhatsappMessagesQuerySchema,
   openWhatsappConversationRequestSchema,
   resolveWhatsappAccountChangeRequestSchema,
   sendWhatsappMessageRequestSchema,
   whatsappConversationParamsSchema,
+  whatsappMessageParamsSchema,
 } from "@vetra/contracts";
 
 import { validation } from "@/shared/http/validation";
@@ -23,6 +27,15 @@ const v = {
     body: sendWhatsappMessageRequestSchema,
   }),
   markRead: validation({ params: whatsappConversationParamsSchema }),
+  editMessage: validation({
+    params: whatsappMessageParamsSchema,
+    body: editWhatsappMessageRequestSchema,
+  }),
+  deleteMessages: validation({
+    params: whatsappConversationParamsSchema,
+    body: deleteWhatsappMessagesRequestSchema,
+  }),
+  leadConversation: validation({ params: leadParamsSchema }),
 };
 
 export default v;

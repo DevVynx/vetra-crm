@@ -1,16 +1,14 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { ListAwaitingConversationsResponse } from "@vetra/contracts";
+import { whatsappRoutes } from "@vetra/routes";
 
-import { dashboardQueryKeys } from "./keys";
-
-// WhatsApp is not connected yet (no API route): nothing is awaiting a reply.
-const NOT_CONNECTED: ListAwaitingConversationsResponse = { conversations: [] };
-
-export const awaitingConversationsQueryOptions = queryOptions({
-  queryKey: dashboardQueryKeys.awaitingConversations,
-  queryFn: () => NOT_CONNECTED,
-});
+import api from "@/shared/lib/axios/api";
+import { whatsappQueryKeys } from "@/shared/queries/whatsapp/keys";
 
 export function useAwaitingConversations() {
-  return useQuery(awaitingConversationsQueryOptions);
+  return useQuery({
+    queryKey: whatsappQueryKeys.awaiting,
+    queryFn: async () =>
+      (await api.get<ListAwaitingConversationsResponse>(whatsappRoutes.conversationsAwaiting)).data,
+  });
 }

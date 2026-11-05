@@ -101,7 +101,11 @@ export function CustomersTable({ customers, activeIndex, isFull }: CustomersTabl
           >
             <TableCell className="pl-4">
               <div className="flex items-center gap-3">
-                <BusinessAvatar name={customer.businessName} className="text-xs" />
+                <BusinessAvatar
+                  name={customer.businessName}
+                  photoUrl={customer.photoUrl ?? undefined}
+                  className="text-xs"
+                />
                 <div className="min-w-0">
                   <Link
                     to="/customers/$customerId"

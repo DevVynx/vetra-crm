@@ -44,6 +44,7 @@ export const listLeadIdsResponseSchema = z.object({ ids: z.array(z.string()) });
 export type ListLeadIdsResponse = z.infer<typeof listLeadIdsResponseSchema>;
 
 export const leadListItemSchema = leadSummarySchema.extend({
+  photoUrl: z.string().nullable(),
   nextAction: z.object({ description: z.string(), dueAt: z.iso.datetime() }).nullable(),
   lastContactAt: z.iso.datetime().nullable(),
 });

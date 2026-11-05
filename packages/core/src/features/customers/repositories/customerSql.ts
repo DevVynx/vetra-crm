@@ -7,7 +7,7 @@ import {
   sql,
 } from "@vetra/database";
 
-import { leadColumns } from "../../leads/repositories/leadColumns";
+import { leadColumns, leadPhotoSql } from "../../leads/repositories/leadColumns";
 
 export const dealColumns = {
   id: dealsTable.id,
@@ -18,7 +18,10 @@ export const dealColumns = {
   monthlyFeeInCents: dealsTable.monthlyFeeInCents,
 };
 
-export const customerColumns = { lead: leadColumns, deal: dealColumns };
+export const customerColumns = {
+  lead: { ...leadColumns, photoUrl: leadPhotoSql },
+  deal: dealColumns,
+};
 
 // Per-customer figures computed in the database, correlated to the current lead row.
 export const receivedSql = sql<number>`(

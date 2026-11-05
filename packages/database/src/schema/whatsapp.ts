@@ -1,7 +1,6 @@
 import { index, integer, pgEnum, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
 
 import { createdAtColumn, instantColumn, updatedAtColumn, uuidPrimaryKeyColumn } from "./common";
-import { leadsTable } from "./leads";
 
 export const whatsappMessageDirectionEnum = pgEnum("whatsapp_message_direction", [
   "inbound",
@@ -40,7 +39,6 @@ export const whatsappConversationsTable = pgTable(
     chatId: text().notNull(),
     phone: text(),
     phoneKey: text(),
-    leadId: text().references(() => leadsTable.id, { onDelete: "set null" }),
     // The name the person gave themselves on WhatsApp; savedName is the one in the user's agenda.
     contactName: text(),
     savedName: text(),
@@ -54,7 +52,6 @@ export const whatsappConversationsTable = pgTable(
   (table) => [
     uniqueIndex("whatsapp_conversations_chat_id_idx").on(table.chatId),
     index("whatsapp_conversations_phone_key_idx").on(table.phoneKey),
-    index("whatsapp_conversations_lead_id_idx").on(table.leadId),
     index("whatsapp_conversations_last_message_at_idx").on(table.lastMessageAt),
   ]
 );
@@ -71,6 +68,13 @@ export const whatsappMessagesTable = pgTable(
     type: whatsappMessageTypeEnum().notNull(),
     status: whatsappMessageStatusEnum(),
     content: text(),
+    // WAHA's edit, delete and reply calls need its full id, and external_id keeps only the last part.
+    wahaId: text(),
+    replyToExternalId: text(),
+    replyToContent: text(),
+    editedAt: instantColumn("edited_at"),
+    // The text is dropped when it is deleted, like WhatsApp does.
+    deletedAt: instantColumn("deleted_at"),
     sentAt: instantColumn("sent_at").notNull(),
     createdAt: createdAtColumn(),
   },

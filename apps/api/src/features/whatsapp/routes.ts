@@ -5,13 +5,18 @@ import {
   connectWhatsappController,
   countWhatsappConversationsController,
   deleteWhatsappConversationsController,
+  deleteWhatsappMessagesController,
   disconnectWhatsappController,
+  editWhatsappMessageController,
+  getLeadConversationController,
   getWhatsappConversationController,
   getWhatsappQrCodeController,
   getWhatsappStatusController,
+  listAwaitingWhatsappConversationsController,
   listWhatsappConversationsController,
   listWhatsappMessagesController,
   markWhatsappConversationReadController,
+  openLeadConversationController,
   openWhatsappConversationController,
   resolveWhatsappAccountChangeController,
   sendWhatsappMessageController,
@@ -32,8 +37,12 @@ whatsappRouter.post(
 );
 whatsappRouter.get(whatsappRoutes.events, streamWhatsappEventsController);
 
-// Declared before the :id routes, which would otherwise take "count" for an id.
+// Declared before the :id routes, which would otherwise take these words for an id.
 whatsappRouter.get(whatsappRoutes.conversationCount, countWhatsappConversationsController);
+whatsappRouter.get(
+  whatsappRoutes.conversationsAwaiting,
+  listAwaitingWhatsappConversationsController
+);
 whatsappRouter.get(
   whatsappRoutes.conversations,
   v.listConversations,
@@ -64,4 +73,24 @@ whatsappRouter.post(
   whatsappRoutes.conversationRead,
   v.markRead,
   markWhatsappConversationReadController
+);
+whatsappRouter.get(
+  whatsappRoutes.leadConversation,
+  v.leadConversation,
+  getLeadConversationController
+);
+whatsappRouter.post(
+  whatsappRoutes.leadConversation,
+  v.leadConversation,
+  openLeadConversationController
+);
+whatsappRouter.post(
+  whatsappRoutes.conversationMessageDelete,
+  v.deleteMessages,
+  deleteWhatsappMessagesController
+);
+whatsappRouter.patch(
+  whatsappRoutes.conversationMessageById,
+  v.editMessage,
+  editWhatsappMessageController
 );

@@ -1,18 +1,25 @@
 import { Link } from "@tanstack/react-router";
+import type { WhatsappMessage } from "@vetra/contracts";
 import { ArrowLeftIcon, MessageCircleOffIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { BusinessAvatar } from "@/shared/components/BusinessAvatar";
+import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
+import {
+  conversationName,
+  conversationSubtitle,
+} from "@/shared/components/whatsapp/conversationName";
 import { useIsPageActive } from "@/shared/hooks/useIsPageActive";
-import { formatPhone } from "@/shared/utils/format";
 
+import { useDeleteWhatsappMessages } from "../mutations/useDeleteWhatsappMessages";
 import { useMarkWhatsappConversationRead } from "../mutations/useMarkWhatsappConversationRead";
 import { useWhatsappConversation } from "../queries/useWhatsappConversation";
-import { conversationName } from "../utils/conversationName";
+import { ConversationActions } from "./ConversationActions";
 import { MessageComposer } from "./MessageComposer";
+import { SelectionBar } from "./SelectionBar";
 import { ThreadMessages } from "./ThreadMessages";
 
 type ConversationThreadProps = {
@@ -25,6 +32,34 @@ export function ConversationThread({ conversationId, isConnected }: Conversation
   const { mutate: markRead } = useMarkWhatsappConversationRead();
   const isPageActive = useIsPageActive();
   const hasUnread = (conversation?.unreadCount ?? 0) > 0;
+  const [reply, setReply] = useState<WhatsappMessage | null>(null);
+  const [editing, setEditing] = useState<WhatsappMessage | null>(null);
+  const [selection, setSelection] = useState<ReadonlySet<string> | null>(null);
+  const [toDelete, setToDelete] = useState<string[] | null>(null);
+  const deleteMessages = useDeleteWhatsappMessages(conversationId);
+
+  const toggleSelection = ({ id }: WhatsappMessage) =>
+    setSelection((current) => {
+      const next = new Set(current);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
+
+  const confirmDelete = () => {
+    if (!toDelete) return;
+
+    deleteMessages.mutate(
+      { ids: toDelete },
+      {
+        onSuccess: () => {
+          if (editing && toDelete.includes(editing.id)) setEditing(null);
+          setSelection(null);
+          setToDelete(null);
+        },
+        onError: () => setToDelete(null),
+      }
+    );
+  };
 
   // Only while really being used: a tab or window in the background must not show the blue ticks.
   useEffect(() => {
@@ -40,7 +75,7 @@ export function ConversationThread({ conversationId, isConnected }: Conversation
   }
 
   const name = conversation ? conversationName(conversation) : "";
-  const phone = conversation?.phone ? formatPhone(conversation.phone) : null;
+  const subtitle = conversation ? conversationSubtitle(conversation) : null;
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -67,21 +102,70 @@ export function ConversationThread({ conversationId, isConnected }: Conversation
               photoUrl={conversation?.photoUrl ?? undefined}
               className="size-10 shrink-0"
             />
-            <div className="flex min-w-0 flex-col">
+            <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-sm font-medium">{name}</span>
-              {phone && phone !== name && (
-                <span className="text-muted-foreground truncate text-xs">{phone}</span>
+              {subtitle && (
+                <span className="text-muted-foreground truncate text-xs">{subtitle}</span>
               )}
             </div>
+            {conversation && <ConversationActions conversation={conversation} />}
           </>
         )}
       </header>
 
-      <ThreadMessages key={conversationId} conversationId={conversationId} />
-      <MessageComposer
-        key={`composer-${conversationId}`}
+      <ThreadMessages
+        key={conversationId}
         conversationId={conversationId}
         isConnected={isConnected}
+        selection={selection}
+        onToggleSelection={toggleSelection}
+        actions={{
+          onReply: (message) => {
+            setEditing(null);
+            setReply(message);
+          },
+          onEdit: (message) => {
+            setReply(null);
+            setEditing(message);
+          },
+          onDelete: (message) => setToDelete([message.id]),
+          onSelect: (message) => setSelection(new Set([message.id])),
+        }}
+      />
+      {selection ? (
+        <SelectionBar
+          count={selection.size}
+          isConnected={isConnected}
+          onCancel={() => setSelection(null)}
+          onDelete={() => setToDelete([...selection])}
+        />
+      ) : (
+        <MessageComposer
+          key={`composer-${conversationId}`}
+          conversationId={conversationId}
+          isConnected={isConnected}
+          reply={reply}
+          editing={editing}
+          onDone={() => {
+            setReply(null);
+            setEditing(null);
+          }}
+        />
+      )}
+      <ConfirmDialog
+        open={toDelete !== null}
+        onOpenChange={(open) => !open && setToDelete(null)}
+        title={
+          toDelete?.length === 1
+            ? "Apagar mensagem para todos?"
+            : `Apagar ${toDelete?.length} mensagens para todos?`
+        }
+        description="Ela some para você e para a pessoa no WhatsApp. Isso não pode ser desfeito."
+        confirmLabel="Apagar para todos"
+        destructive
+        isPending={deleteMessages.isPending}
+        ignoreEscape={deleteMessages.isPending}
+        onConfirm={confirmDelete}
       />
     </div>
   );

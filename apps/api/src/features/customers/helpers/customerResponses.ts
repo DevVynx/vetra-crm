@@ -9,6 +9,7 @@ import { toLeadDetail, toLeadSummary } from "@/features/leads/helpers/leadRespon
 
 export const toCustomerListItem = (row: CustomerListRow): CustomerListItem => ({
   ...toLeadSummary(row.lead),
+  photoUrl: row.lead.photoUrl,
   closedAt: row.deal.closedAt.toISOString(),
   closedValueInCents: row.deal.closedValueInCents,
   receivedInCents: row.receivedInCents,

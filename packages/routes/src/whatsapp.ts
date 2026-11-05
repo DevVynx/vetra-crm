@@ -7,7 +7,11 @@ export const whatsappRoutes = {
   events: "/whatsapp/events",
   conversations: "/whatsapp/conversations",
   conversationCount: "/whatsapp/conversations/count",
+  conversationsAwaiting: "/whatsapp/conversations/awaiting",
   conversationById: "/whatsapp/conversations/:id",
   conversationMessages: "/whatsapp/conversations/:id/messages",
   conversationRead: "/whatsapp/conversations/:id/read",
+  conversationMessageDelete: "/whatsapp/conversations/:id/messages/delete",
+  conversationMessageById: "/whatsapp/conversations/:id/messages/:messageId",
+  leadConversation: "/leads/:id/conversation",
 } as const;

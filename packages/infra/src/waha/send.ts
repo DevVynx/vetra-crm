@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-import { parseWahaResponse, WAHA_SESSION, wahaCommand, wahaFetch } from "./wahaFetch";
+import {
+  ensureWahaAccepted,
+  parseWahaResponse,
+  WAHA_SESSION,
+  wahaCommand,
+  wahaFetch,
+} from "./wahaFetch";
 import { WahaSendRestrictedError } from "./WahaSendRestrictedError";
 
 const SEND_TIMEOUT_MS = 30_000;
@@ -23,11 +29,15 @@ export async function findChatIdOfPhone(phone: string): Promise<string | null> {
 const sentMessageSchema = z.object({ id: z.string().nullish() });
 
 // The live event of this same message also arrives, so a missing id here loses nothing.
-export async function sendText(chatId: string, text: string): Promise<string | null> {
+export async function sendText(
+  chatId: string,
+  text: string,
+  replyTo?: string
+): Promise<string | null> {
   const response = await wahaFetch(
     "/api/sendText",
     "POST",
-    { session: WAHA_SESSION, chatId, text },
+    { session: WAHA_SESSION, chatId, text, ...(replyTo ? { reply_to: replyTo } : {}) },
     SEND_TIMEOUT_MS
   );
 
@@ -36,6 +46,21 @@ export async function sendText(chatId: string, text: string): Promise<string | n
   }
 
   return (await parseWahaResponse(response, sentMessageSchema)).id ?? null;
+}
+
+const messagePath = (chatId: string, messageId: string) =>
+  `/api/${WAHA_SESSION}/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`;
+
+export async function editText(chatId: string, messageId: string, text: string): Promise<void> {
+  ensureWahaAccepted(
+    await wahaFetch(messagePath(chatId, messageId), "PUT", { text }, SEND_TIMEOUT_MS)
+  );
+}
+
+export async function deleteMessage(chatId: string, messageId: string): Promise<void> {
+  ensureWahaAccepted(
+    await wahaFetch(messagePath(chatId, messageId), "DELETE", undefined, SEND_TIMEOUT_MS)
+  );
 }
 
 export const markChatAsRead = (chatId: string) =>

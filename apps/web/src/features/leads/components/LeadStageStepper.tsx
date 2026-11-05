@@ -2,14 +2,13 @@ import type { LeadDetail, Stage } from "@vetra/contracts";
 import { CheckIcon, MilestoneIcon, Undo2Icon } from "lucide-react";
 import { useState } from "react";
 
+import { CloseLeadSheet } from "@/shared/components/leads/CloseLeadSheet";
 import { LeadStageBadge } from "@/shared/components/LeadStageBadge";
 import { Section } from "@/shared/components/Section";
 import { Button } from "@/shared/components/ui/button";
+import { useChangeLeadStage } from "@/shared/mutations/leads/useChangeLeadStage";
 import { useStages } from "@/shared/stages/useStages";
 import { cn } from "@/shared/utils/cn";
-
-import { useChangeLeadStage } from "../mutations/useChangeLeadStage";
-import { CloseLeadSheet } from "./CloseLeadSheet";
 
 function StepMarker({ stage, state }: { stage: Stage; state: "done" | "current" | "upcoming" }) {
   if (state === "upcoming") {

@@ -1,11 +1,11 @@
 import { count, db, leadsTable, nextActionsTable, qualified, sql } from "@vetra/database";
 
 import { type Sort, type SortColumns, sortToSql } from "../../../shared/sort";
-import type { Lead } from "../domain";
-import { leadColumns } from "./leadColumns";
+import type { LeadWithPhoto } from "../domain";
+import { leadColumns, leadPhotoSql } from "./leadColumns";
 import { type LeadListScope, leadListWhere } from "./leadListWhere";
 
-export type LeadListRow = Lead & {
+export type LeadListRow = LeadWithPhoto & {
   nextAction: { description: string; dueAt: Date } | null;
 };
 
@@ -53,6 +53,7 @@ export async function findLeadsPage({
   const rows = await db
     .select({
       ...leadColumns,
+      photoUrl: leadPhotoSql,
       nextActionDescription: sql<string | null>`next_action.description`,
       nextActionDueAt: sql<string | null>`next_action.due_at`,
     })

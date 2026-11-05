@@ -74,7 +74,7 @@ export function NextActionItem({
             aria-label="Abrir conversa no WhatsApp"
             title="Abrir conversa no WhatsApp"
             nativeButton={false}
-            render={<Link to="/whatsapp" />}
+            render={<Link to="/whatsapp" search={{ leadId: lead.id }} />}
           >
             <WhatsAppIcon />
           </Button>

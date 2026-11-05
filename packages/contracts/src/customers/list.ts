@@ -39,6 +39,7 @@ export const listCustomersQuerySchema = z
 export type ListCustomersQuery = z.infer<typeof listCustomersQuerySchema>;
 
 export const customerListItemSchema = leadSummarySchema.extend({
+  photoUrl: z.string().nullable(),
   closedAt: z.iso.datetime(),
   closedValueInCents: amountInCentsSchema,
   receivedInCents: amountInCentsSchema,

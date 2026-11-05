@@ -1,8 +1,11 @@
-import type { Lead, LeadFields } from "../domain";
+import type { LeadFields, LeadWithPhoto } from "../domain";
 import { LeadNotFoundError } from "../errors";
 import { leadRepositories } from "../repositories";
+import { ensurePhoneIsAvailable } from "./ensurePhoneIsAvailable";
 
-export async function updateLead(id: string, fields: LeadFields): Promise<Lead> {
+export async function updateLead(id: string, fields: LeadFields): Promise<LeadWithPhoto> {
+  await ensurePhoneIsAvailable(fields.phone, id);
+
   const lead = await leadRepositories.updateLeadContact(id, fields);
   if (!lead) throw new LeadNotFoundError();
 

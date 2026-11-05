@@ -60,14 +60,15 @@ async function syncChat(
   if (!whatsappDomain.isIndividualChat(chat.id) || !chat.lastMessage) return 0;
 
   const lastMessageAt = new Date(chat.lastMessage.timestamp * SECOND_IN_MS);
-  const stored = await whatsappRepositories.findConversationByChatId(chat.id);
+  const stored = await whatsappRepositories.findConversationOfChat(chat.id);
   const historyStart = whatsappDomain.historyStart(now);
   if (!stored && lastMessageAt < historyStart) return 0;
 
-  const agendaEntry = agenda?.get(chat.id);
+  const phoneKey = whatsappDomain.phoneKeyOfChatId(chat.id);
+  const agendaEntry = phoneKey ? agenda?.get(phoneKey) : undefined;
   const conversation = await whatsappRepositories.saveConversationFromOverview(
     whatsappDomain.createConversation({
-      chatId: chat.id,
+      chatId: stored?.chatId ?? chat.id,
       contactName: agendaEntry?.profileName ?? stored?.contactName ?? chat.name ?? null,
       savedName: agendaEntry?.savedName ?? null,
       photoUrl: whatsappDomain.safePhotoUrl(chat.picture),

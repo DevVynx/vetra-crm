@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import api from "@/shared/lib/axios/api";
 import { useInvalidateAfterLeadChange } from "@/shared/mutations/leads/useInvalidateAfterLeadChange";
-import { getErrorMessage } from "@/shared/utils/getErrorMessage";
+import { contactErrorMessage } from "@/shared/utils/contactForm";
 import { toastWithUndo } from "@/shared/utils/toastWithUndo";
 
 const toRequest = (lead: LeadDetail): UpdateLeadRequest => ({
@@ -26,7 +26,7 @@ export function useUpdateLead(lead: LeadDetail, onUpdated: () => void) {
       (await api.patch<UpdateLeadResponse>(buildPath(leadsRoutes.byId, { id: lead.id }), request))
         .data,
     onSuccess: invalidate,
-    onError: (error) => toast.error(getErrorMessage(error, "Não foi possível salvar o lead.")),
+    onError: (error) => toast.error(contactErrorMessage(error, "Não foi possível salvar o lead.")),
   });
 
   const save = (request: UpdateLeadRequest) => {

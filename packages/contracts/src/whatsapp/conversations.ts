@@ -19,16 +19,37 @@ export const whatsappConversationSchema = z.object({
   photoUrl: z.string().nullable(),
   unreadCount: z.number().int().nonnegative(),
   lastMessageAt: z.iso.datetime().nullable(),
+  lead: z
+    .object({
+      id: z.string(),
+      businessName: z.string(),
+      contactName: z.string().nullable(),
+      stage: z.string(),
+      stoppedAtStage: z.string().nullable(),
+      isCustomer: z.boolean(),
+    })
+    .nullable(),
   lastMessage: z
     .object({
       direction: whatsappMessageDirectionSchema,
       type: whatsappMessageTypeSchema,
       status: whatsappMessageStatusSchema.nullable(),
       content: z.string().nullable(),
+      isDeleted: z.boolean(),
     })
     .nullable(),
 });
 export type WhatsappConversation = z.infer<typeof whatsappConversationSchema>;
+
+export const leadConversationSchema = whatsappConversationSchema.extend({
+  messages: z.array(whatsappMessageSchema),
+});
+export type LeadConversation = z.infer<typeof leadConversationSchema>;
+
+export const getLeadConversationResponseSchema = z.object({
+  conversation: leadConversationSchema.nullable(),
+});
+export type GetLeadConversationResponse = z.infer<typeof getLeadConversationResponseSchema>;
 
 export const whatsappConversationParamsSchema = z.object({ id: z.string() });
 
@@ -70,7 +91,22 @@ export const listWhatsappMessagesResponseSchema = z.object({
 });
 export type ListWhatsappMessagesResponse = z.infer<typeof listWhatsappMessagesResponseSchema>;
 
+const whatsappMessageTextSchema = z.string().trim().min(1).max(WHATSAPP_MESSAGE_MAX_LENGTH);
+
 export const sendWhatsappMessageRequestSchema = z.object({
-  text: z.string().trim().min(1).max(WHATSAPP_MESSAGE_MAX_LENGTH),
+  text: whatsappMessageTextSchema,
+  replyTo: z.string().optional(),
 });
 export type SendWhatsappMessageRequest = z.infer<typeof sendWhatsappMessageRequestSchema>;
+
+export const whatsappMessageParamsSchema = z.object({ id: z.string(), messageId: z.string() });
+
+export const editWhatsappMessageRequestSchema = z.object({ text: whatsappMessageTextSchema });
+export type EditWhatsappMessageRequest = z.infer<typeof editWhatsappMessageRequestSchema>;
+
+export const WHATSAPP_DELETE_MAX_MESSAGES = 50;
+
+export const deleteWhatsappMessagesRequestSchema = z.object({
+  ids: z.array(z.string()).min(1).max(WHATSAPP_DELETE_MAX_MESSAGES),
+});
+export type DeleteWhatsappMessagesRequest = z.infer<typeof deleteWhatsappMessagesRequestSchema>;

@@ -74,6 +74,7 @@ export function LeadDetailPage() {
             kind="Lead"
             name={lead.businessName}
             contactName={lead.contactName}
+            photoUrl={lead.photoUrl}
             status={
               <>
                 {stages.nameOf(lead.stage)} {formatLastContact(new Date(lead.stageChangedAt))}
@@ -100,7 +101,7 @@ export function LeadDetailPage() {
       <div className="-mb-2 flex items-center gap-2">
         <DetailPanelTrigger label="dados do lead" />
         <div className="ml-auto flex gap-2">
-          <WhatsAppButton />
+          <WhatsAppButton leadId={lead.id} />
           <Button
             className="font-semibold"
             title="Nova atividade (N)"

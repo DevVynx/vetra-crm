@@ -4,13 +4,20 @@ import {
   desc,
   eq,
   inArray,
+  isNull,
+  qualified,
   sql,
   type Transaction,
   whatsappConversationsTable,
   whatsappMessagesTable,
 } from "@vetra/database";
 
-import { whatsappDomain, type WhatsappMessage, type WhatsappMessageStatus } from "../domain";
+import {
+  whatsappDomain,
+  type WhatsappMessage,
+  type WhatsappMessageDirection,
+  type WhatsappMessageStatus,
+} from "../domain";
 
 // A message read while the service was off only shows its new status when it is delivered again.
 async function advanceKnownStatuses(
@@ -73,6 +80,14 @@ export async function saveMessages(
       })
       .where(eq(whatsappConversationsTable.id, conversationId));
 
+    // Written by hand so it doesn't touch updated_at: a message isn't an edit of the lead.
+    await tx.execute(sql`
+      update leads l
+      set last_contact_at = greatest(l.last_contact_at, ${new Date(latest).toISOString()}::timestamptz)
+      from whatsapp_conversations c
+      where c.id = ${conversationId} and c.phone_key = l.phone_key
+    `);
+
     return inserted.length;
   });
 }
@@ -122,7 +137,24 @@ const messageColumns = {
   type: whatsappMessagesTable.type,
   status: whatsappMessagesTable.status,
   content: whatsappMessagesTable.content,
+  wahaId: whatsappMessagesTable.wahaId,
+  replyToExternalId: whatsappMessagesTable.replyToExternalId,
+  replyToContent: whatsappMessagesTable.replyToContent,
+  editedAt: whatsappMessagesTable.editedAt,
+  deletedAt: whatsappMessagesTable.deletedAt,
   sentAt: whatsappMessagesTable.sentAt,
+};
+
+// Who wrote the quoted message, when it is still stored.
+const replyDirectionSql = sql<WhatsappMessageDirection | null>`(
+  select r.direction from whatsapp_messages r
+  where r.conversation_id = ${qualified(whatsappMessagesTable.conversationId)}
+    and r.external_id = ${qualified(whatsappMessagesTable.replyToExternalId)}
+  limit 1
+)`;
+
+export type WhatsappMessageRow = WhatsappMessage & {
+  replyToDirection: WhatsappMessageDirection | null;
 };
 
 type FindMessagesPageInput = {
@@ -137,9 +169,9 @@ export async function findMessagesPage({
   conversationId,
   before,
   limit,
-}: FindMessagesPageInput): Promise<{ messages: WhatsappMessage[]; hasMore: boolean }> {
+}: FindMessagesPageInput): Promise<{ messages: WhatsappMessageRow[]; hasMore: boolean }> {
   const rows = await db
-    .select(messageColumns)
+    .select({ ...messageColumns, replyToDirection: replyDirectionSql })
     .from(whatsappMessagesTable)
     .where(
       and(
@@ -155,4 +187,64 @@ export async function findMessagesPage({
     .limit(limit + 1);
 
   return { messages: rows.slice(0, limit), hasMore: rows.length > limit };
+}
+
+export async function findMessageById(
+  conversationId: string,
+  id: string
+): Promise<WhatsappMessage | null> {
+  const [message] = await db
+    .select(messageColumns)
+    .from(whatsappMessagesTable)
+    .where(
+      and(
+        eq(whatsappMessagesTable.conversationId, conversationId),
+        eq(whatsappMessagesTable.id, id)
+      )
+    )
+    .limit(1);
+
+  return message ?? null;
+}
+
+// Only a real change counts, so the echo WhatsApp sends of our own edit changes nothing.
+export async function updateMessageContent(
+  where: { id: string } | { externalId: string },
+  content: string
+): Promise<boolean> {
+  const target =
+    "id" in where
+      ? eq(whatsappMessagesTable.id, where.id)
+      : eq(whatsappMessagesTable.externalId, where.externalId);
+
+  const updated = await db
+    .update(whatsappMessagesTable)
+    .set({ content, editedAt: new Date() })
+    .where(
+      and(
+        target,
+        isNull(whatsappMessagesTable.deletedAt),
+        sql`${whatsappMessagesTable.content} is distinct from ${content}`
+      )
+    )
+    .returning({ id: whatsappMessagesTable.id });
+
+  return updated.length > 0;
+}
+
+export async function markMessageDeleted(
+  where: { id: string } | { externalId: string }
+): Promise<boolean> {
+  const target =
+    "id" in where
+      ? eq(whatsappMessagesTable.id, where.id)
+      : eq(whatsappMessagesTable.externalId, where.externalId);
+
+  const updated = await db
+    .update(whatsappMessagesTable)
+    .set({ content: null, replyToExternalId: null, replyToContent: null, deletedAt: new Date() })
+    .where(and(target, isNull(whatsappMessagesTable.deletedAt)))
+    .returning({ id: whatsappMessagesTable.id });
+
+  return updated.length > 0;
 }

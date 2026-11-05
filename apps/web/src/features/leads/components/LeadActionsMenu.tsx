@@ -5,9 +5,9 @@ import { useState } from "react";
 import { ActionsMenu, type ActionsMenuItem } from "@/shared/components/ActionsMenu";
 import { ArchiveLeadDialog } from "@/shared/components/ArchiveLeadDialog";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
+import { useChangeLeadStage } from "@/shared/mutations/leads/useChangeLeadStage";
 import { useStages } from "@/shared/stages/useStages";
 
-import { useChangeLeadStage } from "../mutations/useChangeLeadStage";
 import { useDeleteLead } from "../mutations/useDeleteLead";
 import { EditLeadSheet } from "./EditLeadSheet";
 

@@ -3,19 +3,40 @@ import { MessageCircleIcon } from "lucide-react";
 import { Fragment } from "react";
 
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
+import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { MessageBubble } from "@/shared/components/whatsapp/MessageBubble";
 import { useOnVisible } from "@/shared/hooks/useOnVisible";
+import { cn } from "@/shared/utils/cn";
 import { formatDayLabel } from "@/shared/utils/date";
 import { getErrorMessage } from "@/shared/utils/getErrorMessage";
 
 import { useWhatsappMessages } from "../queries/useWhatsappMessages";
+import { type MessageActions, MessageMenu } from "./MessageMenu";
 
 const startsNewDay = (message: WhatsappMessage, older: WhatsappMessage | undefined) =>
   !older || formatDayLabel(new Date(message.sentAt)) !== formatDayLabel(new Date(older.sentAt));
 
-export function ThreadMessages({ conversationId }: { conversationId: string }) {
+type ThreadMessagesProps = {
+  conversationId: string;
+  isConnected: boolean;
+  actions: MessageActions;
+  selection: ReadonlySet<string> | null;
+  onToggleSelection: (message: WhatsappMessage) => void;
+};
+
+// Only the user's own messages can be deleted, so only those can be selected.
+const isSelectable = (message: WhatsappMessage) =>
+  message.direction === "outbound" && !message.isDeleted;
+
+export function ThreadMessages({
+  conversationId,
+  isConnected,
+  actions,
+  selection,
+  onToggleSelection,
+}: ThreadMessagesProps) {
   const thread = useWhatsappMessages(conversationId);
   const messages = thread.data?.pages.flatMap((page) => page.messages) ?? [];
 
@@ -59,7 +80,32 @@ export function ThreadMessages({ conversationId }: { conversationId: string }) {
     <div className="flex min-h-0 flex-1 flex-col-reverse gap-1 overflow-y-auto p-4">
       {messages.map((message, index) => (
         <Fragment key={message.id}>
-          <MessageBubble message={message} />
+          <div
+            className={cn(
+              "flex items-center gap-2 rounded-md",
+              selection && isSelectable(message) && "hover:bg-muted/40 cursor-pointer",
+              selection?.has(message.id) && "bg-primary/10"
+            )}
+            onClick={() => selection && isSelectable(message) && onToggleSelection(message)}
+          >
+            {selection && isSelectable(message) && (
+              <Checkbox
+                aria-label="Selecionar mensagem"
+                checked={selection.has(message.id)}
+                className="ml-1 shrink-0"
+              />
+            )}
+            <div className="min-w-0 flex-1">
+              <MessageBubble
+                message={message}
+                actions={
+                  selection ? undefined : (
+                    <MessageMenu message={message} isConnected={isConnected} {...actions} />
+                  )
+                }
+              />
+            </div>
+          </div>
           {startsNewDay(message, messages[index + 1]) && (
             <div className="flex justify-center py-2">
               <span className="bg-muted text-muted-foreground rounded-full px-3 py-0.5 text-xs">

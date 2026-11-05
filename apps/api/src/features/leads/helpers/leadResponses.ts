@@ -1,5 +1,10 @@
 import type { LeadDetail, LeadListItem, LeadStageState, LeadSummary } from "@vetra/contracts";
-import type { Lead, LeadListRow, LeadStageState as DomainLeadStageState } from "@vetra/core";
+import type {
+  Lead,
+  LeadListRow,
+  LeadStageState as DomainLeadStageState,
+  LeadWithPhoto,
+} from "@vetra/core";
 
 const isoOrNull = (date: Date | null) => date?.toISOString() ?? null;
 
@@ -14,8 +19,9 @@ export const toLeadSummary = (lead: Lead): LeadSummary => ({
   stoppedAtStage: lead.stoppedAtStageId,
 });
 
-export const toLeadDetail = (lead: Lead): LeadDetail => ({
+export const toLeadDetail = (lead: LeadWithPhoto): LeadDetail => ({
   ...toLeadSummary(lead),
+  photoUrl: lead.photoUrl,
   phone: lead.phone,
   email: lead.email,
   demoUrl: lead.demoUrl,
@@ -27,6 +33,7 @@ export const toLeadDetail = (lead: Lead): LeadDetail => ({
 
 export const toLeadListItem = (row: LeadListRow): LeadListItem => ({
   ...toLeadSummary(row),
+  photoUrl: row.photoUrl,
   nextAction: row.nextAction && {
     description: row.nextAction.description,
     dueAt: row.nextAction.dueAt.toISOString(),

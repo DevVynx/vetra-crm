@@ -60,8 +60,12 @@ type LeadSpec = {
   lastContactDaysAgo?: number;
 };
 
+// Same rule as canonicalPhoneOf in packages/core, which this package cannot import.
+const phoneKeyOf = (phone: string) => phone.replace(/^55(\d{2})9(\d{8})$/, "55$1$2");
+
 function leadFrom(spec: LeadSpec): LeadRow {
   const prospectedAt = at(-spec.prospectedDaysAgo, 13);
+  const phone = nextPhone();
   const isEntry = spec.stage.role === "entry";
   return {
     id: uuidv7(),
@@ -69,7 +73,8 @@ function leadFrom(spec: LeadSpec): LeadRow {
     contactName: spec.contactName,
     niche: spec.niche,
     city: spec.city,
-    phone: nextPhone(),
+    phone,
+    phoneKey: phoneKeyOf(phone),
     email: spec.contactName
       ? `${slug(spec.contactName.split(" ")[0] ?? "contato")}@${slug(spec.businessName)}.com.br`
       : null,

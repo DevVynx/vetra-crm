@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 import api from "@/shared/lib/axios/api";
 import { useInvalidateAfterLeadChange } from "@/shared/mutations/leads/useInvalidateAfterLeadChange";
-import { getErrorMessage } from "@/shared/utils/getErrorMessage";
+import { contactErrorMessage } from "@/shared/utils/contactForm";
 import { toastWithUndo } from "@/shared/utils/toastWithUndo";
 
 const toRequest = (customer: CustomerDetail): UpdateCustomerRequest => ({
@@ -34,7 +34,8 @@ export function useUpdateCustomer(customer: CustomerDetail, onUpdated: () => voi
         )
       ).data,
     onSuccess: invalidate,
-    onError: (error) => toast.error(getErrorMessage(error, "Não foi possível salvar o cliente.")),
+    onError: (error) =>
+      toast.error(contactErrorMessage(error, "Não foi possível salvar o cliente.")),
   });
 
   const save = (request: UpdateCustomerRequest) => {

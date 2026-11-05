@@ -8,10 +8,13 @@ import {
 import {
   clearConversationUnread,
   countWhatsappConversations,
+  findAwaitingConversations,
   findConversationByChatId,
   findConversationById,
   findConversationByPhoneKey,
+  findConversationOfChat,
   findConversationRowById,
+  findConversationRowByPhoneKey,
   findConversationsPage,
   insertConversationIfNew,
   saveConversationFromOverview,
@@ -19,9 +22,12 @@ import {
 } from "./conversations";
 import {
   advanceMessageStatus,
+  findMessageById,
   findMessagesPage,
   markConversationReadByMessage,
+  markMessageDeleted,
   saveMessages,
+  updateMessageContent,
 } from "./messages";
 
 export const whatsappRepositories = {
@@ -31,17 +37,23 @@ export const whatsappRepositories = {
   deleteWhatsappHistory,
   findConversationByChatId,
   findConversationById,
+  findAwaitingConversations,
   findConversationByPhoneKey,
+  findConversationOfChat,
   findConversationRowById,
+  findConversationRowByPhoneKey,
   findConversationsPage,
+  findMessageById,
   findMessagesPage,
   findWhatsappAccount,
   insertConversationIfNew,
   insertWhatsappAccount,
   markConversationReadByMessage,
   markHistoryImported,
+  markMessageDeleted,
   replaceWhatsappAccount,
   saveConversationFromOverview,
   saveMessages,
   updateConversationPhoto,
+  updateMessageContent,
 };

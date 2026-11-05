@@ -108,6 +108,7 @@ export function CustomerDetailPage() {
             kind="Cliente"
             name={customer.businessName}
             contactName={customer.contactName}
+            photoUrl={customer.photoUrl}
             actions={<CustomerActionsMenu customer={customer} />}
           />
           <ContactCard
@@ -148,7 +149,7 @@ export function CustomerDetailPage() {
             </TabsTrigger>
           </TabsList>
           <div className="ml-auto flex gap-2">
-            <WhatsAppButton />
+            <WhatsAppButton leadId={customer.id} />
             {tab === "financial" && <FilterButton controller={filtering} />}
             <Button
               className="font-semibold"

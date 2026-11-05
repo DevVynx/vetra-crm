@@ -3,25 +3,26 @@ import { FormProvider, useForm } from "react-hook-form";
 
 import { ContactFormFields } from "@/shared/components/detail/ContactFormFields";
 import { FormSheet } from "@/shared/components/FormSheet";
+import { useCreateLead } from "@/shared/mutations/leads/useCreateLead";
 import {
   type ContactFormValues,
   emptyContactValues,
   toLeadRequest,
 } from "@/shared/utils/contactForm";
 
-import { useCreateLead } from "../mutations/useCreateLead";
-
 type CreateLeadSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialValues?: Partial<ContactFormValues>;
 };
 
-export function CreateLeadSheet({ open, onOpenChange }: CreateLeadSheetProps) {
-  const form = useForm<ContactFormValues>({ defaultValues: emptyContactValues });
+export function CreateLeadSheet({ open, onOpenChange, initialValues }: CreateLeadSheetProps) {
+  const defaultValues = { ...emptyContactValues, ...initialValues };
+  const form = useForm<ContactFormValues>({ defaultValues });
 
   const createLead = useCreateLead(() => {
     onOpenChange(false);
-    form.reset(emptyContactValues);
+    form.reset(defaultValues);
   });
 
   const submit = form.handleSubmit((values) => createLead.mutate(toLeadRequest(values)));

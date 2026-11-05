@@ -1,6 +1,7 @@
 import { envConfig } from "@vetra/env/waha";
 import type { z } from "zod";
 
+import { WahaRequestRejectedError } from "./WahaRequestRejectedError";
 import { WahaUnavailableError } from "./WahaUnavailableError";
 
 const REQUEST_TIMEOUT_MS = 5_000;
@@ -25,7 +26,7 @@ const describeStatus = (status: number) =>
 
 export async function wahaFetch(
   path: string,
-  method: "GET" | "POST" = "GET",
+  method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
   body?: unknown,
   timeoutMs: number = REQUEST_TIMEOUT_MS
 ) {
@@ -50,6 +51,14 @@ export async function wahaFetch(
 export async function wahaCommand(path: string, body?: unknown) {
   const response = await wahaFetch(path, "POST", body);
   if (!response.ok) failWith(describeStatus(response.status));
+
+  lastReportedFailure = null;
+}
+
+// For actions whose answer carries nothing: a refusal from WhatsApp is not WAHA being down.
+export function ensureWahaAccepted(response: Response): void {
+  if (response.status === 401) failWith(describeStatus(response.status));
+  if (!response.ok) throw new WahaRequestRejectedError();
 
   lastReportedFailure = null;
 }

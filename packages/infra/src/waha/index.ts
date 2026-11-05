@@ -6,7 +6,7 @@ import {
   getPhoneIdOfLid,
   getProfilePictureUrl,
 } from "./messages";
-import { findChatIdOfPhone, markChatAsRead, sendText } from "./send";
+import { deleteMessage, editText, findChatIdOfPhone, markChatAsRead, sendText } from "./send";
 import {
   createSession,
   getQrCode,
@@ -19,11 +19,14 @@ import {
 export type { WahaEvent } from "./events";
 export type { WahaChatOverview, WahaContact, WahaMessage } from "./messages";
 export type { WahaQrCode, WahaSession } from "./session";
+export * from "./WahaRequestRejectedError";
 export * from "./WahaSendRestrictedError";
 export * from "./WahaUnavailableError";
 
 export const wahaClient = {
   createSession,
+  deleteMessage,
+  editText,
   findChatIdOfPhone,
   getChatMessages,
   getChatsOverview,

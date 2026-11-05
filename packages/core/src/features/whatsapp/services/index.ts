@@ -5,13 +5,18 @@ import {
 import { connectWhatsapp } from "./connectWhatsapp";
 import { countWhatsappConversations } from "./countWhatsappConversations";
 import { deleteWhatsappConversations } from "./deleteWhatsappConversations";
+import { deleteWhatsappMessages } from "./deleteWhatsappMessages";
 import { disconnectWhatsapp } from "./disconnectWhatsapp";
+import { editWhatsappMessage } from "./editWhatsappMessage";
+import { getLeadConversation } from "./getLeadConversation";
 import { getWhatsappConversation } from "./getWhatsappConversation";
 import { getWhatsappQrCode } from "./getWhatsappQrCode";
 import { getWhatsappStatus } from "./getWhatsappStatus";
+import { listAwaitingWhatsappConversations } from "./listAwaitingWhatsappConversations";
 import { listWhatsappConversations } from "./listWhatsappConversations";
 import { listWhatsappMessages } from "./listWhatsappMessages";
 import { markWhatsappConversationRead } from "./markWhatsappConversationRead";
+import { openLeadConversation } from "./openLeadConversation";
 import { openWhatsappConversation } from "./openWhatsappConversation";
 import { resolveWhatsappAccountChange } from "./resolveWhatsappAccountChange";
 import { sendWhatsappMessage } from "./sendWhatsappMessage";
@@ -22,13 +27,18 @@ export const whatsappServices = {
   connectWhatsapp,
   countWhatsappConversations,
   deleteWhatsappConversations,
+  deleteWhatsappMessages,
   disconnectWhatsapp,
+  editWhatsappMessage,
+  getLeadConversation,
   getWhatsappConversation,
   getWhatsappQrCode,
   getWhatsappStatus,
+  listAwaitingWhatsappConversations,
   listWhatsappConversations,
   listWhatsappMessages,
   markWhatsappConversationRead,
+  openLeadConversation,
   openWhatsappConversation,
   removeWhatsappChangeListener,
   resolveWhatsappAccountChange,

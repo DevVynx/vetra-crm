@@ -1,15 +1,19 @@
 import {
+  type GetLeadConversationResponse,
+  getLeadConversationResponseSchema,
+  type ListAwaitingConversationsResponse,
+  listAwaitingConversationsResponseSchema,
   type ListWhatsappConversationsResponse,
   listWhatsappConversationsResponseSchema,
   type WhatsappConversationResponse,
   whatsappConversationResponseSchema,
 } from "@vetra/contracts";
 import { whatsappServices } from "@vetra/core";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
 import type { ValidatedRequest } from "@/shared/http/validation";
 
-import { toWhatsappConversation } from "../helpers/whatsappResponses";
+import { toWhatsappConversation, toWhatsappMessage } from "../helpers/whatsappResponses";
 import type v from "../validators";
 
 export async function listWhatsappConversationsController(
@@ -54,4 +58,44 @@ export async function markWhatsappConversationReadController(
 ) {
   await whatsappServices.markWhatsappConversationRead(req.params.id);
   res.status(204).send();
+}
+
+export async function listAwaitingWhatsappConversationsController(
+  _req: Request,
+  res: Response<ListAwaitingConversationsResponse>
+) {
+  const conversations = await whatsappServices.listAwaitingWhatsappConversations();
+
+  res.json(
+    listAwaitingConversationsResponseSchema.parse({
+      conversations: conversations.map(toWhatsappConversation),
+    })
+  );
+}
+
+export async function getLeadConversationController(
+  req: ValidatedRequest<typeof v.leadConversation>,
+  res: Response<GetLeadConversationResponse>
+) {
+  const found = await whatsappServices.getLeadConversation(req.params.id);
+
+  res.json(
+    getLeadConversationResponseSchema.parse({
+      conversation: found && {
+        ...toWhatsappConversation(found.conversation),
+        messages: found.messages.map(toWhatsappMessage),
+      },
+    })
+  );
+}
+
+export async function openLeadConversationController(
+  req: ValidatedRequest<typeof v.leadConversation>,
+  res: Response<WhatsappConversationResponse>
+) {
+  const conversation = await whatsappServices.openLeadConversation(req.params.id);
+
+  res.json(
+    whatsappConversationResponseSchema.parse({ conversation: toWhatsappConversation(conversation) })
+  );
 }

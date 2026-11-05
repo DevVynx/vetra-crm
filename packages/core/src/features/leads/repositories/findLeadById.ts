@@ -1,9 +1,12 @@
 import { db, eq, leadsTable } from "@vetra/database";
 
-import type { Lead } from "../domain";
-import { leadColumns } from "./leadColumns";
+import type { LeadWithPhoto } from "../domain";
+import { leadColumns, leadPhotoSql } from "./leadColumns";
 
-export async function findLeadById(id: string): Promise<Lead | undefined> {
-  const [lead] = await db.select(leadColumns).from(leadsTable).where(eq(leadsTable.id, id));
+export async function findLeadById(id: string): Promise<LeadWithPhoto | undefined> {
+  const [lead] = await db
+    .select({ ...leadColumns, photoUrl: leadPhotoSql })
+    .from(leadsTable)
+    .where(eq(leadsTable.id, id));
   return lead;
 }

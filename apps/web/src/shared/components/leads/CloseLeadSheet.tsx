@@ -8,8 +8,7 @@ import {
   toDealPayment,
 } from "@/shared/components/detail/DealFields";
 import { FormSheet } from "@/shared/components/FormSheet";
-
-import { useCloseLead } from "../mutations/useCloseLead";
+import { useCloseLead } from "@/shared/mutations/leads/useCloseLead";
 
 type CloseLeadSheetProps = {
   leadId: string;

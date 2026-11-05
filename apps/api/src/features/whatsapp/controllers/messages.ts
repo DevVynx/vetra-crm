@@ -29,6 +29,30 @@ export async function sendWhatsappMessageController(
   req: ValidatedRequest<typeof v.sendMessage>,
   res: Response
 ) {
-  await whatsappServices.sendWhatsappMessage(req.params.id, req.body.text);
+  await whatsappServices.sendWhatsappMessage({
+    conversationId: req.params.id,
+    text: req.body.text,
+    replyToMessageId: req.body.replyTo,
+  });
+  res.status(204).send();
+}
+
+export async function editWhatsappMessageController(
+  req: ValidatedRequest<typeof v.editMessage>,
+  res: Response
+) {
+  await whatsappServices.editWhatsappMessage({
+    conversationId: req.params.id,
+    messageId: req.params.messageId,
+    text: req.body.text,
+  });
+  res.status(204).send();
+}
+
+export async function deleteWhatsappMessagesController(
+  req: ValidatedRequest<typeof v.deleteMessages>,
+  res: Response
+) {
+  await whatsappServices.deleteWhatsappMessages(req.params.id, req.body.ids);
   res.status(204).send();
 }

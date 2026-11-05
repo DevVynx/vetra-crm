@@ -23,18 +23,14 @@ export const whatsappMessageSchema = z.object({
   // Only for what was sent; it stays at delivered when the person turned read receipts off.
   status: whatsappMessageStatusSchema.nullable(),
   content: z.string().nullable(),
+  replyTo: z
+    .object({
+      content: z.string().nullable(),
+      direction: whatsappMessageDirectionSchema.nullable(),
+    })
+    .nullable(),
+  editedAt: z.iso.datetime().nullable(),
+  isDeleted: z.boolean(),
   sentAt: z.iso.datetime(),
 });
 export type WhatsappMessage = z.infer<typeof whatsappMessageSchema>;
-
-export const leadConversationSchema = z.object({
-  id: z.string(),
-  unreadCount: z.number().int().nonnegative(),
-  messages: z.array(whatsappMessageSchema),
-});
-export type LeadConversation = z.infer<typeof leadConversationSchema>;
-
-export const getLeadConversationResponseSchema = z.object({
-  conversation: leadConversationSchema.nullable(),
-});
-export type GetLeadConversationResponse = z.infer<typeof getLeadConversationResponseSchema>;

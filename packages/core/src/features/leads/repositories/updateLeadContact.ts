@@ -1,13 +1,17 @@
 import { db, eq, leadsTable } from "@vetra/database";
 
-import type { Lead, LeadFields } from "../domain";
-import { leadColumns } from "./leadColumns";
+import type { LeadFields, LeadWithPhoto } from "../domain";
+import { contactChangeOf } from "./contactChange";
+import { leadColumns, leadPhotoSql } from "./leadColumns";
 
-export async function updateLeadContact(id: string, fields: LeadFields): Promise<Lead | undefined> {
+export async function updateLeadContact(
+  id: string,
+  fields: LeadFields
+): Promise<LeadWithPhoto | undefined> {
   const [lead] = await db
     .update(leadsTable)
-    .set(fields)
+    .set(contactChangeOf(fields))
     .where(eq(leadsTable.id, id))
-    .returning(leadColumns);
+    .returning({ ...leadColumns, photoUrl: leadPhotoSql });
   return lead;
 }

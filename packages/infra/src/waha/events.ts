@@ -24,6 +24,17 @@ const wahaEventSchema = z.discriminatedUnion("event", [
       ackName: z.string().nullish(),
     }),
   }),
+  z.object({
+    event: z.literal("message.edited"),
+    payload: z.object({ editedMessageId: z.string().nullish(), body: z.string().nullish() }),
+  }),
+  z.object({
+    event: z.literal("message.revoked"),
+    payload: z.object({
+      revokedMessageId: z.string().nullish(),
+      after: z.object({ revokedMessageId: z.string().nullish() }).nullish(),
+    }),
+  }),
 ]);
 export type WahaEvent = z.infer<typeof wahaEventSchema>;
 
@@ -50,7 +61,13 @@ function buildEventsUrl(): string {
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
   url.searchParams.set("x-api-key", WAHA_API_KEY);
   url.searchParams.set("session", WAHA_SESSION);
-  for (const event of ["session.status", "message.any", "message.ack"]) {
+  for (const event of [
+    "session.status",
+    "message.any",
+    "message.ack",
+    "message.edited",
+    "message.revoked",
+  ]) {
     url.searchParams.append("events", event);
   }
 

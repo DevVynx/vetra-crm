@@ -6,15 +6,23 @@ type DetailIdentityProps = {
   kind: "Lead" | "Cliente";
   name: string;
   contactName: string | null;
+  photoUrl: string | null;
   status?: ReactNode;
   actions?: ReactNode;
 };
 
-export function DetailIdentity({ kind, name, contactName, status, actions }: DetailIdentityProps) {
+export function DetailIdentity({
+  kind,
+  name,
+  contactName,
+  photoUrl,
+  status,
+  actions,
+}: DetailIdentityProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
-        <BusinessAvatar name={name} className="size-16 text-xl" />
+        <BusinessAvatar name={name} photoUrl={photoUrl ?? undefined} className="size-16 text-xl" />
         {actions}
       </div>
       <div>

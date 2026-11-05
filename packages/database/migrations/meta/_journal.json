@@ -64,6 +64,34 @@
       "when": 1793900052770,
       "tag": "0008_add_whatsapp_saved_name",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793901450495,
+      "tag": "0009_add_lead_phone_key",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793901453629,
+      "tag": "0010_fill_lead_phone_key",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793901473193,
+      "tag": "0011_require_lead_phone_key",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793904661444,
+      "tag": "0012_add_whatsapp_message_actions",
+      "breakpoints": true
     }
   ]
 }

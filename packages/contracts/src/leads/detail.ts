@@ -6,6 +6,7 @@ export const leadDetailSchema = leadSummarySchema.extend({
   phone: z.string().regex(/^\d{8,15}$/),
   email: z.email().nullable(),
   demoUrl: demoUrlSchema.nullable(),
+  photoUrl: z.string().nullable(),
   stageChangedAt: z.iso.datetime(),
   lastContactAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),

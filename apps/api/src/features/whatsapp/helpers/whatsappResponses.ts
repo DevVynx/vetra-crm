@@ -17,5 +17,11 @@ export const toWhatsappMessage = (row: MessageRow): WhatsappMessage => ({
   type: row.type,
   status: row.status,
   content: row.content,
+  replyTo:
+    row.replyToExternalId || row.replyToContent
+      ? { content: row.replyToContent, direction: row.replyToDirection }
+      : null,
+  editedAt: row.editedAt?.toISOString() ?? null,
+  isDeleted: row.deletedAt !== null,
   sentAt: row.sentAt.toISOString(),
 });

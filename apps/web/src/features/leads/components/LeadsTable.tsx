@@ -180,7 +180,11 @@ export function LeadsTable({ leads, activeIndex, isFull, selection }: LeadsTable
               )}
               <TableCell className={selection.isSelecting ? undefined : "pl-4"}>
                 <div className="flex items-center gap-3">
-                  <BusinessAvatar name={lead.businessName} className="text-xs" />
+                  <BusinessAvatar
+                    name={lead.businessName}
+                    photoUrl={lead.photoUrl ?? undefined}
+                    className="text-xs"
+                  />
                   <div className="min-w-0">
                     <Link
                       to="/leads/$leadId"

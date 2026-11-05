@@ -1,6 +1,7 @@
 import { v7 as uuidv7 } from "uuid";
 
 import type { Filter } from "../../shared/filters";
+import { canonicalPhoneOf } from "../../shared/phone";
 import type { Stage } from "../stages/domain";
 import { LeadIsCustomerError, LeadMustCloseWithDealError } from "./errors";
 
@@ -11,6 +12,7 @@ export type Lead = {
   niche: string;
   city: string;
   phone: string;
+  phoneKey: string;
   email: string | null;
   demoUrl: string | null;
   stageId: string;
@@ -27,6 +29,9 @@ export type LeadContact = Pick<
   "businessName" | "contactName" | "niche" | "city" | "phone" | "email"
 >;
 
+// The photo comes from the conversation with the same number, so it isn't part of the lead itself.
+export type LeadWithPhoto = Lead & { photoUrl: string | null };
+
 // What can be typed for a lead. Customers only have the contact part: their screens have no demo.
 export type LeadFields = LeadContact & Pick<Lead, "demoUrl">;
 
@@ -40,6 +45,7 @@ function create(fields: LeadFields, entryStage: Stage, now: Date): Lead {
   return {
     ...fields,
     id: uuidv7(),
+    phoneKey: canonicalPhoneOf(fields.phone),
     stageId: entryStage.id,
     stoppedAtStageId: null,
     stageChangedAt: now,

@@ -1,4 +1,5 @@
 import { type Lead, type LeadContact, leadDomain } from "../../leads/domain";
+import { ensurePhoneIsAvailable } from "../../leads/services/ensurePhoneIsAvailable";
 import { stageDomain } from "../../stages/domain";
 import { stageRepositories } from "../../stages/repositories";
 import { customerDomain, type DealPayment } from "../domain";
@@ -16,6 +17,8 @@ export async function createCustomer({
   document,
   payment,
 }: createCustomerInput): Promise<Lead> {
+  await ensurePhoneIsAvailable(contact.phone);
+
   const stages = await stageRepositories.findStages();
   const closingStage = stageDomain.closingOf(stages);
 

@@ -1,9 +1,13 @@
 import { getRouteApi } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/shared/components/ui/button";
+import { Spinner } from "@/shared/components/ui/spinner";
 import { cn } from "@/shared/utils/cn";
 
+import { useOpenLeadConversation } from "../mutations/useOpenLeadConversation";
+import { whatsappErrorMessage } from "../utils/whatsappErrors";
 import { ConversationList } from "./ConversationList";
 import { ConversationThread } from "./ConversationThread";
 import { NewConversationDialog } from "./NewConversationDialog";
@@ -18,9 +22,23 @@ type WhatsAppInboxProps = {
 };
 
 export function WhatsAppInbox({ isConnected, isImporting, onConnect }: WhatsAppInboxProps) {
-  const { conversation: selectedId } = route.useSearch();
+  const { conversation: selectedId, leadId } = route.useSearch();
   const navigate = route.useNavigate();
   const [startingConversation, setStartingConversation] = useState(false);
+  const { mutate: openLeadConversation } = useOpenLeadConversation();
+
+  // Replaces the address, so going back doesn't land here again and reopen the same conversation.
+  useEffect(() => {
+    if (!leadId) return;
+
+    openLeadConversation(leadId, {
+      onSuccess: ({ id }) => void navigate({ search: { conversation: id }, replace: true }),
+      onError: (error) => {
+        toast.error(whatsappErrorMessage(error, "Não foi possível abrir a conversa."));
+        void navigate({ search: {}, replace: true });
+      },
+    });
+  }, [leadId, navigate, openLeadConversation]);
 
   return (
     <div className="flex h-full min-h-[28rem] flex-col">
@@ -39,7 +57,7 @@ export function WhatsAppInbox({ isConnected, isImporting, onConnect }: WhatsAppI
         <aside
           className={cn(
             "w-full min-w-0 md:w-80 md:shrink-0 md:border-r lg:w-96",
-            selectedId && "hidden md:block"
+            (selectedId || leadId) && "hidden md:block"
           )}
         >
           <ConversationList
@@ -50,8 +68,12 @@ export function WhatsAppInbox({ isConnected, isImporting, onConnect }: WhatsAppI
           />
         </aside>
 
-        <section className={cn("min-w-0 flex-1", !selectedId && "hidden md:block")}>
-          {selectedId ? (
+        <section className={cn("min-w-0 flex-1", !selectedId && !leadId && "hidden md:block")}>
+          {leadId ? (
+            <div className="flex h-full items-center justify-center">
+              <Spinner />
+            </div>
+          ) : selectedId ? (
             <ConversationThread
               key={selectedId}
               conversationId={selectedId}

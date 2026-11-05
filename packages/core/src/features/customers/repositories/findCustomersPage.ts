@@ -2,7 +2,7 @@ import { and, count, db, dealsTable, eq, leadsTable, sql } from "@vetra/database
 
 import { type Filter, type FilterColumns, filtersToSql } from "../../../shared/filters";
 import { type Sort, type SortColumns, sortToSql } from "../../../shared/sort";
-import type { Lead } from "../../leads/domain";
+import type { LeadWithPhoto } from "../../leads/domain";
 import { leadSearchSql } from "../../leads/repositories/leadListWhere";
 import type { Deal } from "../domain";
 import {
@@ -13,7 +13,7 @@ import {
 } from "./customerSql";
 
 export type CustomerListRow = {
-  lead: Lead;
+  lead: LeadWithPhoto;
   deal: Deal;
   receivedInCents: number;
   activeProjectsCount: number;

@@ -2,7 +2,7 @@ import type { DashboardPeriod } from "@vetra/contracts";
 import { UserPlusIcon } from "lucide-react";
 import { useState } from "react";
 
-import { CreateLeadSheet } from "@/features/leads/components/CreateLeadSheet";
+import { CreateLeadSheet } from "@/shared/components/leads/CreateLeadSheet";
 import { Button } from "@/shared/components/ui/button";
 import { useHotkey } from "@/shared/hooks/useHotkey";
 import { useProfile } from "@/shared/queries/profile/useProfile";
