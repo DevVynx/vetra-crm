@@ -23,7 +23,12 @@ function failWith(failure: string): never {
 const describeStatus = (status: number) =>
   status === 401 ? "invalid API key, check WAHA_API_KEY" : `responded with ${status}`;
 
-export async function wahaFetch(path: string, method: "GET" | "POST" = "GET", body?: unknown) {
+export async function wahaFetch(
+  path: string,
+  method: "GET" | "POST" = "GET",
+  body?: unknown,
+  timeoutMs: number = REQUEST_TIMEOUT_MS
+) {
   const { WAHA_URL, WAHA_API_KEY } = envConfig.get();
 
   try {
@@ -35,7 +40,7 @@ export async function wahaFetch(path: string, method: "GET" | "POST" = "GET", bo
         "X-Api-Key": WAHA_API_KEY,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
     });
   } catch {
     return failWith("not reachable");

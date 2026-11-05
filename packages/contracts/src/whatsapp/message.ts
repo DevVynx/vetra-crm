@@ -3,7 +3,14 @@ import { z } from "zod";
 export const whatsappMessageDirectionSchema = z.enum(["inbound", "outbound"]);
 export type WhatsappMessageDirection = z.infer<typeof whatsappMessageDirectionSchema>;
 
-export const whatsappMessageTypeSchema = z.enum(["text", "audio", "image", "document"]);
+export const whatsappMessageTypeSchema = z.enum([
+  "text",
+  "audio",
+  "image",
+  "video",
+  "document",
+  "other",
+]);
 export type WhatsappMessageType = z.infer<typeof whatsappMessageTypeSchema>;
 
 export const whatsappMessageSchema = z.object({

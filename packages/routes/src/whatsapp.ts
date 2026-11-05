@@ -3,4 +3,8 @@ export const whatsappRoutes = {
   connect: "/whatsapp/connect",
   qrCode: "/whatsapp/qr",
   disconnect: "/whatsapp/disconnect",
+  accountChange: "/whatsapp/account-change",
+  events: "/whatsapp/events",
+  conversations: "/whatsapp/conversations",
+  conversationCount: "/whatsapp/conversations/count",
 } as const;

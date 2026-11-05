@@ -1,4 +1,4 @@
-import { profileServices, stageServices } from "@vetra/core";
+import { profileServices, stageServices, whatsappServices } from "@vetra/core";
 import { envConfig } from "@vetra/env/server";
 import { envConfig as wahaEnvConfig } from "@vetra/env/waha";
 
@@ -13,6 +13,7 @@ const HOST = "127.0.0.1";
 
 await profileServices.ensureProfile();
 await stageServices.ensureStages();
+whatsappServices.startWhatsappSync();
 
 app.listen(API_PORT, HOST, () => {
   console.log(`Servidor rodando em http://${HOST}:${API_PORT}/api 🚀`);
