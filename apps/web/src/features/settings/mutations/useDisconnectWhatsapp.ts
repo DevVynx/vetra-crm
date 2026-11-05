@@ -14,7 +14,12 @@ export function useDisconnectWhatsapp() {
   return useMutation({
     mutationFn: () => api.post(whatsappRoutes.disconnect),
     onSuccess: () => {
-      statusQuery.setData({ status: "disconnected", phone: null });
+      statusQuery.setData({
+        status: "disconnected",
+        phone: null,
+        importing: false,
+        pendingAccountChange: null,
+      });
       statusQuery.invalidate();
       toast.success("WhatsApp desconectado.");
     },

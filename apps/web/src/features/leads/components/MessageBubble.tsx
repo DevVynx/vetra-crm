@@ -1,5 +1,5 @@
 import type { WhatsappMessage, WhatsappMessageType } from "@vetra/contracts";
-import { FileTextIcon, ImageIcon, MicIcon } from "lucide-react";
+import { FileTextIcon, ImageIcon, MicIcon, PaperclipIcon, VideoIcon } from "lucide-react";
 import type { ComponentType } from "react";
 
 import { cn } from "@/shared/utils/cn";
@@ -11,7 +11,9 @@ const nonTextLabels: Record<
 > = {
   audio: { label: "Áudio", icon: MicIcon },
   image: { label: "Imagem", icon: ImageIcon },
+  video: { label: "Vídeo", icon: VideoIcon },
   document: { label: "Documento", icon: FileTextIcon },
+  other: { label: "Mídia", icon: PaperclipIcon },
 };
 
 export function MessageBubble({ message }: { message: WhatsappMessage }) {

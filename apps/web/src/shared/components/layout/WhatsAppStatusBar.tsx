@@ -2,9 +2,12 @@ import { Link } from "@tanstack/react-router";
 
 import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
 import { Badge } from "@/shared/components/ui/badge";
+import { useWhatsappEvents } from "@/shared/queries/whatsapp/useWhatsappEvents";
 import { useWhatsappStatus } from "@/shared/queries/whatsapp/useWhatsappStatus";
 
 export function WhatsAppStatusBar() {
+  useWhatsappEvents();
+
   const { data, isPending, isError } = useWhatsappStatus();
   const isConnected = !isError && data?.status === "connected";
 
