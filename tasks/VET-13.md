@@ -108,10 +108,23 @@ Not documented, and only a real file can answer:
 - **How it travels:** one request per file, with the bytes as the body and the name, type and caption in the request, so no new dependency is needed. The API checks the size while reading, refuses what is too big, and passes the file on to WAHA as base64. WAHA restrictions (`463`, `475`) become the same message as for text.
 - **Stored:** the message, with its type, file name and caption, like a received one. Not the file.
 - **In the thread:** the sent file shows like any other, with the ticks, and opens the same way. It can be deleted for everyone, like any message of the user's.
-- **Voice recording from the microphone is not in this step.** A browser records in WebM, and WhatsApp needs OGG with OPUS, which WAHA converts only with ffmpeg. Whether the free image can do it is not documented, so it is checked first and decided with the user.
+- **Voice recording from the microphone is the next section.** A browser records in WebM, and WhatsApp needs OGG with OPUS.
 - **Built as:** the thread is wrapped in the File Upload component (`ThreadAttachments`), which holds the chosen files and their captions. The paperclip, the drop over the thread and the paste only add files; the tray (`AttachmentTray`) shows them, and sending goes one file at a time. If one fails, the reason is shown and what was not sent stays in the tray. Text pasted into the message box is left alone, and a drag that carries no file shows nothing. An image sent as JPEG, PNG or WebP and an MP4 go as photo and video; a GIF and a QuickTime video go as documents, since WhatsApp only plays MP4. The size is checked in the browser and again in the API (over 25 MB is a 422).
 - **Checked** over HTTP and in the browser with the fake WAHA: every type goes to the right endpoint with the bytes intact, captions (not for documents), 25 MB exactly and one byte over, restrictions (429, nothing stored), disconnected (409), attach, remove, caption, paste, drop, refusals in Portuguese, a failure keeping the rest, phone width.
 - **Real checks:** with the user, sending one image, one video and one document to a contact they choose. WAHA's real behavior for `sendFile` and whether images need converting to JPEG are only known after that.
+
+### Step 3b — recording a voice message
+
+- **Like WhatsApp, simpler.** With an empty message box (and nothing attached) the microphone takes the place of the send button. Clicking it starts recording and the row becomes: a bin (cancel), a red dot, the time, a small live level (bars that follow the volume, drawn from an `AnalyserNode`, not a waveform of the whole recording) and the send button. No pause, no view-once.
+- **Cancelling:** the bin, Escape, leaving the conversation or the page. A recording under one second is discarded when sent. The microphone is only on while recording.
+- **Format:** the browser records WebM/OPUS (OGG/OPUS in Firefox). Vetra sends it to WAHA's `sendVoice` with `convert: true`, and WAHA converts it with ffmpeg, which the free image has (checked: `ffmpeg` with `libopus`). Whether the conversion works on the free image was **not provable without a logged-in session** (WAHA refuses to convert without one), so it is checked with the user's account.
+- **Plan B if it doesn't convert:** write the OGG container in the browser from the OPUS packets that WebCodecs' `AudioEncoder` gives, with no ffmpeg and no dependency.
+- **Route:** `POST /whatsapp/conversations/:id/messages/voice`, the bytes as the body, `mimetype`, `seconds` and an optional `replyTo` in the query. The recording is never stored. The message is saved as a voice `audio` with the length, so the player shows it.
+- **Limit:** 15 minutes. Reaching it stops the recording, which waits for the user to send it. The 25 MB limit of files applies.
+- **The bars of a sent voice come from WAHA, not from Vetra.** `sendVoice` has no field for them: WAHA works them out from the converted file and WhatsApp shows them (checked by the user in WhatsApp Web). Vetra stores the message as soon as WAHA answers, without bars, so the echo WAHA sends later is used to fill them (only when empty, and the recorded length is kept).
+- **A failed send keeps the recording** (stopped) so sending can be tried again. A denied or missing microphone is explained in Portuguese.
+- **Checked** over the browser with a fake WAHA and a fake microphone: empty box, typing and clearing swapping the button, record, cancel, Escape, under one second, send (one request, `voice`, `convert: true`, WebM bytes), failure keeping the recording and retrying, denied microphone, leaving the page releasing the microphone, phone width.
+- **Real check:** the user records one voice message to a contact they choose and confirms it arrives as a voice message.
 
 ---
 
