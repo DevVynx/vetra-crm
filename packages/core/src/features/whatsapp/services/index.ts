@@ -23,6 +23,7 @@ import { openWhatsappConversation } from "./openWhatsappConversation";
 import { resolveWhatsappAccountChange } from "./resolveWhatsappAccountChange";
 import { sendWhatsappMedia } from "./sendWhatsappMedia";
 import { sendWhatsappMessage } from "./sendWhatsappMessage";
+import { sendWhatsappVoice } from "./sendWhatsappVoice";
 import { startWhatsappSync } from "./startWhatsappSync";
 
 export const whatsappServices = {
@@ -49,5 +50,6 @@ export const whatsappServices = {
   resolveWhatsappAccountChange,
   sendWhatsappMedia,
   sendWhatsappMessage,
+  sendWhatsappVoice,
   startWhatsappSync,
 };

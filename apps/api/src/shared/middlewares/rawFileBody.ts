@@ -2,8 +2,13 @@ import express, { type RequestHandler } from "express";
 
 import { UnprocessableEntityError } from "@/shared/http/errors";
 
+// Untyped like the validators (see validation.ts): a route's handlers share one Request type, and
+// the default one would reject a controller whose query was already parsed into numbers.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RawFileBodyHandler = RequestHandler<any, any, any, any>;
+
 // A file arrives as the bytes of the request. One over the limit is a clear 422, not a 500.
-export function rawFileBody(maxBytes: number): RequestHandler {
+export function rawFileBody(maxBytes: number): RawFileBodyHandler {
   const readBytes = express.raw({ type: () => true, limit: maxBytes });
 
   return (req, res, next) =>

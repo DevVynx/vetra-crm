@@ -32,6 +32,16 @@ const sentMessageSchema = z.object({ id: z.string().nullish(), timestamp: z.numb
 export type WahaSentMessage = { id: string; sentAtSeconds: number | null };
 
 // The live event of this same message also arrives, so a missing id here loses nothing.
+async function readSentMessage(response: Response): Promise<WahaSentMessage | null> {
+  if (!response.ok && RESTRICTION_CODES.test(await response.clone().text())) {
+    throw new WahaSendRestrictedError();
+  }
+
+  const { id, timestamp } = await parseWahaResponse(response, sentMessageSchema);
+
+  return id ? { id, sentAtSeconds: timestamp ?? null } : null;
+}
+
 export async function sendText(
   chatId: string,
   text: string,
@@ -44,13 +54,7 @@ export async function sendText(
     SEND_TIMEOUT_MS
   );
 
-  if (!response.ok && RESTRICTION_CODES.test(await response.clone().text())) {
-    throw new WahaSendRestrictedError();
-  }
-
-  const { id, timestamp } = await parseWahaResponse(response, sentMessageSchema);
-
-  return id ? { id, sentAtSeconds: timestamp ?? null } : null;
+  return readSentMessage(response);
 }
 
 const messagePath = (chatId: string, messageId: string) =>
@@ -109,11 +113,38 @@ export async function sendMedia({
     SEND_MEDIA_TIMEOUT_MS
   );
 
-  if (!response.ok && RESTRICTION_CODES.test(await response.clone().text())) {
-    throw new WahaSendRestrictedError();
-  }
+  return readSentMessage(response);
+}
 
-  const { id, timestamp } = await parseWahaResponse(response, sentMessageSchema);
+type SendVoiceInput = {
+  chatId: string;
+  file: { content: Buffer; mimetype: string; filename: string };
+  replyTo: string | undefined;
+};
 
-  return id ? { id, sentAtSeconds: timestamp ?? null } : null;
+// WhatsApp only plays OGG with OPUS as a voice message. What a browser records is another
+// container, so WAHA is asked to convert it (it runs ffmpeg).
+export async function sendVoice({
+  chatId,
+  file,
+  replyTo,
+}: SendVoiceInput): Promise<WahaSentMessage | null> {
+  const response = await wahaFetch(
+    "/api/sendVoice",
+    "POST",
+    {
+      session: WAHA_SESSION,
+      chatId,
+      file: {
+        mimetype: file.mimetype,
+        filename: file.filename,
+        data: file.content.toString("base64"),
+      },
+      convert: true,
+      ...(replyTo ? { reply_to: replyTo } : {}),
+    },
+    SEND_MEDIA_TIMEOUT_MS
+  );
+
+  return readSentMessage(response);
 }

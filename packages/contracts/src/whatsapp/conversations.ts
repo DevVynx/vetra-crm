@@ -13,6 +13,7 @@ export const WHATSAPP_MESSAGE_MAX_LENGTH = 4096;
 export const WHATSAPP_MEDIA_MAX_BYTES = 25 * 1024 * 1024;
 export const WHATSAPP_CAPTION_MAX_LENGTH = 1024;
 export const WHATSAPP_MAX_FILES_AT_ONCE = 10;
+export const WHATSAPP_VOICE_MAX_SECONDS = 15 * 60;
 
 export const whatsappConversationSchema = z.object({
   id: z.string(),
@@ -127,3 +128,17 @@ export const sendWhatsappMediaQuerySchema = z.object({
   caption: z.string().trim().max(WHATSAPP_CAPTION_MAX_LENGTH).optional(),
 });
 export type SendWhatsappMediaQuery = z.input<typeof sendWhatsappMediaQuerySchema>;
+
+// A recorded voice message: the bytes are the body and the length, in seconds, is told by the
+// browser that recorded it. WhatsApp wants OGG with OPUS and WAHA converts what the browser made.
+export const sendWhatsappVoiceQuerySchema = z.object({
+  mimetype: z
+    .string()
+    .trim()
+    .max(100)
+    .regex(/^audio\/[\w.+-]+$/)
+    .default("audio/webm"),
+  seconds: z.coerce.number().int().min(1).max(WHATSAPP_VOICE_MAX_SECONDS),
+  replyTo: z.string().optional(),
+});
+export type SendWhatsappVoiceQuery = z.input<typeof sendWhatsappVoiceQuerySchema>;

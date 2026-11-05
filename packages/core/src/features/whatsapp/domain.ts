@@ -191,6 +191,16 @@ const MESSAGE_TYPE_BY_SEND_KIND: Record<SendKind, WhatsappMessageType> = {
   file: "document",
 };
 
+const VOICE_EXTENSION_BY_MIMETYPE: Record<string, string> = {
+  "audio/ogg": "ogg",
+  "audio/mp4": "m4a",
+  "audio/mpeg": "mp3",
+};
+
+function voiceFilenameOf(mimetype: string): string {
+  return `voice.${VOICE_EXTENSION_BY_MIMETYPE[mimetype] ?? "webm"}`;
+}
+
 const MAX_FILENAME_LENGTH = 150;
 
 // Goes into a header: no control characters, no path, no quotes.
@@ -278,6 +288,7 @@ export const whatsappDomain = {
   MESSAGE_TYPE_BY_SEND_KIND,
   safeFilenameOf,
   sendKindOf,
+  voiceFilenameOf,
   safePhotoUrl,
   savedNameOfContact,
   unreadChangeOf,

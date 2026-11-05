@@ -8,6 +8,7 @@ import {
   resolveWhatsappAccountChangeRequestSchema,
   sendWhatsappMediaQuerySchema,
   sendWhatsappMessageRequestSchema,
+  sendWhatsappVoiceQuerySchema,
   whatsappConversationParamsSchema,
   whatsappMessageParamsSchema,
 } from "@vetra/contracts";
@@ -30,6 +31,10 @@ const v = {
   markRead: validation({ params: whatsappConversationParamsSchema }),
   getMessageMedia: validation({ params: whatsappMessageParamsSchema }),
   markMessagePlayed: validation({ params: whatsappMessageParamsSchema }),
+  sendVoice: validation({
+    params: whatsappConversationParamsSchema,
+    query: sendWhatsappVoiceQuerySchema,
+  }),
   sendMedia: validation({
     params: whatsappConversationParamsSchema,
     query: sendWhatsappMediaQuerySchema,

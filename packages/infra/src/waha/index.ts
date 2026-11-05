@@ -14,6 +14,7 @@ import {
   markChatAsRead,
   sendMedia,
   sendText,
+  sendVoice,
 } from "./send";
 import {
   createSession,
@@ -52,6 +53,7 @@ export const wahaClient = {
   markChatAsRead,
   sendMedia,
   sendText,
+  sendVoice,
   startSession,
   stopSession,
   subscribeToEvents,

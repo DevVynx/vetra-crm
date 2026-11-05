@@ -26,6 +26,7 @@ import {
   resolveWhatsappAccountChangeController,
   sendWhatsappMediaController,
   sendWhatsappMessageController,
+  sendWhatsappVoiceController,
   streamWhatsappEventsController,
 } from "./controllers";
 import v from "./validators";
@@ -115,4 +116,10 @@ whatsappRouter.post(
   rawFileBody(WHATSAPP_MEDIA_MAX_BYTES),
   v.sendMedia,
   sendWhatsappMediaController
+);
+whatsappRouter.post(
+  whatsappRoutes.conversationMessagesVoice,
+  v.sendVoice,
+  rawFileBody(WHATSAPP_MEDIA_MAX_BYTES),
+  sendWhatsappVoiceController
 );

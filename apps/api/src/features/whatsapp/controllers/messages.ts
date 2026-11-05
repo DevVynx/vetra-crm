@@ -107,3 +107,22 @@ export async function sendWhatsappMediaController(
   });
   res.status(204).send();
 }
+
+export async function sendWhatsappVoiceController(
+  req: ValidatedRequest<typeof v.sendVoice>,
+  res: Response
+) {
+  const content: unknown = req.body;
+  if (!Buffer.isBuffer(content) || content.length === 0) {
+    throw new BadRequestError("The request has no recording.");
+  }
+
+  await whatsappServices.sendWhatsappVoice({
+    conversationId: req.params.id,
+    content,
+    mimetype: req.query.mimetype,
+    seconds: req.query.seconds,
+    replyToMessageId: req.query.replyTo,
+  });
+  res.status(204).send();
+}

@@ -1,16 +1,21 @@
 import { WHATSAPP_MESSAGE_MAX_LENGTH, type WhatsappMessage } from "@vetra/contracts";
-import { PencilIcon, SendHorizontalIcon, XIcon } from "lucide-react";
+import { MicIcon, PencilIcon, SendHorizontalIcon, XIcon } from "lucide-react";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/shared/components/ui/button";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { QuotedMessage } from "@/shared/components/whatsapp/MessageBubble";
 
+import { useVoiceRecorder } from "../hooks/useVoiceRecorder";
 import { useEditWhatsappMessage } from "../mutations/useEditWhatsappMessage";
 import { useSendWhatsappMessage } from "../mutations/useSendWhatsappMessage";
+import { useSendWhatsappVoice } from "../mutations/useSendWhatsappVoice";
+import { voiceRecorderProblemMessage } from "../utils/whatsappErrors";
 import { AttachButton } from "./AttachButton";
 import { useThreadAttachments } from "./ThreadAttachments";
+import { VoiceRecorderBar } from "./VoiceRecorderBar";
 
 type MessageComposerProps = {
   conversationId: string;
@@ -32,11 +37,33 @@ export function MessageComposer({
   const edit = useEditWhatsappMessage(conversationId);
   const attachments = useThreadAttachments();
   const hasFiles = !editing && attachments.files.length > 0;
-  const isPending = send.isPending || edit.isPending || attachments.isSending;
+  const sendVoice = useSendWhatsappVoice(conversationId);
+  const recorder = useVoiceRecorder();
+  const { cancel: cancelRecording } = recorder;
+  const isPending =
+    send.isPending || edit.isPending || attachments.isSending || sendVoice.isPending;
   const hasText = text.trim().length > 0;
   const isChanged = !editing || text.trim() !== editing.content;
   const canSend = isConnected && !isPending && ((hasText && isChanged) || hasFiles);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const recordingState = recorder.state;
+  const isRecording = recordingState.phase !== "idle";
+  // The microphone takes the place of send while there is nothing to send, like in WhatsApp.
+  const showsMicrophone = !isRecording && !hasText && !hasFiles && !editing;
+
+  // A recording belongs to the conversation it started in: leaving it drops it.
+  useEffect(() => cancelRecording, [conversationId, cancelRecording]);
+
+  useEffect(() => {
+    if (!isRecording || sendVoice.isPending) return;
+
+    const onEscape = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") cancelRecording();
+    };
+    document.addEventListener("keydown", onEscape);
+
+    return () => document.removeEventListener("keydown", onEscape);
+  }, [isRecording, sendVoice.isPending, cancelRecording]);
 
   // Not on touch screens, where the keyboard would open by itself and cover the messages.
   useEffect(() => {
@@ -76,6 +103,28 @@ export function MessageComposer({
     // The text only clears once sent, so a failure never loses what was written.
     if (editing) edit.mutate({ messageId: editing.id, text: text.trim() }, { onSuccess: finish });
     else send.mutate({ text: text.trim(), replyTo: reply?.id }, { onSuccess: finish });
+  };
+
+  const startRecording = async () => {
+    const problem = await recorder.start();
+    if (problem) toast.error(voiceRecorderProblemMessage(problem));
+  };
+
+  // A failure leaves the recording as it was, stopped, so sending can be tried again.
+  const sendRecording = async () => {
+    const recording = await recorder.finish();
+    if (!recording) return;
+    if (recording.seconds < 1) return cancelRecording();
+
+    sendVoice.mutate(
+      { blob: recording.blob, seconds: Math.round(recording.seconds), replyTo: reply?.id },
+      {
+        onSuccess: () => {
+          cancelRecording();
+          onDone();
+        },
+      }
+    );
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -120,31 +169,53 @@ export function MessageComposer({
           </Button>
         </div>
       )}
-      <div className="flex items-end gap-2 p-3">
-        <AttachButton />
-        <Textarea
-          ref={textareaRef}
-          aria-label="Mensagem"
-          rows={1}
-          className="max-h-32 min-h-9 resize-none read-only:opacity-60"
-          // Read-only instead of disabled while sending: a disabled field would lose the focus.
-          readOnly={isPending}
-          maxLength={WHATSAPP_MESSAGE_MAX_LENGTH}
-          placeholder={isConnected ? "Escreva uma mensagem" : "Conecte o WhatsApp para enviar"}
-          disabled={!isConnected}
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          onKeyDown={onKeyDown}
+      {recordingState.phase !== "idle" ? (
+        <VoiceRecorderBar
+          state={recordingState}
+          isSending={sendVoice.isPending}
+          onCancel={cancelRecording}
+          onSend={() => void sendRecording()}
         />
-        <Button
-          size="icon"
-          aria-label={editing ? "Salvar edição" : hasFiles ? "Enviar arquivos" : "Enviar mensagem"}
-          disabled={!canSend}
-          onClick={() => void submit()}
-        >
-          {isPending ? <Spinner /> : <SendHorizontalIcon />}
-        </Button>
-      </div>
+      ) : (
+        <div className="flex items-end gap-2 p-3">
+          <AttachButton />
+          <Textarea
+            ref={textareaRef}
+            aria-label="Mensagem"
+            rows={1}
+            className="max-h-32 min-h-9 resize-none read-only:opacity-60"
+            // Read-only instead of disabled while sending: a disabled field would lose the focus.
+            readOnly={isPending}
+            maxLength={WHATSAPP_MESSAGE_MAX_LENGTH}
+            placeholder={isConnected ? "Escreva uma mensagem" : "Conecte o WhatsApp para enviar"}
+            disabled={!isConnected}
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            onKeyDown={onKeyDown}
+          />
+          {showsMicrophone ? (
+            <Button
+              size="icon"
+              aria-label="Gravar áudio"
+              disabled={!isConnected || isPending}
+              onClick={() => void startRecording()}
+            >
+              <MicIcon />
+            </Button>
+          ) : (
+            <Button
+              size="icon"
+              aria-label={
+                editing ? "Salvar edição" : hasFiles ? "Enviar arquivos" : "Enviar mensagem"
+              }
+              disabled={!canSend}
+              onClick={() => void submit()}
+            >
+              {isPending ? <Spinner /> : <SendHorizontalIcon />}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
