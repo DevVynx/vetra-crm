@@ -1,5 +1,6 @@
 import { ProfileSettings } from "./ProfileSettings";
 import { StagesSettings } from "./StagesSettings";
+import { WhatsAppSettings } from "./WhatsAppSettings";
 
 export function SettingsPage() {
   return (
@@ -7,6 +8,7 @@ export function SettingsPage() {
       <h1 className="text-2xl font-semibold tracking-tight">Configurações</h1>
       <ProfileSettings />
       <StagesSettings />
+      <WhatsAppSettings />
     </div>
   );
 }

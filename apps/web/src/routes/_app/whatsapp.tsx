@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PagePlaceholder } from "@/shared/components/layout/PagePlaceholder";
+import { WhatsAppPage } from "@/features/whatsapp/components/WhatsAppPage";
 
 export const Route = createFileRoute("/_app/whatsapp")({
   staticData: { title: "WhatsApp" },
-  component: () => <PagePlaceholder description="Suas conversas do WhatsApp aparecerão aqui." />,
+  component: WhatsAppPage,
 });
