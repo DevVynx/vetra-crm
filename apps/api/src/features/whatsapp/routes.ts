@@ -1,3 +1,4 @@
+import { WHATSAPP_MEDIA_MAX_BYTES } from "@vetra/contracts";
 import { whatsappRoutes } from "@vetra/routes";
 import { Router } from "express";
 
@@ -111,7 +112,7 @@ whatsappRouter.post(
 );
 whatsappRouter.post(
   whatsappRoutes.conversationMessagesMedia,
-  rawFileBody,
+  rawFileBody(WHATSAPP_MEDIA_MAX_BYTES),
   v.sendMedia,
   sendWhatsappMediaController
 );
