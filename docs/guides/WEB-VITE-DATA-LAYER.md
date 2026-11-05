@@ -101,3 +101,12 @@ retries on its own, and refetches whenever the connection returns. A slow interv
 as a safety net for a lost signal. Query keys of one area share a prefix
 (`whatsappQueryKeys.all`), so one invalidation refreshes the list, the thread, the lead card and
 the Painel together.
+
+## Files asked for on demand
+
+A file the API serves (a message's image, video or audio) is asked for with the normal axios client
+as a blob, only when the user clicks, and shown from a temporary address (`URL.createObjectURL`). The
+hook that owns it releases the address when the component leaves the screen, so nothing is cached.
+It isn't a query: a blob has no key worth keeping, and an `<img src>` pointing at the API would
+skip the origin protection and the CORS rules that every other request goes through. An error from
+it is turned into text by status in one place (`mediaErrorMessage`), like the others.

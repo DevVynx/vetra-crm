@@ -79,3 +79,17 @@ just adds noise. Full mechanics in `ERROR-HANDLING.md`.
 `errors/` (the domain-error registry and its mapper), `http/` (HTTP error classes,
 validation middleware), `middlewares/` (404, global error handler). Keep this granularity for new
 cross-cutting code — don't pile unrelated helpers into one file.
+
+## Serving a file from a third party
+
+A file someone else sent (a WhatsApp image, document or audio) must never be able to run in the
+page, whatever it says it is. The WhatsApp media route is the model:
+
+- **An allowlist of types may be shown inline** (`jpeg`, `png`, `webp`, `gif`, `mp4`, `webm` and a few
+  audio types). Anything else, `html` and `svg` included, is sent as an attachment with a generic type.
+- **Headers:** `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none';
+sandbox`, `Cache-Control: no-store`, and a file name with no control character, quote or slash.
+- **A size cap** applied while reading, so a huge file is refused without being loaded.
+- **Only the path the upstream gives is used,** on the address already trusted, and only under the
+  folder it should come from. The host in the URL it returns is ignored.
+- **Nothing is stored:** the file is asked for, handed over and forgotten.

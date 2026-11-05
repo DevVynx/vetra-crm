@@ -84,3 +84,13 @@ account, including personal conversations. There is no link column to leads: a c
 linked by comparing `phone_key` at read time. Photos are stored as URLs only, and a message
 keeps the full WAHA id because its edit, delete and reply calls need it. Deleting a message
 drops its text and its quote. `pnpm db:seed` never creates conversations.
+
+## Correcting old rows with a one-time read
+
+When a new column or type needs data that old rows never kept, and the data lives in WAHA, a
+migration can't fill it. The pattern: a nullable timestamp on `whatsapp_accounts` says when the
+correction ran (`stickers_repaired_at`, `audio_details_filled_at`); a new account is created with it
+already set, since its first import brings the right data; and the sync runs the correction once when
+it is null, reading again only the conversations that have a candidate, through
+`helpers/rereadConversations.ts`. To run one again later, a custom migration sets the timestamp back to
+null. A correction only ever moves a value forward (a listened audio never becomes unheard).

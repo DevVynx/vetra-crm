@@ -51,7 +51,9 @@ messages to new contacts. The web shows Portuguese text for both, and never the 
 `WahaRequestRejectedError`), because it must not know the domain. The domain wraps them in
 `helpers/callWaha.ts`, the only place that translates: a refusal from WhatsApp on an edit or a
 delete (`WahaRequestRejectedError`) becomes an `InvariantViolationError` (422), while WAHA being
-off becomes `ServiceUnavailableError`. So the same status can mean different things per
+off becomes `ServiceUnavailableError`. A media that WhatsApp no longer serves is a
+`NotFoundError` (404), and one over the size limit an `InvariantViolationError` (422). So the same
+status can mean different things per
 route, and the web picks its message by the action (`whatsappErrorMessage` and
 `whatsappMessageActionErrorMessage`).
 

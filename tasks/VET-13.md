@@ -62,7 +62,7 @@ Verified in WAHA's docs, not yet with a real file:
 
 Not documented, and only a real file can answer:
 
-- **WAHA keeps its own copy** of a file it downloaded, in its media storage. That conflicts with the rule that no media stays in the container, so it must be checked how long it stays and how to clean it.
+- **WAHA keeping its own copy** of a file it downloaded was checked with real files, opened by the user: the container's temporary folder for files was empty, and no media file existed outside the image's own demo assets. Only counts and sizes were read. So nothing needs cleaning, and the rule that no media stays in the container holds.
 - **Old media:** WhatsApp stops serving old files, so opening an old image may fail. The thread says so, with no raw error.
 - **Size:** no limit is documented, so the API sets its own: 25 MB.
 
