@@ -64,11 +64,12 @@ export async function listAwaitingWhatsappConversationsController(
   _req: Request,
   res: Response<ListAwaitingConversationsResponse>
 ) {
-  const conversations = await whatsappServices.listAwaitingWhatsappConversations();
+  const { items, total } = await whatsappServices.listAwaitingWhatsappConversations();
 
   res.json(
     listAwaitingConversationsResponseSchema.parse({
-      conversations: conversations.map(toWhatsappConversation),
+      conversations: items.map(toWhatsappConversation),
+      total,
     })
   );
 }

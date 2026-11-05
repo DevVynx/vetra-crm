@@ -1,12 +1,17 @@
-import { leadsTable, sql } from "@vetra/database";
+import { leadsTable, qualified, sql, whatsappConversationsTable } from "@vetra/database";
 
 import { canonicalPhoneOf } from "../../../shared/phone";
 
 // Messages exchanged before the lead existed, or before it got this number, count as contact.
 export const lastMessageAtOfPhoneKey = (phoneKey: string) =>
-  sql<Date | null>`(select max(c.last_message_at) from whatsapp_conversations c where c.phone_key = ${phoneKey})`;
+  sql<Date | null>`(
+    select max(${qualified(whatsappConversationsTable.lastMessageAt)}) from ${whatsappConversationsTable}
+    where ${qualified(whatsappConversationsTable.phoneKey)} = ${phoneKey}
+  )`;
 
 // Every edit of a phone goes through here, so the key can't fall out of step with the number.
+// The last contact never moves back: after a phone change it keeps the date of the old number's
+// messages, and the new number's messages only count when they are more recent.
 export function contactChangeOf<Contact extends { phone: string }>(contact: Contact) {
   const phoneKey = canonicalPhoneOf(contact.phone);
 

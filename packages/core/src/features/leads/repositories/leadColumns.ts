@@ -1,4 +1,4 @@
-import { leadsTable, qualified, sql } from "@vetra/database";
+import { leadsTable, qualified, sql, whatsappConversationsTable } from "@vetra/database";
 
 export const leadColumns = {
   id: leadsTable.id,
@@ -20,7 +20,8 @@ export const leadColumns = {
 };
 
 export const leadPhotoSql = sql<string | null>`(
-  select c.photo_url from whatsapp_conversations c
-  where c.phone_key = ${qualified(leadsTable.phoneKey)} and c.photo_url is not null
+  select ${qualified(whatsappConversationsTable.photoUrl)} from ${whatsappConversationsTable}
+  where ${qualified(whatsappConversationsTable.phoneKey)} = ${qualified(leadsTable.phoneKey)}
+    and ${qualified(whatsappConversationsTable.photoUrl)} is not null
   limit 1
 )`;

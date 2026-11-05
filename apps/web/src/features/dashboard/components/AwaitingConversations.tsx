@@ -38,9 +38,9 @@ export function AwaitingConversations() {
       title="Conversas esperando você"
       icon={WhatsAppIcon}
       iconClassName="text-success"
-      count={data ? conversations.length : undefined}
+      count={data?.total}
     >
-      {isPending ? (
+      {isPending || isSetUp === undefined ? (
         <SectionSkeleton rows={2} />
       ) : conversations.length === 0 ? (
         <SectionEmpty
@@ -79,6 +79,11 @@ export function AwaitingConversations() {
               )}
             </Item>
           ))}
+          {data && data.total > conversations.length && (
+            <p className="text-muted-foreground text-center text-xs">
+              Mostrando as {conversations.length} mais recentes.
+            </p>
+          )}
         </div>
       )}
     </Section>

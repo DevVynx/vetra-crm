@@ -6,7 +6,8 @@ import { toSnakeCase } from "drizzle-orm/casing";
 // Use this for every outer-row reference in a subquery: it always renders "table"."column".
 // Columns declared without an explicit name get it from their key, converted with the same
 // snake_case casing the client is configured with.
+export const unqualified = (column: Column) =>
+  sql.identifier(column.keyAsName ? toSnakeCase(column.name) : column.name);
+
 export const qualified = (column: Column) =>
-  sql`${sql.identifier(getTableName(column.table))}.${sql.identifier(
-    column.keyAsName ? toSnakeCase(column.name) : column.name
-  )}`;
+  sql`${sql.identifier(getTableName(column.table))}.${unqualified(column)}`;

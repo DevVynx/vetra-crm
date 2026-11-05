@@ -92,6 +92,13 @@
       "when": 1793904661444,
       "tag": "0012_add_whatsapp_message_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793908902851,
+      "tag": "0013_make_conversation_phone_key_unique",
+      "breakpoints": true
     }
   ]
 }

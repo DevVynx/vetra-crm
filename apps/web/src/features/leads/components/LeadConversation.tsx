@@ -35,6 +35,7 @@ function CardLink({ search, children }: CardLinkProps) {
 
 export function LeadConversation({ leadId }: { leadId: string }) {
   const isSetUp = useIsWhatsappSetUp();
+  const isLoading = isSetUp === undefined;
   const { data, isPending } = useLeadConversation(leadId);
   const conversation = data?.conversation ?? null;
   const state = conversation ? conversationStateOf(conversation) : null;
@@ -45,7 +46,7 @@ export function LeadConversation({ leadId }: { leadId: string }) {
       icon={WhatsAppIcon}
       iconClassName="text-success"
       action={
-        isPending ? null : conversation ? (
+        isPending || isLoading ? null : conversation ? (
           <CardLink search={{ conversation: conversation.id }}>Abrir conversa</CardLink>
         ) : isSetUp ? (
           <CardLink search={{ leadId }}>Enviar mensagem</CardLink>
@@ -54,7 +55,7 @@ export function LeadConversation({ leadId }: { leadId: string }) {
         )
       }
     >
-      {isPending ? (
+      {isPending || isLoading ? (
         <SectionSkeleton rows={2} />
       ) : !conversation || !state ? (
         <SectionEmpty

@@ -51,7 +51,7 @@ export const whatsappConversationsTable = pgTable(
   },
   (table) => [
     uniqueIndex("whatsapp_conversations_chat_id_idx").on(table.chatId),
-    index("whatsapp_conversations_phone_key_idx").on(table.phoneKey),
+    uniqueIndex("whatsapp_conversations_phone_key_idx").on(table.phoneKey),
     index("whatsapp_conversations_last_message_at_idx").on(table.lastMessageAt),
   ]
 );

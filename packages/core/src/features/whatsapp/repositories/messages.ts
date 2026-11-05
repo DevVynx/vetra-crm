@@ -5,9 +5,11 @@ import {
   eq,
   inArray,
   isNull,
+  leadsTable,
   qualified,
   sql,
   type Transaction,
+  unqualified,
   whatsappConversationsTable,
   whatsappMessagesTable,
 } from "@vetra/database";
@@ -82,10 +84,14 @@ export async function saveMessages(
 
     // Written by hand so it doesn't touch updated_at: a message isn't an edit of the lead.
     await tx.execute(sql`
-      update leads l
-      set last_contact_at = greatest(l.last_contact_at, ${new Date(latest).toISOString()}::timestamptz)
-      from whatsapp_conversations c
-      where c.id = ${conversationId} and c.phone_key = l.phone_key
+      update ${leadsTable}
+      set ${unqualified(leadsTable.lastContactAt)} = greatest(
+        ${qualified(leadsTable.lastContactAt)},
+        ${new Date(latest).toISOString()}::timestamptz
+      )
+      from ${whatsappConversationsTable}
+      where ${qualified(whatsappConversationsTable.id)} = ${conversationId}
+        and ${qualified(whatsappConversationsTable.phoneKey)} = ${qualified(leadsTable.phoneKey)}
     `);
 
     return inserted.length;

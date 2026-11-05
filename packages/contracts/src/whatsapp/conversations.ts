@@ -104,7 +104,7 @@ export const whatsappMessageParamsSchema = z.object({ id: z.string(), messageId:
 export const editWhatsappMessageRequestSchema = z.object({ text: whatsappMessageTextSchema });
 export type EditWhatsappMessageRequest = z.infer<typeof editWhatsappMessageRequestSchema>;
 
-export const WHATSAPP_DELETE_MAX_MESSAGES = 50;
+export const WHATSAPP_DELETE_MAX_MESSAGES = 20;
 
 export const deleteWhatsappMessagesRequestSchema = z.object({
   ids: z.array(z.string()).min(1).max(WHATSAPP_DELETE_MAX_MESSAGES),

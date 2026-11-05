@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import type { WhatsappMessage } from "@vetra/contracts";
+import { WHATSAPP_DELETE_MAX_MESSAGES, type WhatsappMessage } from "@vetra/contracts";
 import { ArrowLeftIcon, MessageCircleOffIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { BusinessAvatar } from "@/shared/components/BusinessAvatar";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
@@ -38,12 +39,16 @@ export function ConversationThread({ conversationId, isConnected }: Conversation
   const [toDelete, setToDelete] = useState<string[] | null>(null);
   const deleteMessages = useDeleteWhatsappMessages(conversationId);
 
-  const toggleSelection = ({ id }: WhatsappMessage) =>
-    setSelection((current) => {
-      const next = new Set(current);
-      if (!next.delete(id)) next.add(id);
-      return next;
-    });
+  const toggleSelection = ({ id }: WhatsappMessage) => {
+    const current = new Set(selection);
+
+    if (current.delete(id)) return setSelection(current);
+    if (current.size >= WHATSAPP_DELETE_MAX_MESSAGES) {
+      return void toast.info(`Selecione até ${WHATSAPP_DELETE_MAX_MESSAGES} mensagens por vez.`);
+    }
+
+    setSelection(current.add(id));
+  };
 
   const confirmDelete = () => {
     if (!toDelete) return;

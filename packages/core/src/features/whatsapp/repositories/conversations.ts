@@ -2,13 +2,16 @@ import {
   and,
   count,
   db,
+  dealsTable,
   desc,
   eq,
   isNotNull,
+  leadsTable,
   or,
   qualified,
   sql,
   whatsappConversationsTable,
+  whatsappMessagesTable,
 } from "@vetra/database";
 
 import { containsSql } from "../../../shared/filters/filtersToSql";
@@ -59,6 +62,15 @@ const conversationColumns = {
   lastMessageAt: whatsappConversationsTable.lastMessageAt,
 };
 
+// A lead or customer is linked by comparing numbers, never by a stored reference.
+const leadOfConversationSql = sql`${qualified(leadsTable.phoneKey)} = ${qualified(whatsappConversationsTable.phoneKey)}`;
+
+const latestMessageOfConversationSql = sql`
+  from ${whatsappMessagesTable}
+  where ${qualified(whatsappMessagesTable.conversationId)} = ${qualified(whatsappConversationsTable.id)}
+  order by ${qualified(whatsappMessagesTable.sentAt)} desc, ${qualified(whatsappMessagesTable.id)} desc
+  limit 1`;
+
 const conversationRowColumns = {
   id: whatsappConversationsTable.id,
   phone: whatsappConversationsTable.phone,
@@ -71,23 +83,28 @@ const conversationRowColumns = {
   // another phone or is deleted. Conversations with no phone never match; see VET-12.md.
   lead: sql<WhatsappConversationRow["lead"]>`(
     select json_build_object(
-      'id', l.id,
-      'businessName', l.business_name,
-      'contactName', l.contact_name,
-      'stage', l.stage_id,
-      'stoppedAtStage', l.stopped_at_stage_id,
-      'isCustomer', exists(select 1 from deals d where d.lead_id = l.id)
+      'id', ${qualified(leadsTable.id)},
+      'businessName', ${qualified(leadsTable.businessName)},
+      'contactName', ${qualified(leadsTable.contactName)},
+      'stage', ${qualified(leadsTable.stageId)},
+      'stoppedAtStage', ${qualified(leadsTable.stoppedAtStageId)},
+      'isCustomer', exists(
+        select 1 from ${dealsTable} where ${qualified(dealsTable.leadId)} = ${qualified(leadsTable.id)}
+      )
     )
-    from leads l
-    where l.phone_key = ${qualified(whatsappConversationsTable.phoneKey)}
+    from ${leadsTable}
+    where ${leadOfConversationSql}
   )`,
   // Read from the message itself, so the preview can never disagree with the thread.
   lastMessage: sql<WhatsappConversationRow["lastMessage"]>`(
-    select json_build_object('direction', m.direction, 'type', m.type, 'status', m.status, 'content', left(m.content, ${PREVIEW_LENGTH}), 'isDeleted', m.deleted_at is not null)
-    from whatsapp_messages m
-    where m.conversation_id = ${qualified(whatsappConversationsTable.id)}
-    order by m.sent_at desc, m.id desc
-    limit 1
+    select json_build_object(
+      'direction', ${qualified(whatsappMessagesTable.direction)},
+      'type', ${qualified(whatsappMessagesTable.type)},
+      'status', ${qualified(whatsappMessagesTable.status)},
+      'content', left(${qualified(whatsappMessagesTable.content)}, ${PREVIEW_LENGTH}),
+      'isDeleted', ${qualified(whatsappMessagesTable.deletedAt)} is not null
+    )
+    ${latestMessageOfConversationSql}
   )`,
 };
 
@@ -106,9 +123,12 @@ function matchesSearch(q: string) {
   return or(
     containsSql(sql`${whatsappConversationsTable.savedName}`, q),
     sql`exists (
-      select 1 from leads l
-      where l.phone_key = ${qualified(whatsappConversationsTable.phoneKey)}
-        and (${containsSql(sql`l.business_name`, q)} or ${containsSql(sql`l.contact_name`, q)})
+      select 1 from ${leadsTable}
+      where ${leadOfConversationSql}
+        and (
+          ${containsSql(sql`${qualified(leadsTable.businessName)}`, q)}
+          or ${containsSql(sql`${qualified(leadsTable.contactName)}`, q)}
+        )
     )`,
     ...(digits
       ? [
@@ -139,27 +159,28 @@ export async function findConversationsPage({
   return { items: rows.slice(0, pageSize), hasMore: rows.length > pageSize };
 }
 
-export async function findAwaitingConversations(limit: number): Promise<WhatsappConversationRow[]> {
-  return db
-    .select(conversationRowColumns)
-    .from(whatsappConversationsTable)
-    .where(
-      and(
-        // Family and friends also write, but only leads and customers are work waiting on the user.
-        sql`exists (
-          select 1 from leads l
-          where l.phone_key = ${qualified(whatsappConversationsTable.phoneKey)}
-        )`,
-        sql`(
-          select m.direction from whatsapp_messages m
-          where m.conversation_id = ${qualified(whatsappConversationsTable.id)}
-          order by m.sent_at desc, m.id desc
-          limit 1
-        ) = 'inbound'`
-      )
-    )
-    .orderBy(desc(whatsappConversationsTable.lastMessageAt), desc(whatsappConversationsTable.id))
-    .limit(limit);
+// Family and friends also write, but only leads and customers are work waiting on the user.
+const awaitingSql = and(
+  sql`exists (select 1 from ${leadsTable} where ${leadOfConversationSql})`,
+  sql`(
+    select ${qualified(whatsappMessagesTable.direction)} ${latestMessageOfConversationSql}
+  ) = 'inbound'`
+);
+
+export async function findAwaitingConversations(
+  limit: number
+): Promise<{ items: WhatsappConversationRow[]; total: number }> {
+  const [items, [totalRow]] = await Promise.all([
+    db
+      .select(conversationRowColumns)
+      .from(whatsappConversationsTable)
+      .where(awaitingSql)
+      .orderBy(desc(whatsappConversationsTable.lastMessageAt), desc(whatsappConversationsTable.id))
+      .limit(limit),
+    db.select({ total: count() }).from(whatsappConversationsTable).where(awaitingSql),
+  ]);
+
+  return { items, total: totalRow?.total ?? 0 };
 }
 
 export async function findConversationRowByPhoneKey(
@@ -258,7 +279,8 @@ export async function insertConversationIfNew(
   const inserted = await db
     .insert(whatsappConversationsTable)
     .values(conversation)
-    .onConflictDoNothing({ target: whatsappConversationsTable.chatId })
+    // Any unique index: the chat id, or the same person arriving under the other form of the number.
+    .onConflictDoNothing()
     .returning({ id: whatsappConversationsTable.id });
 
   return inserted.length > 0;
