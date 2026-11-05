@@ -3,12 +3,11 @@ import { wahaClient, WahaSendRestrictedError, type WahaSentMessage } from "@vetr
 import { whatsappDomain } from "../domain";
 import {
   WhatsappConversationNotFoundError,
-  WhatsappMessageActionNotAllowedError,
-  WhatsappMessageNotFoundError,
   WhatsappNotConnectedError,
   WhatsappSendRestrictedError,
 } from "../errors";
 import { callWaha } from "../helpers/callWaha";
+import { findMessageToReply } from "../helpers/findMessageToReply";
 import { whatsappSyncState } from "../helpers/syncLoop";
 import { notifyWhatsappChange } from "../helpers/whatsappChanges";
 import { whatsappRepositories } from "../repositories";
@@ -24,14 +23,6 @@ async function sendThroughWaha(
     if (error instanceof WahaSendRestrictedError) throw new WhatsappSendRestrictedError();
     throw error;
   }
-}
-
-async function findMessageToReply(conversationId: string, messageId: string) {
-  const message = await whatsappRepositories.findMessageById(conversationId, messageId);
-  if (!message) throw new WhatsappMessageNotFoundError();
-  if (message.deletedAt) throw new WhatsappMessageActionNotAllowedError();
-
-  return message;
 }
 
 const SECOND_IN_MS = 1_000;
