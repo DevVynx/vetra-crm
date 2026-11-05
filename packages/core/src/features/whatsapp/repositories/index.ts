@@ -3,6 +3,7 @@ import {
   findWhatsappAccount,
   insertWhatsappAccount,
   markHistoryImported,
+  markStickersRepaired,
   replaceWhatsappAccount,
 } from "./accounts";
 import {
@@ -22,10 +23,12 @@ import {
 } from "./conversations";
 import {
   advanceMessageStatus,
+  findConversationsWithCaptionlessImages,
   findMessageById,
   findMessagesPage,
   markConversationReadByMessage,
   markMessageDeleted,
+  markMessagesAsStickers,
   saveMessages,
   updateMessageContent,
 } from "./messages";
@@ -49,8 +52,11 @@ export const whatsappRepositories = {
   insertConversationIfNew,
   insertWhatsappAccount,
   markConversationReadByMessage,
+  findConversationsWithCaptionlessImages,
   markHistoryImported,
   markMessageDeleted,
+  markMessagesAsStickers,
+  markStickersRepaired,
   replaceWhatsappAccount,
   saveConversationFromOverview,
   saveMessages,

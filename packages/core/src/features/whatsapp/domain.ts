@@ -4,7 +4,8 @@ import { v7 as uuidv7 } from "uuid";
 import { canonicalPhoneOf } from "../../shared/phone";
 
 export type WhatsappMessageDirection = "inbound" | "outbound";
-export type WhatsappMessageType = "text" | "audio" | "image" | "video" | "document" | "other";
+export type WhatsappMessageType =
+  "text" | "audio" | "image" | "video" | "document" | "sticker" | "other";
 export type WhatsappMessageStatus = "sent" | "delivered" | "read";
 
 export type WhatsappAccount = {
@@ -12,6 +13,7 @@ export type WhatsappAccount = {
   phone: string;
   connectedAt: Date;
   historyImportedAt: Date | null;
+  stickersRepairedAt: Date | null;
 };
 
 export type WhatsappConversation = {
@@ -197,7 +199,14 @@ function createConversation(input: CreateConversationInput): WhatsappConversatio
 }
 
 function createAccount(phone: string, now: Date): WhatsappAccount {
-  return { id: uuidv7(), phone, connectedAt: now, historyImportedAt: null };
+  // A new account is imported with the right types, so it has nothing to repair.
+  return {
+    id: uuidv7(),
+    phone,
+    connectedAt: now,
+    historyImportedAt: null,
+    stickersRepairedAt: now,
+  };
 }
 
 type UnreadChange = { reset: boolean; add: number };

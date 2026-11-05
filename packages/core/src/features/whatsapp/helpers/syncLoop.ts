@@ -2,6 +2,7 @@ import { wahaClient } from "@vetra/infra";
 
 import { whatsappDomain } from "../domain";
 import { whatsappRepositories } from "../repositories";
+import { repairStickerTypes } from "./repairStickerTypes";
 import { syncConversations } from "./syncConversations";
 import { notifyWhatsappChange } from "./whatsappChanges";
 
@@ -76,6 +77,10 @@ async function runOnce(): Promise<boolean> {
   setSyncState(phone, isFullImport);
 
   const imported = await syncConversations(isFullImport, now);
+  if (!account.stickersRepairedAt) {
+    await repairStickerTypes();
+    await whatsappRepositories.markStickersRepaired(new Date());
+  }
   runs += 1;
   quietRuns = imported > 0 ? 0 : quietRuns + 1;
 

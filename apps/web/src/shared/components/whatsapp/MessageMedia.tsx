@@ -1,18 +1,19 @@
 import type { WhatsappMessage } from "@vetra/contracts";
-import { DownloadIcon, FileTextIcon, ImageIcon, VideoIcon } from "lucide-react";
+import { DownloadIcon, FileTextIcon, ImageIcon, StickerIcon, VideoIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/components/ui/dialog";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { useWhatsappMediaFile } from "@/shared/queries/whatsapp/useWhatsappMediaFile";
+import { cn } from "@/shared/utils/cn";
 
 type MessageMediaProps = {
   conversationId: string;
   message: WhatsappMessage;
 };
 
-export const OPENABLE_MEDIA_TYPES = ["image", "video", "document"] as const;
+export const OPENABLE_MEDIA_TYPES = ["image", "sticker", "video", "document"] as const;
 
 const FALLBACK_FILENAME = "arquivo";
 
@@ -99,9 +100,16 @@ export function MessageMedia({ conversationId, message }: MessageMediaProps) {
     );
   }
 
+  const isSticker = message.type === "sticker";
+
   if (!file.objectUrl) {
     return (
-      <OpenTile icon={ImageIcon} label="Ver imagem" isLoading={file.isLoading} onOpen={retry} />
+      <OpenTile
+        icon={isSticker ? StickerIcon : ImageIcon}
+        label={isSticker ? "Ver figurinha" : "Ver imagem"}
+        isLoading={file.isLoading}
+        onOpen={retry}
+      />
     );
   }
 
@@ -110,13 +118,13 @@ export function MessageMedia({ conversationId, message }: MessageMediaProps) {
       <button
         type="button"
         className="cursor-pointer self-start rounded-md outline-none focus-visible:ring-3"
-        aria-label="Ampliar imagem"
+        aria-label={isSticker ? "Ampliar figurinha" : "Ampliar imagem"}
         onClick={() => setIsEnlarged(true)}
       >
         <img
           src={file.objectUrl}
-          alt="Imagem recebida"
-          className="max-h-72 max-w-full rounded-md"
+          alt={isSticker ? "Figurinha" : "Imagem recebida"}
+          className={cn("max-w-full rounded-md", isSticker ? "max-h-44" : "max-h-72")}
         />
       </button>
       <Dialog open={isEnlarged} onOpenChange={setIsEnlarged}>

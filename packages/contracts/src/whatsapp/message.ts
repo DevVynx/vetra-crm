@@ -9,6 +9,7 @@ export const whatsappMessageTypeSchema = z.enum([
   "image",
   "video",
   "document",
+  "sticker",
   "other",
 ]);
 export type WhatsappMessageType = z.infer<typeof whatsappMessageTypeSchema>;

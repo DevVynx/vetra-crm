@@ -106,6 +106,13 @@
       "when": 1793911525232,
       "tag": "0014_add_message_media_filename",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1793912807594,
+      "tag": "0015_add_sticker_message_type",
+      "breakpoints": true
     }
   ]
 }

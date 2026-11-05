@@ -255,3 +255,56 @@ export async function markMessageDeleted(
 
   return updated.length > 0;
 }
+
+export type ConversationWithUntypedImages = {
+  conversationId: string;
+  chatId: string;
+  since: Date;
+};
+
+// Stickers have no caption, so an image with text can't be one. Only those conversations are read
+// again, from their oldest candidate on.
+export async function findConversationsWithCaptionlessImages(): Promise<
+  ConversationWithUntypedImages[]
+> {
+  return db
+    .select({
+      conversationId: whatsappMessagesTable.conversationId,
+      chatId: whatsappConversationsTable.chatId,
+      since: sql<Date>`min(${whatsappMessagesTable.sentAt})`.mapWith(whatsappMessagesTable.sentAt),
+    })
+    .from(whatsappMessagesTable)
+    .innerJoin(
+      whatsappConversationsTable,
+      eq(whatsappConversationsTable.id, whatsappMessagesTable.conversationId)
+    )
+    .where(
+      and(
+        eq(whatsappMessagesTable.type, "image"),
+        isNull(whatsappMessagesTable.content),
+        isNull(whatsappMessagesTable.deletedAt)
+      )
+    )
+    .groupBy(whatsappMessagesTable.conversationId, whatsappConversationsTable.chatId);
+}
+
+export async function markMessagesAsStickers(
+  conversationId: string,
+  externalIds: string[]
+): Promise<number> {
+  if (externalIds.length === 0) return 0;
+
+  const updated = await db
+    .update(whatsappMessagesTable)
+    .set({ type: "sticker" })
+    .where(
+      and(
+        eq(whatsappMessagesTable.conversationId, conversationId),
+        inArray(whatsappMessagesTable.externalId, externalIds),
+        eq(whatsappMessagesTable.type, "image")
+      )
+    )
+    .returning({ id: whatsappMessagesTable.id });
+
+  return updated.length;
+}

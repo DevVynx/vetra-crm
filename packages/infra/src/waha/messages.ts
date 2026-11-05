@@ -31,8 +31,10 @@ export const wahaMessageSchema = z.object({
           SenderAlt: z.string().nullish(),
           RecipientAlt: z.string().nullish(),
           PushName: z.string().nullish(),
+          MediaType: z.string().nullish(),
         })
         .nullish(),
+      Message: z.object({ stickerMessage: z.unknown().optional() }).nullish(),
     })
     .nullish(),
 });

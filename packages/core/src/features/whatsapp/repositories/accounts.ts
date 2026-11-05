@@ -7,6 +7,7 @@ const accountColumns = {
   phone: whatsappAccountsTable.phone,
   connectedAt: whatsappAccountsTable.connectedAt,
   historyImportedAt: whatsappAccountsTable.historyImportedAt,
+  stickersRepairedAt: whatsappAccountsTable.stickersRepairedAt,
 };
 
 export async function findWhatsappAccount(): Promise<WhatsappAccount | null> {
@@ -38,4 +39,8 @@ export async function replaceWhatsappAccount(account: WhatsappAccount): Promise<
     await tx.delete(whatsappAccountsTable);
     await tx.insert(whatsappAccountsTable).values(account);
   });
+}
+
+export async function markStickersRepaired(now: Date): Promise<void> {
+  await db.update(whatsappAccountsTable).set({ stickersRepairedAt: now });
 }

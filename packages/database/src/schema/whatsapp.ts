@@ -13,6 +13,7 @@ export const whatsappMessageTypeEnum = pgEnum("whatsapp_message_type", [
   "image",
   "video",
   "document",
+  "sticker",
   "other",
 ]);
 
@@ -28,6 +29,8 @@ export const whatsappAccountsTable = pgTable("whatsapp_accounts", {
   phone: text().notNull(),
   connectedAt: instantColumn("connected_at").notNull(),
   historyImportedAt: instantColumn("history_imported_at"),
+  // Stickers used to be stored as images; this is when the old ones were corrected.
+  stickersRepairedAt: instantColumn("stickers_repaired_at"),
   createdAt: createdAtColumn(),
   updatedAt: updatedAtColumn(),
 });
