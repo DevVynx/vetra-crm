@@ -28,7 +28,9 @@ export const toLeadSummary = (lead: Lead): LeadSummary => ({
   autoSend: lead.autoSend,
 });
 
-export const toPipelineLead = (lead: LeadLookupRow): PipelineLead => ({
+export const toPipelineLead = (
+  lead: LeadLookupRow & { followUps: PipelineLead["followUps"] }
+): PipelineLead => ({
   id: lead.id,
   slug: lead.slug,
   businessName: lead.businessName,
@@ -36,6 +38,7 @@ export const toPipelineLead = (lead: LeadLookupRow): PipelineLead => ({
   phone: lead.phone,
   doNotContact: lead.doNotContact,
   stage: { name: lead.stageName, role: lead.stageRole },
+  followUps: lead.followUps,
 });
 
 export const toLeadDetail = (lead: LeadWithPhoto): LeadDetail => ({

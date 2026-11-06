@@ -11,11 +11,13 @@ export async function upsertLeadBySlugController(
   req: ValidatedRequest<typeof v.upsertLeadBySlug>,
   res: Response<UpsertLeadBySlugResponse>
 ) {
-  const { prospectedAt, nextAction, ...fields } = req.body;
+  const { prospectedAt, nextAction, approachSentAt, followUps, ...fields } = req.body;
 
   const result = await leadServices.upsertLeadBySlug(req.params.slug, {
     ...fields,
     prospectedAt: prospectedAt ? new Date(prospectedAt) : null,
+    approachSentAt: approachSentAt ? new Date(approachSentAt) : null,
+    followUps: followUps.map((followUp) => followUp.body),
     nextAction: nextAction && {
       ...nextAction,
       dueAt: nextAction.dueAt ? new Date(nextAction.dueAt) : null,
@@ -27,6 +29,7 @@ export async function upsertLeadBySlugController(
       created: result.created,
       conflict: result.conflict,
       lead: toPipelineLead(result.lead),
+      followUps: result.followUps,
     })
   );
 }
