@@ -31,6 +31,37 @@ e escreva o número (por exemplo, `0.1.0`).
 O Vetra só aceita conexões do próprio computador. Não existe login, porque ninguém mais consegue
 abri-lo.
 
+## Atualizando o Vetra
+
+Em **Configurações → Atualizações** o Vetra mostra a versão instalada e avisa quando existe uma nova
+(o botão **Verificar agora** consulta de novo). Para atualizar:
+
+1. Abra a pasta **`scripts`** e dê duplo clique em **`atualizar-vetra-windows.bat`** (no macOS e no Linux, rode
+   `bash scripts/atualizar-vetra-mac-linux.sh`). O Vetra precisa estar aberto, porque é ele que diz qual é a versão mais nova.
+2. Confirme com **s**. O Vetra fica fora do ar por alguns instantes.
+
+O que o atualizador faz, nesta ordem: baixa a versão nova, guarda um **backup do banco** na pasta `backups` (os 5 mais
+recentes ficam), troca o Vetra e espera ele responder. **Se a versão nova não iniciar, ele volta sozinho para a anterior**
+e avisa. Seus leads e o WhatsApp conectado continuam como estavam.
+
+Uma mudança que a versão nova já tenha feito no banco não é desfeita pela volta; é para esse caso que existe o backup.
+
+### Voltando a um backup
+
+Para trazer os dados de um backup (os arquivos `backups/vetra-AAAAMMDD-HHMMSS-vX.Y.Z.sql.gz`), com o Vetra parado
+(`scripts/parar-vetra-*`), rode no terminal, dentro da pasta do Vetra, trocando `ARQUIVO` pelo nome do backup:
+
+```sh
+docker compose -f compose.yaml up -d --wait db
+docker compose -f compose.yaml cp backups/ARQUIVO db:/tmp/restaurar.sql.gz
+docker compose -f compose.yaml exec -T db psql -U dev -d postgres -c "DROP DATABASE vetra" -c "CREATE DATABASE vetra"
+docker compose -f compose.yaml exec -T db sh -c "gunzip -c /tmp/restaurar.sql.gz | psql -U dev -d vetra -q"
+```
+
+Depois, no arquivo `.env`, coloque em `VETRA_VERSION` a versão do nome do backup e abra o Vetra de novo
+(`iniciar-vetra`). O backup guarda os dados do CRM e as conversas importadas do WhatsApp; a conexão do WhatsApp em si
+(o QR Code) fica em outro volume e não muda.
+
 ## Conectando o WhatsApp
 
 Com o app aberto, vá em **WhatsApp** e leia o QR Code com o celular. A conexão não é oficial,

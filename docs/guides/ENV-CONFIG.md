@@ -68,6 +68,16 @@ The web build is made with `VITE_API_URL=/api`, a relative address, so the same 
 port. (On Windows, Git Bash rewrites a value that starts with `/` into a path when it launches a
 program: build with `MSYS_NO_PATHCONV=1`. Docker is not affected.)
 
+## The version variables
+
+Both are read by the API (`@vetra/env/server`) and both are optional.
+
+- `VETRA_VERSION` is written into the image when it is published (the tag, without the `v`), and `.env` of an
+  installation fixes it so the update script knows what runs. Without it (development) the version is `dev`, which the
+  Settings screen shows as "Desenvolvimento" and for which no update is looked for.
+- `VETRA_RELEASES_URL` is where the published releases are listed (the public GitHub API of the repository by default).
+  Only tests change it, to point at a fake list.
+
 ## The WAHA variables
 
 `WAHA_URL` and `WAHA_API_KEY` are required, and only the API reads them (through
