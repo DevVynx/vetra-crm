@@ -35,6 +35,7 @@ export const importReportSchema = z.object({
   expenses: countsSchema,
   notes: countsSchema,
   activities: countsSchema,
+  completedActivities: countsSchema,
   errors: z.array(importErrorSchema),
   hiddenErrors: z.number().int(),
   skippedLeads: z.array(importSkippedLeadSchema),

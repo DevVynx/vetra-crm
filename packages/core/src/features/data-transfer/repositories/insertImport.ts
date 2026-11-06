@@ -1,4 +1,5 @@
 import {
+  completedActionsTable,
   db,
   dealsTable,
   expensesTable,
@@ -36,6 +37,9 @@ export async function insertImport(records: ImportRecords): Promise<void> {
     for (const rows of inChunks(records.notes)) await tx.insert(leadNotesTable).values(rows);
     for (const rows of inChunks(records.nextActions)) {
       await tx.insert(nextActionsTable).values(rows);
+    }
+    for (const rows of inChunks(records.completedActions)) {
+      await tx.insert(completedActionsTable).values(rows);
     }
   });
 }

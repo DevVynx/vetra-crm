@@ -48,7 +48,7 @@ export function DataSettings() {
     <SettingsSection title="Dados">
       <SettingsRow
         title="Exportar tudo"
-        description="Um arquivo .zip com planilhas CSV de leads, clientes, projetos, parcelas, despesas, notas, atividades e etapas. Não inclui o WhatsApp."
+        description="Um arquivo .zip com planilhas CSV de leads, clientes, projetos, parcelas, despesas, notas, atividades (pendentes e concluídas) e etapas. Não inclui o WhatsApp."
       >
         <Button
           variant="outline"

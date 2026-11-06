@@ -25,6 +25,7 @@ export type ImportReport = {
   expenses: ImportCounts;
   notes: ImportCounts;
   activities: ImportCounts;
+  completedActivities: ImportCounts;
   errors: ImportError[];
   hiddenErrors: number;
   skippedLeads: ImportSkippedLead[];
@@ -81,6 +82,8 @@ type NewNextAction = {
   dueAt: Date;
 };
 
+type NewCompletedAction = NewNextAction & { completedAt: Date };
+
 export type ImportRecords = {
   leads: Lead[];
   deals: NewDeal[];
@@ -89,6 +92,7 @@ export type ImportRecords = {
   expenses: NewExpense[];
   notes: NewNote[];
   nextActions: NewNextAction[];
+  completedActions: NewCompletedAction[];
 };
 
 export type ImportContext = {
@@ -507,6 +511,16 @@ function readNotes(files: Map<string, string>, context: ImportContext, state: St
   });
 }
 
+function readFollowUpStep(reader: Reader): number | null {
+  const text = reader.raw("passo_follow_up");
+  if (text === "") return null;
+
+  const step = Number(text);
+  if (!(Number.isInteger(step) && step >= 1)) reader.fail("passo_follow_up", "invalid_value");
+
+  return step;
+}
+
 function readActivities(files: Map<string, string>, context: ImportContext, state: State) {
   readChildren(
     files,
@@ -519,11 +533,7 @@ function readActivities(files: Map<string, string>, context: ImportContext, stat
       const type = reader.oneOf("tipo", ACTION_TYPES);
       const description = reader.required("descricao", MAX_TEXT.description);
       const dueAt = reader.requiredInstant("vence_em");
-      const stepText = reader.raw("passo_follow_up");
-      const followUpStep = stepText === "" ? null : Number(stepText);
-      if (followUpStep !== null && !(Number.isInteger(followUpStep) && followUpStep >= 1)) {
-        reader.fail("passo_follow_up", "invalid_value");
-      }
+      const followUpStep = readFollowUpStep(reader);
       if (!reader.isValid() || !type) return false;
 
       state.records.nextActions.push({
@@ -533,6 +543,37 @@ function readActivities(files: Map<string, string>, context: ImportContext, stat
         followUpStep,
         description,
         dueAt,
+      });
+
+      return true;
+    }
+  );
+}
+
+function readCompletedActivities(files: Map<string, string>, context: ImportContext, state: State) {
+  readChildren(
+    files,
+    "atividades_concluidas.csv",
+    ["tipo", "descricao", "vence_em", "concluida_em"],
+    "completedActivities",
+    context,
+    state,
+    (reader, leadId) => {
+      const type = reader.oneOf("tipo", ACTION_TYPES);
+      const description = reader.required("descricao", MAX_TEXT.description);
+      const dueAt = reader.requiredInstant("vence_em");
+      const completedAt = reader.requiredInstant("concluida_em");
+      const followUpStep = readFollowUpStep(reader);
+      if (!reader.isValid() || !type) return false;
+
+      state.records.completedActions.push({
+        id: uuidv7(),
+        leadId,
+        type,
+        followUpStep,
+        description,
+        dueAt,
+        completedAt,
       });
 
       return true;
@@ -555,6 +596,7 @@ export function planImport(files: Map<string, string>, context: ImportContext): 
       expenses: [],
       notes: [],
       nextActions: [],
+      completedActions: [],
     },
     counts: {
       leads: emptyCounts(),
@@ -563,6 +605,7 @@ export function planImport(files: Map<string, string>, context: ImportContext): 
       expenses: emptyCounts(),
       notes: emptyCounts(),
       activities: emptyCounts(),
+      completedActivities: emptyCounts(),
     },
     skippedLeads: [],
     leadStatus: new Map(),
@@ -575,6 +618,7 @@ export function planImport(files: Map<string, string>, context: ImportContext): 
   readExpenses(files, context, state);
   readNotes(files, context, state);
   readActivities(files, context, state);
+  readCompletedActivities(files, context, state);
 
   return {
     records: state.records,

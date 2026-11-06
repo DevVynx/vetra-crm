@@ -6,22 +6,43 @@ import { dataTransferRepositories } from "../repositories";
 
 // Everything the CRM owns, one CSV per kind in a zip. WhatsApp is not part of it.
 export async function exportData(): Promise<{ filename: string; content: Buffer }> {
-  const [profile, leads, deals, stages, projects, installments, expenses, notes, nextActions] =
-    await Promise.all([
-      getProfile(),
-      dataTransferRepositories.findAllLeads(),
-      dataTransferRepositories.findAllDeals(),
-      dataTransferRepositories.findAllStages(),
-      dataTransferRepositories.findAllProjects(),
-      dataTransferRepositories.findAllInstallments(),
-      dataTransferRepositories.findAllExpenses(),
-      dataTransferRepositories.findAllNotes(),
-      dataTransferRepositories.findAllNextActions(),
-    ]);
+  const [
+    profile,
+    leads,
+    deals,
+    stages,
+    projects,
+    installments,
+    expenses,
+    notes,
+    nextActions,
+    completedActions,
+  ] = await Promise.all([
+    getProfile(),
+    dataTransferRepositories.findAllLeads(),
+    dataTransferRepositories.findAllDeals(),
+    dataTransferRepositories.findAllStages(),
+    dataTransferRepositories.findAllProjects(),
+    dataTransferRepositories.findAllInstallments(),
+    dataTransferRepositories.findAllExpenses(),
+    dataTransferRepositories.findAllNotes(),
+    dataTransferRepositories.findAllNextActions(),
+    dataTransferRepositories.findAllCompletedActions(),
+  ]);
 
   const now = new Date();
   const files = dataTransferDomain.exportFiles(
-    { leads, deals, stages, projects, installments, expenses, notes, nextActions },
+    {
+      leads,
+      deals,
+      stages,
+      projects,
+      installments,
+      expenses,
+      notes,
+      nextActions,
+      completedActions,
+    },
     profile.timeZone
   );
 

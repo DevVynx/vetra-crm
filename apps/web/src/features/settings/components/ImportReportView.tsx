@@ -25,6 +25,7 @@ export function ImportReportView({ report }: { report: ImportReport }) {
     { label: "Despesas", counts: report.expenses },
     { label: "Notas", counts: report.notes },
     { label: "Atividades", counts: report.activities },
+    { label: "Atividades concluídas", counts: report.completedActivities },
   ].filter(({ counts }) => counts.new + counts.skipped + counts.invalid > 0);
 
   const hasDetails = report.errors.length > 0 || report.skippedLeads.length > 0;

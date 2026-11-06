@@ -101,6 +101,16 @@ type NextActionRow = {
   updatedAt: Date;
 };
 
+type CompletedActionRow = {
+  id: string;
+  leadId: string;
+  type: NextActionType;
+  followUpStep: number | null;
+  description: string;
+  dueAt: Date;
+  completedAt: Date;
+};
+
 export type ExportData = {
   leads: LeadRow[];
   deals: DealRow[];
@@ -110,6 +120,7 @@ export type ExportData = {
   expenses: ExpenseRow[];
   notes: NoteRow[];
   nextActions: NextActionRow[];
+  completedActions: CompletedActionRow[];
 };
 
 export type ExportFile = { name: string; csv: string };
@@ -298,6 +309,21 @@ function exportFiles(data: ExportData, timeZone: string): ExportFile[] {
           formatInstant(action.dueAt),
           formatInstant(action.createdAt),
           formatInstant(action.updatedAt),
+        ])
+      ),
+    },
+    {
+      name: "atividades_concluidas.csv",
+      csv: csvOf(
+        ["id", "lead_id", "tipo", "passo_follow_up", "descricao", "vence_em", "concluida_em"],
+        data.completedActions.map((action) => [
+          action.id,
+          action.leadId,
+          NEXT_ACTION_WORDS[action.type],
+          optionalNumber(action.followUpStep),
+          textCell(action.description),
+          formatInstant(action.dueAt),
+          formatInstant(action.completedAt),
         ])
       ),
     },

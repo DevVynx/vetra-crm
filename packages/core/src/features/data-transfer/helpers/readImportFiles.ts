@@ -13,6 +13,7 @@ const FILES_READ = new Set([
   "despesas.csv",
   "notas.csv",
   "atividades.csv",
+  "atividades_concluidas.csv",
 ]);
 
 // A "CSV" saved by Excel in Windows is not UTF-8, so what is not valid UTF-8 is read as the
