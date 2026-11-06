@@ -20,6 +20,8 @@ export const leadsTable = pgTable(
     slug: text(),
     // Only the user turns it off; see VET-19.md.
     doNotContact: boolean().notNull().default(false),
+    // Vetra sends the texts of this lead's activities by itself; see VET-20.md.
+    autoSend: boolean().notNull().default(false),
     stageId: text()
       .notNull()
       .references(() => stagesTable.id, { onDelete: "restrict" }),

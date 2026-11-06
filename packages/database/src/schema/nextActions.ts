@@ -24,6 +24,13 @@ export const nextActionsTable = pgTable(
     description: text().notNull(),
     // The text to use when doing it (a message to send); the description stays a one-line title.
     body: text(),
+    // Sending (VET-20): how many times the automatic send failed, why the last one did, how many of
+    // the blocks of the text already went (so a retry does not repeat them), and since when it is
+    // being sent (so two runs never send the same action).
+    sendAttempts: integer().notNull().default(0),
+    sendError: text(),
+    sendBlocksDone: integer().notNull().default(0),
+    sendingSince: instantColumn("sending_since"),
     dueAt: instantColumn("due_at").notNull(),
     createdAt: createdAtColumn(),
     updatedAt: updatedAtColumn(),

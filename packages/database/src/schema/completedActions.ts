@@ -20,6 +20,8 @@ export const completedActionsTable = pgTable(
     body: text(),
     dueAt: instantColumn("due_at").notNull(),
     completedAt: instantColumn("completed_at").notNull(),
+    // Set when completing it was sending its text, not only ticking it off.
+    sentAt: instantColumn("sent_at"),
   },
   (table) => [
     index("completed_actions_lead_id_idx").on(table.leadId),

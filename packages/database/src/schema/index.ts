@@ -1,3 +1,4 @@
+export * from "./automationSettings";
 export * from "./completedActions";
 export * from "./deals";
 export * from "./expenses";
