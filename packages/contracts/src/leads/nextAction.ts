@@ -18,6 +18,10 @@ export const nextActionSchema = z.object({
   description: z.string().min(1),
   body: z.string().nullable(),
   dueAt: z.iso.datetime(),
+  createdAt: z.iso.datetime(),
+  // How sending its text went: the automatic attempts that failed, and why the last one did.
+  sendAttempts: z.number().int().min(0),
+  sendError: z.string().nullable(),
   lead: leadSummarySchema,
 });
 export type NextAction = z.infer<typeof nextActionSchema>;
@@ -46,6 +50,14 @@ export type ListNextActionsResponse = z.infer<typeof listNextActionsResponseSche
 
 export const completeNextActionResponseSchema = z.void();
 export type CompleteNextActionResponse = z.infer<typeof completeNextActionResponseSchema>;
+
+// A lead that asked not to be contacted, or a text with a marker still to fill in, is only sent
+// when the user confirmed it.
+export const sendNextActionRequestSchema = z.object({ confirmed: z.boolean().default(false) });
+export type SendNextActionRequest = z.infer<typeof sendNextActionRequestSchema>;
+
+export const sendNextActionResponseSchema = z.void();
+export type SendNextActionResponse = z.infer<typeof sendNextActionResponseSchema>;
 
 export const reopenNextActionResponseSchema = nextActionSchema;
 export type ReopenNextActionResponse = z.infer<typeof reopenNextActionResponseSchema>;

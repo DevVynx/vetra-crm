@@ -1,3 +1,4 @@
+export * from "./autoSend";
 export * from "./common";
 export * from "./contact";
 export * from "./dealPayment";

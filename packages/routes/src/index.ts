@@ -1,3 +1,4 @@
+export * from "./automations";
 export * from "./buildPath";
 export * from "./customers";
 export * from "./dashboard";
