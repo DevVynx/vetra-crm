@@ -61,9 +61,24 @@ Every row keeps its own `id`, and the child files carry `lead_id`, so a spreadsh
 - In Settings, a "Dados" section with "Exportar tudo", that downloads `vetra-dados-AAAA-MM-DD.zip`.
 - **Checked** over HTTP and in the browser, with a temporary database: every file and its header, the number of rows against the tables, accents and commas, quotes and line breaks inside a cell, the formula guard, an empty database, and that the zip opens with a real unzip tool.
 
-## Step 2 — Import (after step 1 is validated)
+## Step 2 — Import
 
-Written when step 1 is accepted.
+**Decided with the user:** it accepts the exported `.zip` and a loose `leads.csv`; **only Vetra's own columns** (no guessing names from other CRMs); a lead that already exists is **skipped and listed**.
+
+- **Two requests, nothing kept between them.** `POST /data/import/preview` reads and checks the file and answers what would happen, writing nothing. `POST /data/import` does the same and then writes, in **one transaction**. The browser keeps the file and sends it twice.
+- **The file is told by its first bytes** (`PK`), not by its name: a zip is read, anything else is read as `leads.csv`.
+- **A lead is the same lead by its phone**, with the rule that already exists (the canonical key, nine-digit aware). A lead whose phone is already in Vetra, or that repeats inside the file, is skipped and named in the report. The children of a skipped lead are skipped with it (they are counted, not errors).
+- **New ids.** Nothing keeps the ids of the file: every lead and record gets a new one, and the `lead_id` / `projeto_id` columns only tie the rows of the file together. This is what lets a loose `leads.csv` with no ids work and avoids any clash.
+- **The same rules as typing it in Vetra:** company, niche and city required with their lengths, a phone of 8 to 15 digits (a Brazilian number without the country code gets `55`), an email that is an email, a demo link that is `http`/`https`. A customer (`cliente = sim`) needs the closing stage, a closing date and a value above zero, and a lead in the closing stage must be a customer. An archived lead may say where it stopped.
+- **Stages are matched by name** with the ones that exist, ignoring upper and lower case and the spaces at the ends (accents must match). Importing never creates a stage, so a lead with an unknown stage is an error that names it. `etapas.csv` is ignored: it is not needed.
+- **Tolerant of what a spreadsheet does to a file:** the delimiter is read from the header (comma or semicolon, which Excel in Portuguese writes), a file that is not UTF-8 is read as Windows-1252 (the "CSV" of Excel), dates are ISO or `dd/mm/aaaa` (without an offset they are in the profile time zone), money is `1500.00`, `1500,50` or `R$ 1.500,50`, and the `'` the export puts before a formula is taken off.
+- **A row of a project that stayed out because of an error makes the installments and expenses that point to it errors too, so a link is never lost without being said. A row with an error does not stop the others.** Each error says the file, the line, the column and why, as a code the web writes in Portuguese. The preview shows how many would be created, skipped and left out, and the list of errors and of skipped leads (the first 100 of each). The user confirms, and only valid rows are written.
+- **All or nothing when writing:** if the database refuses anything, nothing of the import stays.
+- **Limits, since the file is read by hand:** 10 MB of upload, at most 20 files in the zip and 50 MB once opened, no encrypted or Zip64 zip, every file's checksum checked, and at most 20,000 rows per file.
+- **The browser turns away what can't be right before sending:** a name that doesn't end in `.zip` or `.csv`, an empty file, and one over 10 MB, each with a message in Portuguese. The API still checks everything, since the browser's check is only a convenience.
+- **In Settings → Dados,** an "Importar" row picks the file and opens a dialog with the preview and the confirm button.
+- **Out of scope:** updating existing leads, creating stages, and importing records of a lead that already exists.
+- **Checked** over HTTP and in the browser with temporary databases: the exact round trip (export from one database, import into an empty one, export again and compare), every refusal and every tolerance above, the transaction rolling back, and the zip limits.
 
 ---
 
