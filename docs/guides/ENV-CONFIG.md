@@ -50,6 +50,24 @@ usually shouldn't be.
 
 `STORAGE_DIR` is optional (default `storage`, read from where the API runs) and belongs to the `server` variant. It is where the API keeps the few files it owns, today only the profile photo (`profile-photo.webp`), written through `@vetra/infra`. It is outside git. Change it only to keep the files somewhere else; a relative path moves with the folder the API is started from.
 
+## Running built, in a container
+
+The compiled server reads a few more variables, all optional and all set by `compose.yaml` for the
+`app` service, so nothing is typed by hand:
+
+- `API_HOST` is where the API listens (`127.0.0.1` by default). In a container only `0.0.0.0` is
+  reachable, and the port is published only on this computer in the compose file.
+- `WEB_DIST_DIR` is the built web, which the API then serves itself, so web and API are one origin.
+  Empty in development, where Vite serves the web.
+- `AUTO_MIGRATE` (`true` in the container) applies the migrations when the server starts, from
+  `MIGRATIONS_DIR`. It is off in development, where nothing may be applied to a database unasked.
+- `VETRA_PORT` (in `.env`, default `4720`) is the port the container answers on; it is also the
+  `API_PORT` and the port in `FRONTEND_URL` there, since the Host check compares them.
+
+The web build is made with `VITE_API_URL=/api`, a relative address, so the same build works on any
+port. (On Windows, Git Bash rewrites a value that starts with `/` into a path when it launches a
+program: build with `MSYS_NO_PATHCONV=1`. Docker is not affected.)
+
 ## The WAHA variables
 
 `WAHA_URL` and `WAHA_API_KEY` are required, and only the API reads them (through

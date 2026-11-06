@@ -2,6 +2,7 @@
 // fills the database with realistic demo data spread over the last months, so every screen and
 // every Painel period has something to show. Stages and profile are kept: the API creates them
 // on startup, and the seed places leads in whatever stages exist, by role and position.
+import { count } from "drizzle-orm";
 import { v7 as uuidv7 } from "uuid";
 
 import { db } from "./index";
@@ -620,6 +621,16 @@ async function seed() {
       `${installments.length} parcelas, ${expenses.length} despesas, ${nextActions.length} próximas ações, ` +
       `${notes.length} notas.`
   );
+}
+
+// It wipes every lead, so on a database that already has some it asks to be told, once, with --yes.
+const [{ total }] = await db.select({ total: count() }).from(leadsTable);
+if (total > 0 && !process.argv.includes("--yes")) {
+  console.error(
+    `Este banco ja tem ${total} leads, e o seed apaga todos. Se e isso mesmo que voce quer, rode de novo com --yes.`
+  );
+  await db.$client.end();
+  process.exit(1);
 }
 
 await seed();

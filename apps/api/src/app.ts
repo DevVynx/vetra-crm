@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { envConfig } from "@vetra/env/server";
 import cors from "cors";
 import express, { Express } from "express";
@@ -22,7 +24,7 @@ import { rejectForeignOrigin } from "@/shared/middlewares/rejectForeignOrigin";
 
 export const app: Express = express();
 
-const { FRONTEND_URL } = envConfig.get();
+const { FRONTEND_URL, WEB_DIST_DIR } = envConfig.get();
 
 app.use(rejectForeignHost);
 app.use(rejectForeignOrigin);
@@ -54,6 +56,36 @@ app.use("/api", projectsRouter);
 app.use("/api", searchRouter);
 app.use("/api", stagesRouter);
 app.use("/api", whatsappRouter);
+
+// The built web, when there is one. Every address that is not the API gives the page, which is
+// what a single-page app needs for a screen opened by its own address. The files have a hash in
+// their name, so they can be kept; the page itself cannot, or an update would not show.
+if (WEB_DIST_DIR) {
+  const indexFile = path.resolve(WEB_DIST_DIR, "index.html");
+
+  app.use(
+    express.static(WEB_DIST_DIR, {
+      index: false,
+      setHeaders: (res, filePath) => {
+        if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        }
+      },
+    })
+  );
+  app.use((req, res, next) => {
+    // A screen has no extension. A file that is asked for and doesn't exist (an asset of an older
+    // version of the page) is a 404, not the page, which a script would choke on.
+    const isPage =
+      (req.method === "GET" || req.method === "HEAD") &&
+      !req.path.startsWith("/api") &&
+      path.extname(req.path) === "";
+    if (!isPage) return next();
+
+    res.setHeader("Cache-Control", "no-cache");
+    res.sendFile(indexFile);
+  });
+}
 
 app.use(notFoundHandler);
 app.use(handleGlobalError);

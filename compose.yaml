@@ -1,3 +1,7 @@
+# Only the app publishes a port. The database and WhatsApp are reached by the app through the private
+# network of this file (db:5432, waha:3000), so nothing of them is open on this computer and they
+# cannot clash with another Postgres or tool. The ports development needs are in
+# compose.override.yaml, which `docker compose` reads by itself and the launcher (iniciar-vetra) skips.
 services:
   db:
     image: postgres:18-alpine
@@ -7,8 +11,6 @@ services:
       POSTGRES_USER: dev
       POSTGRES_PASSWORD: dev
       POSTGRES_DB: vetra
-    ports:
-      - "5432:5432"
     volumes:
       - vetra_postgres_data:/var/lib/postgresql
     healthcheck:
@@ -30,11 +32,41 @@ services:
       WAHA_EVENTS_DOWNLOAD_MEDIA: "false"
       WAHA_API_DOWNLOAD_MEDIA: "false"
       WAHA_GOWS_DEVICE_HISTORY_SYNC_FULL_SYNC_DAYS_LIMIT: "365"
-    ports:
-      - "127.0.0.1:3001:3000"
     volumes:
       - vetra_waha_sessions:/app/.sessions
+
+  # Vetra itself: the API and the built web. It is in the "app" profile so that, in development,
+  # `docker compose up -d` does not start a second API that would also sync WhatsApp. The
+  # launcher (iniciar-vetra) starts it with --profile app.
+  app:
+    profiles: ["app"]
+    build: .
+    container_name: vetra_app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      waha:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://dev:dev@db:5432/vetra
+      FRONTEND_URL: http://localhost:${VETRA_PORT:-4720}
+      API_PORT: ${VETRA_PORT:-4720}
+      WAHA_URL: http://waha:3000
+      WAHA_API_KEY: ${WAHA_API_KEY:?Set WAHA_API_KEY in .env}
+    ports:
+      # Published only on this computer: there is no login, so nothing else may reach it.
+      - "127.0.0.1:${VETRA_PORT:-4720}:${VETRA_PORT:-4720}"
+    volumes:
+      - vetra_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:$$API_PORT/api/profile > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
 volumes:
   vetra_postgres_data:
   vetra_waha_sessions:
+  vetra_data:

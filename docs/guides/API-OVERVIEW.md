@@ -40,6 +40,21 @@ user's browser can reach `127.0.0.1`. Listening only on that address isn't enoug
 - **`rejectForeignHost`:** with DNS rebinding, a site points its own domain at
   `127.0.0.1` and becomes same-origin with the API. Only `127.0.0.1:<port>` and
   `localhost:<port>` are accepted as `Host`.
+- **The origin of the app is accepted written either way** (`localhost` or `127.0.0.1`, same port), so
+  someone who typed the IP is still at home.
+
+Where it listens: on this computer only (`API_HOST`, `127.0.0.1`), or, in a container, on every
+interface with the port published only on this computer (`127.0.0.1:<port>` in `compose.yaml`). The
+second is the same exposure, since only a container's own address is reachable from outside it.
+
+## Serving the built web
+
+When `WEB_DIST_DIR` is set (the container), the API also serves the web build, so everything is one
+origin and the web calls `/api` with a relative address. The files in `/assets` have a hash in their
+name and are cached for a year; `index.html` is never cached, or an update would not show. Every
+**address of a screen** (no extension, not under `/api`) answers `index.html`, so a screen opened by its
+own address works; a file that does not exist (an asset of an older page) is a 404, never the page,
+which a script would choke on. This goes after the API routes and before the 404 handler.
 
 ## Env access
 

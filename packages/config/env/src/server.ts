@@ -6,6 +6,13 @@ export type ServerConfig = {
   FRONTEND_URL: string;
   DATABASE_URL: string;
   STORAGE_DIR: string;
+  // Where the API listens. 127.0.0.1 unless it runs in a container, where only 0.0.0.0 is reachable.
+  API_HOST: string;
+  // The built web, served by the API itself. Empty in development, where Vite serves it.
+  WEB_DIST_DIR: string | null;
+  // Applies the migrations when the server starts, from this folder. Only the container turns it on.
+  AUTO_MIGRATE: boolean;
+  MIGRATIONS_DIR: string | null;
 };
 
 function load(): ServerConfig {
@@ -15,6 +22,10 @@ function load(): ServerConfig {
     FRONTEND_URL: requireEnv("FRONTEND_URL"),
     DATABASE_URL: requireEnv("DATABASE_URL"),
     STORAGE_DIR: process.env.STORAGE_DIR ?? "storage",
+    API_HOST: process.env.API_HOST ?? "127.0.0.1",
+    WEB_DIST_DIR: process.env.WEB_DIST_DIR || null,
+    AUTO_MIGRATE: process.env.AUTO_MIGRATE === "true",
+    MIGRATIONS_DIR: process.env.MIGRATIONS_DIR || null,
   };
 }
 

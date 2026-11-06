@@ -12,7 +12,7 @@ and is used through the browser — there is no login and no hosted deployment. 
 
 This is a TypeScript monorepo (pnpm workspace + Turbo) containing:
 
-- **apps/api**: Express 5 REST API bound to `127.0.0.1` only (no authentication), Drizzle ORM over PostgreSQL
+- **apps/api**: Express 5 REST API for this computer only (no authentication), which in production also serves the built web, Drizzle ORM over PostgreSQL
 - **apps/web**: Vite + React 19 SPA, TanStack Router (file-based routing) + TanStack Query, Tailwind CSS + shadcn/ui. UI text is Portuguese, hardcoded (no i18n).
 - **packages/core**: the domain layer — domain modules, services, repositories, and the `DomainError` hierarchy. Framework-agnostic, no HTTP/DB knowledge.
 - **packages/contracts**: shared Zod schemas for request/response validation, consumed by every app
@@ -130,7 +130,7 @@ Quality is always more important than delivery speed. These principles **MUST** 
 ### Security is Non-Negotiable
 
 - Validate all inputs with Zod (`packages/contracts`) on both API and Web
-- There is no authentication: the API must only listen on `127.0.0.1`, and CORS only allows the web app's origin. Never bind it to `0.0.0.0` or widen CORS
+- There is no authentication: the API must only be reachable from this computer: it listens on `127.0.0.1`, or, in the container, on `0.0.0.0` with the port published only on `127.0.0.1` (`compose.yaml`). The Host and Origin checks stay, and CORS only allows the web app's origin. Never publish the port to the network or widen CORS
 - Never hardcode secrets, credentials, or tokens
 - Never expose sensitive data in logs, error messages, or API responses
 

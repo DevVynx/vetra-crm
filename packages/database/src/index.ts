@@ -16,3 +16,4 @@ export * from "./qualified";
 export * from "./uniqueViolation";
 export * from "./schema";
 export * from "drizzle-orm";
+export * from "./migrate";
