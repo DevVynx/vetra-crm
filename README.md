@@ -8,11 +8,18 @@ Você só precisa do **Docker Desktop** (https://www.docker.com/products/docker-
 instalar Node nem usar o terminal.
 
 1. Instale e abra o Docker Desktop. Espere ele terminar de iniciar.
-2. Baixe o Vetra (no GitHub, **Code → Download ZIP**) e extraia a pasta.
+2. Baixe o **`vetra-instalador.zip`** na página de Releases do Vetra
+   (https://github.com/DevVynx/vetra-crm/releases/latest) e extraia a pasta. Ele tem só o necessário, sem o código-fonte.
 3. Abra a pasta **`scripts`** e dê um duplo clique em **`iniciar-vetra-windows.bat`** (no macOS e no Linux, rode `bash scripts/iniciar-vetra-mac-linux.sh`). O arquivo `win-auxiliar.ps1` da mesma pasta é só um auxiliar do `.bat`: não precisa abri-lo.
 
-Na primeira vez ele demora alguns minutos, porque monta tudo. Quando terminar, o navegador abre em
+Na primeira vez ele demora alguns minutos, porque baixa tudo. Quando terminar, o navegador abre em
 **http://localhost:4720**. Nas próximas vezes é rápido.
+
+Para usar uma versão específica em vez da mais recente, tire o `#` da linha `VETRA_VERSION` no arquivo `.env`
+e escreva o número (por exemplo, `0.1.0`).
+
+**Mac com chip Apple (M1 ou mais novo) e Linux ARM:** o Vetra publica a imagem para esses computadores, mas ainda
+**não foi testado** neles. Pode funcionar, pode não funcionar.
 
 - **Para parar:** `scripts/parar-vetra-windows.bat` (ou `bash scripts/parar-vetra-mac-linux.sh`). Seus dados ficam guardados. Depois de parar, o Vetra só volta quando você iniciar de novo, mesmo que o computador seja reiniciado.
 - **Para o Vetra voltar sozinho quando o computador ligar:** no Docker Desktop, abra **Settings →
@@ -56,46 +63,13 @@ Os dados ficam no PostgreSQL, em um volume do Docker, que continua existindo qua
 atualiza o Vetra. A única coisa que o Vetra guarda como arquivo é a foto de perfil, em outro volume
 (`vetra_data`).
 
-## Para quem desenvolve
+## Licença
 
-Requisitos: Node.js >= 24.20, pnpm 11 e Docker.
+O código está aberto para ler, mas o Vetra **não é software livre**: ele usa a licença
+[PolyForm Shield 1.0.0](LICENSE). Em resumo:
 
-```sh
-cp .env.example .env
-pnpm install
-pnpm docker:dev
-pnpm --filter @vetra/database db:migrate
-pnpm dev
-```
+- **Pode:** usar o Vetra, inclusive no seu negócio, estudar o código e modificá-lo para o seu uso.
+- **Não pode:** usar o código para oferecer um produto ou serviço que concorra com o Vetra (por exemplo, vendê-lo ou hospedá-lo para terceiros).
 
-- Web: http://localhost:3000
-- API: http://localhost:8000/api (aceita conexões apenas da própria máquina)
-
-Antes de subir o Docker, troque `WAHA_API_KEY` no `.env` por um valor longo e aleatório. Em uma
-instalação que já existia, adicione `WAHA_URL` e `WAHA_API_KEY` ao `.env`: sem elas, o Docker e a
-API não sobem, mas os comandos do banco continuam funcionando sem elas. Se trocar a chave depois,
-recrie o serviço com `pnpm docker:dev`.
-
-`pnpm docker:dev` sobe só o banco e o WhatsApp, para o desenvolvimento, pelo `compose.dev.yaml`, num projeto
-próprio (`vetra-dev`) com containers e volumes só dele: nada é compartilhado com o Vetra compilado. Ele publica as
-portas `127.0.0.1:5432` e `127.0.0.1:3001` para o `pnpm dev` e para ferramentas de banco. Se alguma delas já
-estiver ocupada, troque `VETRA_DB_PORT` ou `VETRA_WAHA_PORT` no `.env` (e a `DATABASE_URL` ou a `WAHA_URL`
-junto). Para parar: `pnpm docker:dev:down`. O WhatsApp do desenvolvimento precisa de uma sessão própria: ligar o
-mesmo número aqui e no Vetra compilado derruba um dos dois, então prefira um número de teste.
-
-O Vetra compilado (a API com o web dentro, a imagem do `Dockerfile`) está no perfil `app`, e o
-`iniciar-vetra-*` o sobe só com o `compose.yaml`: `docker compose -f compose.yaml --profile app up -d --build`.
-Assim, quem só usa o Vetra não tem nenhuma porta aberta além da do app (4720), e o banco e o WhatsApp
-não conflitam com mais nada no computador.
-
-`pnpm db:seed` enche o banco com dados de demonstração e **apaga todos os leads**. Num banco que já
-tem leads ele recusa, a não ser que você passe `--yes`.
-
-## Estrutura
-
-- `apps/api` — API REST (Express 5), que em produção também serve o web compilado
-- `apps/web` — interface (Vite + React)
-- `packages/*` — domínio, contratos, banco, rotas e configurações compartilhadas
-- `docs/` — guias de arquitetura e visão do projeto
-- `tasks/` — tarefas planejadas (`VET-<n>.md`)
-- `Dockerfile`, `compose.yaml` e `scripts/` (`iniciar-vetra-windows`, `iniciar-vetra-mac-linux`, `parar-vetra-*`) — rodar o Vetra compilado, no Docker; `compose.dev.yaml` — o banco e o WhatsApp só do desenvolvimento (`pnpm docker:dev`)
+O texto da licença no arquivo `LICENSE` é o que vale. Para qualquer uso fora disso, fale com o autor.
+Quer mexer no código? Veja o [CONTRIBUTING.md](https://github.com/DevVynx/vetra-crm/blob/main/CONTRIBUTING.md).
