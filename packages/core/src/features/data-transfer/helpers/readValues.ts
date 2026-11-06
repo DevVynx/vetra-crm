@@ -1,4 +1,7 @@
 const CENTS_PER_REAL = 100;
+// What the integer columns of the database hold. A value over it would pass the preview and then
+// make the whole import fail when it is written.
+export const MAX_INTEGER = 2_147_483_647;
 const MINUTE_IN_MS = 60_000;
 const SECOND_IN_MS = 1_000;
 const NOON = 12;
@@ -135,7 +138,9 @@ export function readMoneyInCents(raw: string): number | null | undefined {
   const value = Number(normalized);
   if (!Number.isFinite(value)) return undefined;
 
-  return Math.round(value * CENTS_PER_REAL);
+  const cents = Math.round(value * CENTS_PER_REAL);
+
+  return cents > MAX_INTEGER ? undefined : cents;
 }
 
 // A number with a "+" is international as typed. One without it and with 10 or 11 digits is taken

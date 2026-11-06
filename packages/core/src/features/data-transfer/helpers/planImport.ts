@@ -7,6 +7,7 @@ import { type CsvRow, parseCsv } from "./parseCsv";
 import {
   isEmail,
   isHttpUrl,
+  MAX_INTEGER,
   readInstant,
   readMoneyInCents,
   readPhone,
@@ -148,6 +149,8 @@ function readerOf(file: string, row: CsvRow, errors: ImportError[], timeZone: st
   const optional = (column: string, max: number): string | null => {
     const value = raw(column);
     if (value.length > max) fail(column, "too_long");
+    // The database refuses it in a text, and only when writing: the preview has to say so.
+    if (value.includes("\u0000")) fail(column, "invalid_value");
 
     return value === "" ? null : value;
   };
@@ -294,7 +297,9 @@ function readLeads(files: Map<string, string>, context: ImportContext, state: St
     if (wantsDeal) {
       closedAt = reader.requiredInstant("fechado_em");
       closedValue = reader.requiredMoney("valor_fechado");
-      if (closedValue < 0 || (closedValue === 0 && reader.raw("valor_fechado") !== "")) {
+      // A closed value of zero is a value, but not one a deal can have. A value that could not be
+      // read was already reported, and is not reported twice.
+      if (readMoneyInCents(reader.raw("valor_fechado")) === 0) {
         reader.fail("valor_fechado", "invalid_value");
       }
       document = reader.optional("documento", MAX_TEXT.document);
@@ -516,7 +521,9 @@ function readFollowUpStep(reader: Reader): number | null {
   if (text === "") return null;
 
   const step = Number(text);
-  if (!(Number.isInteger(step) && step >= 1)) reader.fail("passo_follow_up", "invalid_value");
+  if (!(Number.isInteger(step) && step >= 1 && step <= MAX_INTEGER)) {
+    reader.fail("passo_follow_up", "invalid_value");
+  }
 
   return step;
 }
