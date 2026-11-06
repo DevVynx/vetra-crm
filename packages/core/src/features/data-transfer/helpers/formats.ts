@@ -22,8 +22,9 @@ export function instantFormatterOf(timeZone: string): InstantFormatter {
   return (date) => {
     if (!date) return "";
 
+    const parts = formatter.formatToParts(date);
     const part = (type: Intl.DateTimeFormatPartTypes) =>
-      formatter.formatToParts(date).find((item) => item.type === type)?.value ?? "";
+      parts.find((item) => item.type === type)?.value ?? "";
     const offset = part("timeZoneName").replace("GMT", "") || "+00:00";
 
     return `${part("year")}-${part("month")}-${part("day")}T${part("hour")}:${part("minute")}:${part("second")}${offset}`;

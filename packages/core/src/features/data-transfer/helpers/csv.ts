@@ -2,8 +2,9 @@ const BYTE_ORDER_MARK = "\uFEFF";
 const FORMULA_START = /^[=+\-@\t\r]/;
 const NEEDS_QUOTES = /[",\r\n]/;
 
-// A spreadsheet runs a cell that starts with one of these as a formula, so a text the user wrote
-// (or a stranger sent) gets a quote in front, which the spreadsheet shows as nothing.
+// A spreadsheet may run a cell that starts with one of these as a formula, so a text the user wrote
+// (or a stranger sent) gets a quote in front, which makes it a text. In a CSV the quote may stay
+// visible in the cell; the import takes it off.
 export function textCell(value: string | null): string {
   if (value === null) return "";
 

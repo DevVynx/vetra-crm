@@ -4,13 +4,16 @@ import { toast } from "sonner";
 
 import api from "@/shared/lib/axios/api";
 
+// Revoking right after the click can cancel the download in some browsers.
+const REVOKE_DELAY_MS = 10_000;
+
 function saveAsFile(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
   link.click();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), REVOKE_DELAY_MS);
 }
 
 export function useExportData() {
