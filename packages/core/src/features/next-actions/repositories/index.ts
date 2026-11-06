@@ -1,4 +1,5 @@
 import { claimNextActionForSending } from "./claimNextActionForSending";
+import { deleteFollowUpsOfLead } from "./deleteFollowUpsOfLead";
 import { deleteNextAction } from "./deleteNextAction";
 import { deleteNextActionsOfLeads } from "./deleteNextActionsOfLeads";
 import { failStaleSending } from "./failStaleSending";
@@ -15,6 +16,7 @@ import { updateNextAction } from "./updateNextAction";
 export const nextActionRepositories = {
   claimNextActionForSending,
   deleteNextAction,
+  deleteFollowUpsOfLead,
   deleteNextActionsOfLeads,
   failStaleSending,
   findAutoSendCandidates,

@@ -11,5 +11,13 @@ export async function findAutomationSettings(): Promise<AutomationSettings> {
     autoSendEnabled: row.autoSendEnabled,
     autoSendDelayMinutes: row.autoSendDelayMinutes,
     newLeadsAutoSend: row.newLeadsAutoSend,
+    moveOnSendEnabled: row.moveOnSendEnabled,
+    moveOnSendStageId: row.moveOnSendStageId,
+    moveOnReplyEnabled: row.moveOnReplyEnabled,
+    moveOnReplyStageId: row.moveOnReplyStageId,
+    cancelFollowUpsOnReply: row.cancelFollowUpsOnReply,
+    archiveUnansweredEnabled: row.archiveUnansweredEnabled,
+    archiveUnansweredStageId: row.archiveUnansweredStageId,
+    archiveUnansweredDays: row.archiveUnansweredDays,
   };
 }

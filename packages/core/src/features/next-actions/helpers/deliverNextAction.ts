@@ -1,3 +1,4 @@
+import { reactToSentText } from "../../automations/helpers/reactToSentText";
 import {
   WhatsappNotConnectedError,
   WhatsappNumberNotFoundError,
@@ -58,4 +59,5 @@ export async function deliverNextAction(
   await nextActionRepositories.moveNextActionToCompleted(
     nextActionDomain.complete(action, now, now)
   );
+  await reactToSentText(action.lead.id);
 }

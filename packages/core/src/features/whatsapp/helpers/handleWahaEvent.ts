@@ -1,5 +1,6 @@
 import { wahaClient, type WahaEvent, type WahaMessage } from "@vetra/infra";
 
+import { reactToReply } from "../../automations/helpers/reactToReply";
 import { type WhatsappConversation, whatsappDomain } from "../domain";
 import { whatsappRepositories } from "../repositories";
 import { fetchConversationPhoto } from "./fetchConversationPhoto";
@@ -66,7 +67,10 @@ async function saveLiveMessage(message: WahaMessage): Promise<void> {
   if (!conversation) return;
 
   const saved = await whatsappRepositories.saveMessages(conversation.id, [toSave], true);
-  if (saved > 0) return notifyWhatsappChange();
+  if (saved > 0) {
+    if (toSave.direction === "inbound") await reactToReply(conversation.phoneKey);
+    return notifyWhatsappChange();
+  }
 
   // The echo of an audio Vetra sent: it is stored already, but only WAHA knows the bars, which it
   // works out from the converted file. WhatsApp shows those, so Vetra does too.

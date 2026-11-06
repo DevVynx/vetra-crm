@@ -1,3 +1,4 @@
+import { archiveUnanswered } from "./archiveUnanswered";
 import { runAutoSend } from "./runAutoSend";
 
 const TICK_INTERVAL_MS = 15_000;
@@ -11,6 +12,7 @@ async function tick(): Promise<void> {
   isRunning = true;
   try {
     await runAutoSend();
+    await archiveUnanswered();
   } catch (error) {
     console.error(
       `Automatic send pass failed: ${error instanceof Error ? error.name : "unknown error"}`
