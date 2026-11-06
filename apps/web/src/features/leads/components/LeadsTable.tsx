@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { LeadListItem } from "@vetra/contracts";
 import { isBefore } from "date-fns";
+import { ZapIcon } from "lucide-react";
 import { type MouseEvent, type ReactNode, useEffect } from "react";
 
 import { BusinessAvatar } from "@/shared/components/BusinessAvatar";
@@ -17,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
+import { useIsAutoSendEnabled } from "@/shared/queries/automations/useAutomationSettings";
 import { useStages } from "@/shared/stages/useStages";
 import { startOfTodayInProfileZone } from "@/shared/time-zone/zonedDate";
 import { cn } from "@/shared/utils/cn";
@@ -138,6 +140,7 @@ type LeadsTableProps = {
 
 export function LeadsTable({ leads, activeIndex, isFull, selection }: LeadsTableProps) {
   const navigate = useNavigate();
+  const isAutoSendOn = useIsAutoSendEnabled();
 
   useEffect(() => {
     document.querySelector('tr[data-active="true"]')?.scrollIntoView({ block: "nearest" });
@@ -181,11 +184,22 @@ export function LeadsTable({ leads, activeIndex, isFull, selection }: LeadsTable
               )}
               <TableCell className={selection.isSelecting ? undefined : "pl-4"}>
                 <div className="flex items-center gap-3">
-                  <BusinessAvatar
-                    name={lead.businessName}
-                    photoUrl={lead.photoUrl ?? undefined}
-                    className="text-xs"
-                  />
+                  <div className="relative shrink-0">
+                    <BusinessAvatar
+                      name={lead.businessName}
+                      photoUrl={lead.photoUrl ?? undefined}
+                      className="text-xs"
+                    />
+                    {lead.autoSend && isAutoSendOn && (
+                      <span
+                        title="Envio automático ligado"
+                        className="bg-background ring-border absolute -right-1 -bottom-1 flex size-4 items-center justify-center rounded-full ring-1"
+                      >
+                        <ZapIcon className="text-warning fill-warning size-2.5" />
+                        <span className="sr-only">Envio automático ligado</span>
+                      </span>
+                    )}
+                  </div>
                   <div className="min-w-0">
                     <Link
                       to="/leads/$leadId"

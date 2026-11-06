@@ -3,6 +3,8 @@ import type { NextAction } from "@vetra/contracts";
 import { CompleteActionButton } from "@/shared/components/next-actions/CompleteActionButton";
 import { EditNextActionButton } from "@/shared/components/next-actions/EditNextActionButton";
 import { NextActionBody } from "@/shared/components/next-actions/NextActionBody";
+import { NextActionSendStatus } from "@/shared/components/next-actions/NextActionSendStatus";
+import { SendActionButton } from "@/shared/components/next-actions/SendActionButton";
 import { cn } from "@/shared/utils/cn";
 import { formatDayLabel, formatRelative, formatTime } from "@/shared/utils/date";
 
@@ -36,10 +38,12 @@ export function NextActionHighlight({ action, isOverdue }: NextActionHighlightPr
         </p>
       </div>
       <div className="flex gap-2">
+        <SendActionButton action={action} />
         <EditNextActionButton action={action} />
         <CompleteActionButton action={action} />
       </div>
       {action.body && <NextActionBody body={action.body} />}
+      <NextActionSendStatus action={action} />
     </div>
   );
 }

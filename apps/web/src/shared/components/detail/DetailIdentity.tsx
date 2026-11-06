@@ -8,6 +8,8 @@ type DetailIdentityProps = {
   contactName: string | null;
   photoUrl: string | null;
   status?: ReactNode;
+  // Marks that are on, shown together on a line of their own under the status.
+  badges?: ReactNode;
   actions?: ReactNode;
 };
 
@@ -17,6 +19,7 @@ export function DetailIdentity({
   contactName,
   photoUrl,
   status,
+  badges,
   actions,
 }: DetailIdentityProps) {
   return (
@@ -30,6 +33,7 @@ export function DetailIdentity({
         <h2 className="text-2xl font-semibold tracking-tight">{name}</h2>
         {contactName && <p className="text-muted-foreground text-sm">{contactName}</p>}
         {status && <p className="text-muted-foreground mt-1 text-xs">{status}</p>}
+        {badges && <div className="mt-2 flex flex-wrap items-center gap-2">{badges}</div>}
       </div>
     </div>
   );

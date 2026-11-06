@@ -1,11 +1,16 @@
 import { Link } from "@tanstack/react-router";
 import type { NextAction } from "@vetra/contracts";
+import { MessageSquareTextIcon } from "lucide-react";
+import { useState } from "react";
 
 import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
 import { LeadStageBadge } from "@/shared/components/LeadStageBadge";
 import { CompleteActionButton } from "@/shared/components/next-actions/CompleteActionButton";
+import { CopyActionTextButton } from "@/shared/components/next-actions/CopyActionTextButton";
 import { EditNextActionButton } from "@/shared/components/next-actions/EditNextActionButton";
 import { NextActionBody } from "@/shared/components/next-actions/NextActionBody";
+import { NextActionSendStatus } from "@/shared/components/next-actions/NextActionSendStatus";
+import { SendActionButton } from "@/shared/components/next-actions/SendActionButton";
 import { Button } from "@/shared/components/ui/button";
 import {
   Item,
@@ -30,6 +35,8 @@ export function NextActionItem({
 }: NextActionItemProps) {
   const { lead } = action;
   const dueAt = new Date(action.dueAt);
+  // In a list the text is hidden, so the row can show it and copy it without opening the editor.
+  const [isTextOpen, setIsTextOpen] = useState(false);
 
   return (
     <Item variant="outline" size="sm">
@@ -80,10 +87,27 @@ export function NextActionItem({
             <WhatsAppIcon />
           </Button>
         )}
+        {showLead && action.body && (
+          <>
+            <CopyActionTextButton body={action.body} />
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              aria-label={isTextOpen ? "Esconder o texto da mensagem" : "Ver o texto da mensagem"}
+              title={isTextOpen ? "Esconder o texto da mensagem" : "Ver o texto da mensagem"}
+              aria-expanded={isTextOpen}
+              onClick={() => setIsTextOpen((isOpen) => !isOpen)}
+            >
+              <MessageSquareTextIcon />
+            </Button>
+          </>
+        )}
+        <SendActionButton action={action} />
         <EditNextActionButton action={action} />
         <CompleteActionButton action={action} />
       </ItemActions>
-      {!showLead && action.body && <NextActionBody body={action.body} />}
+      {(!showLead || isTextOpen) && action.body && <NextActionBody body={action.body} />}
+      {!showLead && <NextActionSendStatus action={action} />}
     </Item>
   );
 }

@@ -1,14 +1,24 @@
 import type { LeadDetail } from "@vetra/contracts";
-import { ArchiveIcon, BanIcon, CircleCheckIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+  ArchiveIcon,
+  BanIcon,
+  CircleCheckIcon,
+  PencilIcon,
+  Trash2Icon,
+  ZapIcon,
+  ZapOffIcon,
+} from "lucide-react";
 import { useState } from "react";
 
 import { ActionsMenu, type ActionsMenuItem } from "@/shared/components/ActionsMenu";
 import { ArchiveLeadDialog } from "@/shared/components/ArchiveLeadDialog";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { useChangeLeadStage } from "@/shared/mutations/leads/useChangeLeadStage";
+import { useIsAutoSendEnabled } from "@/shared/queries/automations/useAutomationSettings";
 import { useStages } from "@/shared/stages/useStages";
 
 import { useDeleteLead } from "../mutations/useDeleteLead";
+import { useUpdateLeadAutoSend } from "../mutations/useUpdateLeadAutoSend";
 import { useUpdateLeadDoNotContact } from "../mutations/useUpdateLeadDoNotContact";
 import { EditLeadSheet } from "./EditLeadSheet";
 
@@ -19,6 +29,8 @@ export function LeadActionsMenu({ lead }: { lead: LeadDetail }) {
   const { changeStage, isPending: isChanging } = useChangeLeadStage(lead.id);
   const deleteLead = useDeleteLead(lead.id);
   const doNotContact = useUpdateLeadDoNotContact(lead.id);
+  const autoSend = useUpdateLeadAutoSend(lead.id);
+  const isAutoSendOn = useIsAutoSendEnabled();
   const stages = useStages();
   const isArchived = stages.isArchive(lead.stage);
   const close = () => setDialog(null);
@@ -36,6 +48,21 @@ export function LeadActionsMenu({ lead }: { lead: LeadDetail }) {
           icon: BanIcon,
           onSelect: () => doNotContact.change(true),
         },
+    ...(isAutoSendOn
+      ? [
+          lead.autoSend
+            ? {
+                label: "Desligar envio automático",
+                icon: ZapOffIcon,
+                onSelect: () => autoSend.change(false),
+              }
+            : {
+                label: "Ligar envio automático",
+                icon: ZapIcon,
+                onSelect: () => autoSend.change(true),
+              },
+        ]
+      : []),
     ...(isArchived
       ? []
       : [{ label: "Arquivar", icon: ArchiveIcon, onSelect: () => setDialog("archive") }]),

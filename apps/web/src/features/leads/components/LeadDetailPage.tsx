@@ -2,6 +2,7 @@ import { getRouteApi, Navigate } from "@tanstack/react-router";
 import { PlusIcon, UsersIcon } from "lucide-react";
 import { useState } from "react";
 
+import { AutoSendBadge } from "@/shared/components/AutoSendBadge";
 import { ContactCard } from "@/shared/components/detail/ContactCard";
 import { DetailDates } from "@/shared/components/detail/DetailDates";
 import { DetailIdentity } from "@/shared/components/detail/DetailIdentity";
@@ -14,6 +15,7 @@ import { usePageCrumb } from "@/shared/components/layout/PageCrumb";
 import { NewActivitySheet } from "@/shared/components/next-actions/NewActivitySheet";
 import { Button } from "@/shared/components/ui/button";
 import { useHotkey } from "@/shared/hooks/useHotkey";
+import { useIsAutoSendEnabled } from "@/shared/queries/automations/useAutomationSettings";
 import { useLead } from "@/shared/queries/leads/useLead";
 import { useStages } from "@/shared/stages/useStages";
 import { formatLastContact } from "@/shared/utils/date";
@@ -31,6 +33,7 @@ const route = getRouteApi("/_app/leads/$leadId");
 export function LeadDetailPage() {
   const { leadId } = route.useParams();
   const stages = useStages();
+  const isAutoSendOn = useIsAutoSendEnabled();
   const { data: lead, isPending } = useLead(leadId);
   const { data: conversationData, isPending: isConversationPending } = useLeadConversation(leadId);
   usePageCrumb(lead?.businessName);
@@ -81,13 +84,15 @@ export function LeadDetailPage() {
                 {stages.nameOf(lead.stage)} {formatLastContact(new Date(lead.stageChangedAt))}
                 {" · "}
                 {contactStatus}
-                {lead.doNotContact && (
-                  <>
-                    {" · "}
-                    <DoNotContactBadge />
-                  </>
-                )}
               </>
+            }
+            badges={
+              lead.doNotContact || (lead.autoSend && isAutoSendOn) ? (
+                <>
+                  {lead.doNotContact && <DoNotContactBadge />}
+                  {lead.autoSend && isAutoSendOn && <AutoSendBadge />}
+                </>
+              ) : undefined
             }
             actions={<LeadActionsMenu lead={lead} />}
           />
