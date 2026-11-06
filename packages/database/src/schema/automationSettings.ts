@@ -20,5 +20,11 @@ export const automationSettingsTable = pgTable("automation_settings", {
   archiveUnansweredEnabled: boolean().notNull().default(false),
   archiveUnansweredStageId: text(),
   archiveUnansweredDays: integer().notNull().default(7),
+  // How many of the follow-up texts the pipeline hands over Vetra keeps (0 to 3), and the days to wait before each, counted
+  // from the send of the message before it. The pipeline only gives the texts, in order: the rest is Vetra's.
+  followUpLimit: integer().notNull().default(1),
+  followUp1WaitDays: integer().notNull().default(2),
+  followUp2WaitDays: integer().notNull().default(3),
+  followUp3WaitDays: integer().notNull().default(5),
   updatedAt: updatedAtColumn(),
 });

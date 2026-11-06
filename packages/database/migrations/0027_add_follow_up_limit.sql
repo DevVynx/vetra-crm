@@ -1,0 +1,1 @@
+ALTER TABLE "automation_settings" ADD COLUMN "follow_up_limit" integer DEFAULT 3 NOT NULL;

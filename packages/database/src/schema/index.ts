@@ -7,6 +7,7 @@ export * from "./leadNotes";
 export * from "./leads";
 export * from "./nextActions";
 export * from "./profile";
+export * from "./queuedFollowUps";
 export * from "./projects";
 export * from "./stages";
 export * from "./whatsapp";
