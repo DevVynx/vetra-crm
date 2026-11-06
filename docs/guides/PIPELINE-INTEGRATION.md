@@ -49,6 +49,29 @@ All under `/api`, with the paths in `packages/routes` and the schemas in
 - **`PATCH /leads/:id/do-not-contact`** is the user's switch (Leads page, "Ações do lead").
 - The note with the gap goes through `POST /leads/:id/notes`.
 
+## Follow-ups
+
+`PUT /leads/by-slug/:slug` also takes the follow-up texts and a moment (VET-22). **The pipeline only gives the texts, in the
+order they go. Everything else (how many are kept, when each is sent) is Vetra's.**
+
+- `followUps`: up to 3 items `{ body }`, `body` 1..4000 characters (a `step`, if sent, is ignored: the order is the array).
+  More than 3 items, or an empty or too long text, is a 400.
+- **Vetra keeps the first ones, as many as its limit says** (Settings → Automações, 0 to 3, default 1). With a limit of 2 it
+  keeps the first two texts; with 0, none (`ignored: "follow_ups_off"`).
+- `approachSentAt`: when the opening message was **already sent outside Vetra**. It cannot come with a `nextAction`
+  (400), and `followUps` without a `nextAction` need it (400, `followUpsNeedAnOpening`).
+- Vetra creates each text as the activity "Follow-up N" when the previous message is sent or completed, due after the wait
+  of its position (Settings, default 2, 3 and 5 days, each from the previous send). With `approachSentAt` the first one is
+  made at once, due that moment plus its wait, even if it is already in the past.
+- **Only once per lead.** Once any row exists the follow-ups are never taken again, so repeating the call changes nothing.
+  This also works for a lead that exists: `/vetra-sync` sends the missing texts and `approachSentAt`.
+- The response has `followUps: { queued, ignored }`. `ignored` is `null` or `already_has`, `replied` (the lead wrote after
+  `approachSentAt`), `not_in_funnel` (archived, customer), `do_not_contact`, `needs_approach_sent_at` (an existing lead that
+  came with a `nextAction`, which is ignored for it) or `follow_ups_off`. None is an error.
+- The lead of the response, and of `GET /leads/lookup`, carries `followUps: [{ step, status }]`, `step` being the position
+  (1, 2, 3) and `status` `queued`, `scheduled` or `cancelled`. A reply or leaving the funnel cancels what is queued.
+- A text with `[SEU WHATSAPP]` is kept parked and never sent by itself, as for any activity.
+
 ## Reading a lead's conversation
 
 `GET /leads/:id/messages?limit=` is the one way the pipeline reads WhatsApp, and only for `/resultado`, when the

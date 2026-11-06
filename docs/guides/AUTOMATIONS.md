@@ -115,6 +115,17 @@ allowed to reach, is skipped quietly.
 How many follow-ups there are and how far apart is VET-22; until then "no follow-up pending" simply means the
 last text Vetra sent was the last one.
 
+## Follow-ups from the pipeline
+
+The texts come with the lead, in order (see `PIPELINE-INTEGRATION.md`); Vetra keeps the first N, `followUpLimit` (0 to 3,
+default 1, which is the recommendation: more follow-ups raise the risk of a blocked number), and numbers them 1..N. They wait in `queued_follow_ups`, with a status `queued`,
+`scheduled` or `cancelled`; a row is never deleted, so "this lead already got its follow-ups" stays true. Completing the
+opening message, or a follow-up of the queue (sent by click or by itself, or ticked as done), makes the lowest queued step
+an activity "Follow-up N", due the wait of that step after that moment. The next is only made when the previous one is done.
+Undoing a completion deletes the follow-up it made and puts it back in the queue. A reply (with the switch on) or leaving the
+funnel cancels the queue; hand-made activities are never limited. The waits are three numbers of days in Settings (the one of the position), always applied.
+Sending is still the usual: the lead's switch, the master switch, never to "Não contatar", never with the marker.
+
 ## When a lead becomes a customer
 
 A customer is no longer prospected, so closing a lead turns **both** "Envio automático" and "Não contatar"
