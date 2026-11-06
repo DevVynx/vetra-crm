@@ -1,82 +1,33 @@
 import { TriangleAlertIcon } from "lucide-react";
-import { useState } from "react";
 
-import { Input } from "@/shared/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import { Switch } from "@/shared/components/ui/switch";
 import { useAutomationSettings } from "@/shared/queries/automations/useAutomationSettings";
 import { useStages } from "@/shared/stages/useStages";
 
 import { useUpdateAutomationSettings } from "../mutations/useUpdateAutomationSettings";
 import { AutoSendAllLeadsRow } from "./AutoSendAllLeadsRow";
+import { SettingsNumberField } from "./SettingsNumberField";
 import { SettingsRow } from "./SettingsRow";
 import { SettingsSection } from "./SettingsSection";
 import { StageAutomationRow } from "./StageAutomationRow";
 
 const MAX_DELAY_MINUTES = 1440;
 const MAX_UNANSWERED_DAYS = 3650;
-const MAX_FOLLOW_UPS = 3;
+const FOLLOW_UP_LIMIT_LABELS = ["Nenhum", "1 (recomendado)", "2", "3"];
 
 export function AutomationSettings() {
   const { data: settings } = useAutomationSettings();
   const update = useUpdateAutomationSettings();
   const stages = useStages();
-  const [delay, setDelay] = useState<string | null>(null);
-  const [days, setDays] = useState<string | null>(null);
-  const [limit, setLimit] = useState<string | null>(null);
-  const [waits, setWaits] = useState<Record<number, string>>({});
 
   if (!settings) return null;
-
-  const shownDelay = delay ?? String(settings.autoSendDelayMinutes);
-
-  const saveDelay = () => {
-    const minutes = Number(shownDelay);
-    const isValid = Number.isInteger(minutes) && minutes >= 0 && minutes <= MAX_DELAY_MINUTES;
-    setDelay(null);
-
-    if (isValid && minutes !== settings.autoSendDelayMinutes) {
-      update.mutate({ ...settings, autoSendDelayMinutes: minutes });
-    }
-  };
-
-  const shownDays = days ?? String(settings.archiveUnansweredDays);
-
-  const saveDays = () => {
-    const value = Number(shownDays);
-    const isValid = Number.isInteger(value) && value >= 1 && value <= MAX_UNANSWERED_DAYS;
-    setDays(null);
-
-    if (isValid && value !== settings.archiveUnansweredDays) {
-      update.mutate({ ...settings, archiveUnansweredDays: value });
-    }
-  };
-
-  const shownLimit = limit ?? String(settings.followUpLimit);
-
-  const saveLimit = () => {
-    const value = Number(shownLimit);
-    const isValid = Number.isInteger(value) && value >= 0 && value <= MAX_FOLLOW_UPS;
-    setLimit(null);
-
-    if (isValid && value !== settings.followUpLimit) {
-      update.mutate({ ...settings, followUpLimit: value });
-    }
-  };
-
-  const saveWait = (index: number) => {
-    const value = Number(waits[index]);
-    const isValid = Number.isInteger(value) && value >= 0 && value <= MAX_UNANSWERED_DAYS;
-    setWaits((current) =>
-      Object.fromEntries(Object.entries(current).filter(([key]) => Number(key) !== index))
-    );
-
-    if (isValid && value !== settings.followUpWaitDays[index]) {
-      const followUpWaitDays = settings.followUpWaitDays.map((current, i) =>
-        i === index ? value : current
-      );
-      update.mutate({ ...settings, followUpWaitDays });
-    }
-  };
 
   // Every lead starts at the entry stage, so moving to it means nothing: only the middle stages are offered.
   const middleStageIds = stages.middle.map((stage) => stage.id);
@@ -105,16 +56,12 @@ export function AutomationSettings() {
             description="Minutos entre a atividade ser criada e o Vetra enviá-la. 0 envia assim que possível."
           >
             <div className="flex items-center gap-2">
-              <Input
-                aria-label="Minutos de espera"
-                type="number"
+              <SettingsNumberField
+                label="Minutos de espera"
+                value={settings.autoSendDelayMinutes}
                 min={0}
                 max={MAX_DELAY_MINUTES}
-                className="h-9 w-20 text-right"
-                value={shownDelay}
-                onChange={(event) => setDelay(event.target.value)}
-                onBlur={saveDelay}
-                onKeyDown={(event) => event.key === "Enter" && event.currentTarget.blur()}
+                onSave={(minutes) => update.mutate({ ...settings, autoSendDelayMinutes: minutes })}
               />
               <span className="text-muted-foreground text-sm">min</span>
             </div>
@@ -137,19 +84,25 @@ export function AutomationSettings() {
             title="Follow-ups da pipeline"
             description="Recomendamos só 1 follow-up, por causa do risco de bloqueio do número. O máximo é 3, para a sua segurança."
           >
-            <div className="flex items-center gap-2">
-              <Input
-                aria-label="Quantidade de follow-ups"
-                type="number"
-                min={0}
-                max={MAX_FOLLOW_UPS}
-                className="h-9 w-20 text-right"
-                value={shownLimit}
-                onChange={(event) => setLimit(event.target.value)}
-                onBlur={saveLimit}
-                onKeyDown={(event) => event.key === "Enter" && event.currentTarget.blur()}
-              />
-            </div>
+            <Select
+              value={String(settings.followUpLimit)}
+              onValueChange={(value) =>
+                value && update.mutate({ ...settings, followUpLimit: Number(value) })
+              }
+            >
+              <SelectTrigger aria-label="Quantidade de follow-ups" className="w-44">
+                <SelectValue>
+                  {(value: string | null) => FOLLOW_UP_LIMIT_LABELS[Number(value)]}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {FOLLOW_UP_LIMIT_LABELS.map((label, limit) => (
+                  <SelectItem key={limit} value={String(limit)}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </SettingsRow>
           {settings.followUpLimit > 0 && (
             <SettingsRow
@@ -160,18 +113,20 @@ export function AutomationSettings() {
                 {settings.followUpWaitDays.slice(0, settings.followUpLimit).map((wait, index) => (
                   <div key={index} className="flex items-center gap-1.5">
                     <span className="text-muted-foreground text-sm">{index + 1}º</span>
-                    <Input
-                      aria-label={`Dias até o follow-up ${index + 1}`}
-                      type="number"
+                    <SettingsNumberField
+                      label={`Dias até o follow-up ${index + 1}`}
+                      value={wait}
                       min={0}
                       max={MAX_UNANSWERED_DAYS}
-                      className="h-9 w-16 text-right"
-                      value={waits[index] ?? String(wait)}
-                      onChange={(event) =>
-                        setWaits((current) => ({ ...current, [index]: event.target.value }))
+                      className="w-16"
+                      onSave={(days) =>
+                        update.mutate({
+                          ...settings,
+                          followUpWaitDays: settings.followUpWaitDays.map((current, i) =>
+                            i === index ? days : current
+                          ),
+                        })
                       }
-                      onBlur={() => saveWait(index)}
-                      onKeyDown={(event) => event.key === "Enter" && event.currentTarget.blur()}
                     />
                   </div>
                 ))}
@@ -229,16 +184,12 @@ export function AutomationSettings() {
             onStageChange={(id) => update.mutate({ ...settings, archiveUnansweredStageId: id })}
           >
             <div className="flex items-center gap-2">
-              <Input
-                aria-label="Dias sem resposta"
-                type="number"
+              <SettingsNumberField
+                label="Dias sem resposta"
+                value={settings.archiveUnansweredDays}
                 min={1}
                 max={MAX_UNANSWERED_DAYS}
-                className="h-9 w-20 text-right"
-                value={shownDays}
-                onChange={(event) => setDays(event.target.value)}
-                onBlur={saveDays}
-                onKeyDown={(event) => event.key === "Enter" && event.currentTarget.blur()}
+                onSave={(days) => update.mutate({ ...settings, archiveUnansweredDays: days })}
               />
               <span className="text-muted-foreground text-sm">dias</span>
             </div>
