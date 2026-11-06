@@ -5,6 +5,7 @@ export * from "./deleteWhatsappConversations";
 export * from "./disconnectWhatsapp";
 export * from "./getWhatsappQrCode";
 export * from "./getWhatsappStatus";
+export * from "./leadMessages";
 export * from "./messages";
 export * from "./resolveWhatsappAccountChange";
 export * from "./streamWhatsappEvents";

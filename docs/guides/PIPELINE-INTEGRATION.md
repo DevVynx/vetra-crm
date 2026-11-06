@@ -49,6 +49,23 @@ All under `/api`, with the paths in `packages/routes` and the schemas in
 - **`PATCH /leads/:id/do-not-contact`** is the user's switch (Leads page, "Ações do lead").
 - The note with the gap goes through `POST /leads/:id/notes`.
 
+## Reading a lead's conversation
+
+`GET /leads/:id/messages?limit=` is the one way the pipeline reads WhatsApp, and only for `/resultado`, when the
+user asks for it. It answers `{ hasConversation, hasMore, messages }`, the most recent `limit` messages (200 by
+default, 500 at most) oldest first, each with only `direction`, `type`, `text` and `sentAt` (plus `isDeleted`; a
+deleted message has no text). No ids, no media, no photo, no name of the contact.
+
+- It starts from a **lead**: the conversation is found by the lead's phone, so a chat that is not a lead's cannot be
+  asked for. There is no route by conversation, by phone or by search on this path.
+- A lead with no linked conversation (or with WhatsApp never connected) answers `hasConversation: false`, and the
+  pipeline asks the user to paste it instead.
+- Only what Vetra imported is there: individual conversations of the last 12 months. Audio, image and the like show
+  as a type, with no content (a caption, when there is one, is the text).
+- This does not make the rest of the API safe from the pipeline: with no login, `/whatsapp/*` is open to anything on
+  this computer. The pipeline keeps a closed list of the routes it may call, and this is the only WhatsApp one.
+  `GET /leads/:id/conversation` (the 4 messages of the lead's card) stays, but is not what it should use.
+
 ## What guarantees no duplicate lead
 
 The database, not the code: a unique index on the canonical phone key (`leads_phone_key_idx`) and

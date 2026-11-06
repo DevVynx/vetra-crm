@@ -100,3 +100,28 @@ export type UpsertLeadBySlugResponse = z.infer<typeof upsertLeadBySlugResponseSc
 
 export const updateLeadDoNotContactRequestSchema = z.object({ doNotContact: z.boolean() });
 export type UpdateLeadDoNotContactRequest = z.infer<typeof updateLeadDoNotContactRequestSchema>;
+
+const MAX_LEAD_MESSAGES = 500;
+const DEFAULT_LEAD_MESSAGES = 200;
+
+export const leadMessagesQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(MAX_LEAD_MESSAGES).default(DEFAULT_LEAD_MESSAGES),
+});
+export type LeadMessagesQuery = z.infer<typeof leadMessagesQuerySchema>;
+
+// What the pipeline may read of a lead's conversation, and nothing else: no ids, no media, no other
+// conversation. A deleted message has no text.
+export const leadMessagesResponseSchema = z.object({
+  hasConversation: z.boolean(),
+  hasMore: z.boolean(),
+  messages: z.array(
+    z.object({
+      direction: z.enum(["inbound", "outbound"]),
+      type: z.enum(["text", "audio", "image", "video", "document", "sticker", "other"]),
+      text: z.string().nullable(),
+      isDeleted: z.boolean(),
+      sentAt: z.iso.datetime(),
+    })
+  ),
+});
+export type LeadMessagesResponse = z.infer<typeof leadMessagesResponseSchema>;

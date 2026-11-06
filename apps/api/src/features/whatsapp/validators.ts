@@ -1,6 +1,7 @@
 import {
   deleteWhatsappMessagesRequestSchema,
   editWhatsappMessageRequestSchema,
+  leadMessagesQuerySchema,
   leadParamsSchema,
   listWhatsappConversationsQuerySchema,
   listWhatsappMessagesQuerySchema,
@@ -48,6 +49,7 @@ const v = {
     body: deleteWhatsappMessagesRequestSchema,
   }),
   leadConversation: validation({ params: leadParamsSchema }),
+  leadMessages: validation({ params: leadParamsSchema, query: leadMessagesQuerySchema }),
 };
 
 export default v;

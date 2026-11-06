@@ -12,6 +12,7 @@ import {
   disconnectWhatsappController,
   editWhatsappMessageController,
   getLeadConversationController,
+  getLeadMessagesController,
   getWhatsappConversationController,
   getWhatsappMessageMediaController,
   getWhatsappQrCodeController,
@@ -86,6 +87,7 @@ whatsappRouter.get(
   v.leadConversation,
   getLeadConversationController
 );
+whatsappRouter.get(whatsappRoutes.leadMessages, v.leadMessages, getLeadMessagesController);
 whatsappRouter.post(
   whatsappRoutes.leadConversation,
   v.leadConversation,

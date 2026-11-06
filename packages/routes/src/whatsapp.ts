@@ -18,4 +18,5 @@ export const whatsappRoutes = {
   conversationMessageMedia: "/whatsapp/conversations/:id/messages/:messageId/media",
   conversationMessagePlayed: "/whatsapp/conversations/:id/messages/:messageId/played",
   leadConversation: "/leads/:id/conversation",
+  leadMessages: "/leads/:id/messages",
 } as const;
