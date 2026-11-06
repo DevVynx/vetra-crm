@@ -1,0 +1,53 @@
+# Development only: the database and WhatsApp for `pnpm dev`, in a project of their own (`vetra-dev`), so they
+# share nothing with the built app of compose.yaml: not the containers, not the volumes, not the WhatsApp session.
+# Start it with `pnpm docker:dev` and stop it with `pnpm docker:dev:down`. The API and the web run outside Docker.
+#
+# Keep the WAHA image and its settings equal to compose.yaml, which is what the built app runs.
+#
+# Only this computer: the database has a fixed development password and holds everything. If one of the ports
+# clashes with something else, change it in .env (and DATABASE_URL / WAHA_URL to match).
+#
+# WhatsApp: this WAHA needs its own session. Linking the same number here and in the built app makes one drop the
+# other, and both could send the same message. Prefer a test number while developing.
+name: vetra-dev
+
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: vetra_dev_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: vetra
+    ports:
+      - "127.0.0.1:${VETRA_DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d vetra"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  waha:
+    # Pinned to the same digest as compose.yaml (2026.10.1, validated in VET-12).
+    image: devlikeapro/waha:latest@sha256:2fc1787ddbd343ed2e7d59482846d1b22aa5ca134e29aa8d42d0e88c54e24779
+    container_name: vetra_dev_waha
+    restart: unless-stopped
+    environment:
+      WAHA_API_KEY: ${WAHA_API_KEY:?Set WAHA_API_KEY in .env}
+      WHATSAPP_DEFAULT_ENGINE: GOWS
+      WAHA_DASHBOARD_ENABLED: "false"
+      WHATSAPP_SWAGGER_ENABLED: "false"
+      WAHA_EVENTS_DOWNLOAD_MEDIA: "false"
+      WAHA_API_DOWNLOAD_MEDIA: "false"
+      WAHA_GOWS_DEVICE_HISTORY_SYNC_FULL_SYNC_DAYS_LIMIT: "365"
+    ports:
+      - "127.0.0.1:${VETRA_WAHA_PORT:-3001}:3000"
+    volumes:
+      - waha_sessions:/app/.sessions
+
+volumes:
+  postgres_data:
+  waha_sessions:

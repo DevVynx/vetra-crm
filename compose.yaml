@@ -1,7 +1,7 @@
-# Only the app publishes a port. The database and WhatsApp are reached by the app through the private
+# The built app: only the app publishes a port. The database and WhatsApp are reached by the app through the private
 # network of this file (db:5432, waha:3000), so nothing of them is open on this computer and they
-# cannot clash with another Postgres or tool. The ports development needs are in
-# compose.override.yaml, which `docker compose` reads by itself and the launcher (iniciar-vetra) skips.
+# cannot clash with another Postgres or tool. Development has its own file, compose.dev.yaml, with its own
+# project, containers and volumes, so the two never share data or a WhatsApp session.
 services:
   db:
     image: postgres:18-alpine
