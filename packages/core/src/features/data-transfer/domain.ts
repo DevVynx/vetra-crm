@@ -1,5 +1,11 @@
 import { csvOf, textCell } from "./helpers/csv";
 import { dayOf, instantFormatterOf, moneyCell, phoneCell } from "./helpers/formats";
+import {
+  EXPENSE_STATUS_WORDS,
+  NEXT_ACTION_WORDS,
+  PROJECT_STATUS_WORDS,
+  STAGE_ROLE_WORDS,
+} from "./helpers/words";
 
 type StageRole = "entry" | "middle" | "closing" | "archive";
 type NextActionType = "first_approach" | "follow_up" | "meeting" | "proposal" | "custom";
@@ -107,24 +113,6 @@ export type ExportData = {
 };
 
 export type ExportFile = { name: string; csv: string };
-
-const STAGE_ROLE_WORDS: Record<StageRole, string> = {
-  entry: "entrada",
-  middle: "intermediaria",
-  closing: "fechamento",
-  archive: "arquivo",
-};
-
-const PROJECT_STATUS_WORDS = { in_production: "em_producao", delivered: "entregue" } as const;
-const EXPENSE_STATUS_WORDS = { confirmed: "confirmada", pending: "pendente" } as const;
-
-const NEXT_ACTION_WORDS: Record<NextActionType, string> = {
-  first_approach: "primeira_abordagem",
-  follow_up: "follow_up",
-  meeting: "reuniao",
-  proposal: "proposta",
-  custom: "personalizada",
-};
 
 const optionalNumber = (value: number | null) => (value === null ? "" : String(value));
 
