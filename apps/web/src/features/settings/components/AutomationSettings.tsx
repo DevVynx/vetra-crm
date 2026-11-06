@@ -14,6 +14,7 @@ import { StageAutomationRow } from "./StageAutomationRow";
 
 const MAX_DELAY_MINUTES = 1440;
 const MAX_UNANSWERED_DAYS = 3650;
+const MAX_FOLLOW_UPS = 3;
 
 export function AutomationSettings() {
   const { data: settings } = useAutomationSettings();
@@ -21,6 +22,8 @@ export function AutomationSettings() {
   const stages = useStages();
   const [delay, setDelay] = useState<string | null>(null);
   const [days, setDays] = useState<string | null>(null);
+  const [limit, setLimit] = useState<string | null>(null);
+  const [waits, setWaits] = useState<Record<number, string>>({});
 
   if (!settings) return null;
 
@@ -45,6 +48,33 @@ export function AutomationSettings() {
 
     if (isValid && value !== settings.archiveUnansweredDays) {
       update.mutate({ ...settings, archiveUnansweredDays: value });
+    }
+  };
+
+  const shownLimit = limit ?? String(settings.followUpLimit);
+
+  const saveLimit = () => {
+    const value = Number(shownLimit);
+    const isValid = Number.isInteger(value) && value >= 0 && value <= MAX_FOLLOW_UPS;
+    setLimit(null);
+
+    if (isValid && value !== settings.followUpLimit) {
+      update.mutate({ ...settings, followUpLimit: value });
+    }
+  };
+
+  const saveWait = (index: number) => {
+    const value = Number(waits[index]);
+    const isValid = Number.isInteger(value) && value >= 0 && value <= MAX_UNANSWERED_DAYS;
+    setWaits((current) =>
+      Object.fromEntries(Object.entries(current).filter(([key]) => Number(key) !== index))
+    );
+
+    if (isValid && value !== settings.followUpWaitDays[index]) {
+      const followUpWaitDays = settings.followUpWaitDays.map((current, i) =>
+        i === index ? value : current
+      );
+      update.mutate({ ...settings, followUpWaitDays });
     }
   };
 
@@ -103,6 +133,52 @@ export function AutomationSettings() {
             />
           </SettingsRow>
           <AutoSendAllLeadsRow />
+          <SettingsRow
+            title="Follow-ups da pipeline"
+            description="Recomendamos só 1 follow-up, por causa do risco de bloqueio do número. O máximo é 3, para a sua segurança."
+          >
+            <div className="flex items-center gap-2">
+              <Input
+                aria-label="Quantidade de follow-ups"
+                type="number"
+                min={0}
+                max={MAX_FOLLOW_UPS}
+                className="h-9 w-20 text-right"
+                value={shownLimit}
+                onChange={(event) => setLimit(event.target.value)}
+                onBlur={saveLimit}
+                onKeyDown={(event) => event.key === "Enter" && event.currentTarget.blur()}
+              />
+            </div>
+          </SettingsRow>
+          {settings.followUpLimit > 0 && (
+            <SettingsRow
+              title="Espera dos follow-ups da pipeline"
+              description="Dias até cada follow-up, contados do envio da mensagem anterior. O Vetra cria o seguinte quando o anterior é enviado ou concluído."
+            >
+              <div className="flex items-center gap-3">
+                {settings.followUpWaitDays.slice(0, settings.followUpLimit).map((wait, index) => (
+                  <div key={index} className="flex items-center gap-1.5">
+                    <span className="text-muted-foreground text-sm">{index + 1}º</span>
+                    <Input
+                      aria-label={`Dias até o follow-up ${index + 1}`}
+                      type="number"
+                      min={0}
+                      max={MAX_UNANSWERED_DAYS}
+                      className="h-9 w-16 text-right"
+                      value={waits[index] ?? String(wait)}
+                      onChange={(event) =>
+                        setWaits((current) => ({ ...current, [index]: event.target.value }))
+                      }
+                      onBlur={() => saveWait(index)}
+                      onKeyDown={(event) => event.key === "Enter" && event.currentTarget.blur()}
+                    />
+                  </div>
+                ))}
+                <span className="text-muted-foreground text-sm">dias</span>
+              </div>
+            </SettingsRow>
+          )}
           <StageAutomationRow
             title="Mover ao enviar a primeira mensagem"
             description="Quando o Vetra envia o texto de um lead que ainda está na primeira etapa, ele vai para a etapa escolhida."
