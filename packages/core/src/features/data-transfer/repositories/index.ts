@@ -6,6 +6,8 @@ import { findAllNextActions } from "./findAllNextActions";
 import { findAllNotes } from "./findAllNotes";
 import { findAllProjects } from "./findAllProjects";
 import { findAllStages } from "./findAllStages";
+import { findLeadPhoneKeys } from "./findLeadPhoneKeys";
+import { insertImport } from "./insertImport";
 
 export const dataTransferRepositories = {
   findAllDeals,
@@ -16,4 +18,6 @@ export const dataTransferRepositories = {
   findAllNotes,
   findAllProjects,
   findAllStages,
+  findLeadPhoneKeys,
+  insertImport,
 };
