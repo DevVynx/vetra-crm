@@ -2,7 +2,15 @@ import { crc32, inflateRawSync } from "node:zlib";
 
 export type ZipFileEntry = { name: string; content: Buffer };
 
-export type ZipLimits = { maxEntries: number; maxEntryBytes: number; maxTotalBytes: number };
+export type ZipLimits = {
+  // How many of the files wanted may be read.
+  maxEntries: number;
+  maxEntryBytes: number;
+  maxTotalBytes: number;
+  // Which files are wanted. The others are never opened, nor counted against the limits, so a zip
+  // that carries other things (a folder of photos) still reads.
+  accepts: (name: string) => boolean;
+};
 
 export type ZipReadProblem =
   "not-a-zip" | "unsupported" | "too-many-files" | "too-large" | "corrupt";
@@ -24,6 +32,8 @@ const ENCRYPTED_FLAG = 0x0001;
 const STORED = 0;
 const DEFLATED = 8;
 const ZIP64_MARKER = 0xffffffff;
+// Reading a header costs nothing, but a zip can declare any number of them.
+const MAX_HEADERS = 10_000;
 
 function findEnd(zip: Buffer): number {
   const lowest = Math.max(0, zip.length - END_SIZE - MAX_COMMENT_BYTES);
@@ -48,7 +58,7 @@ export function readZip(zip: Buffer, limits: ZipLimits): ZipFileEntry[] {
   if (count === 0xffff || centralSize === ZIP64_MARKER || cursor === ZIP64_MARKER) {
     throw new ZipReadError("unsupported");
   }
-  if (count > limits.maxEntries) throw new ZipReadError("too-many-files");
+  if (count > MAX_HEADERS) throw new ZipReadError("too-many-files");
 
   const entries: ZipFileEntry[] = [];
   let totalBytes = 0;
@@ -73,7 +83,8 @@ export function readZip(zip: Buffer, limits: ZipLimits): ZipFileEntry[] {
     );
     cursor += CENTRAL_HEADER_SIZE + nameLength + extraLength + commentLength;
 
-    if (name.endsWith("/")) continue;
+    if (name.endsWith("/") || !limits.accepts(name)) continue;
+    if (entries.length >= limits.maxEntries) throw new ZipReadError("too-many-files");
     if (flags & ENCRYPTED_FLAG) throw new ZipReadError("unsupported");
     if (method !== STORED && method !== DEFLATED) throw new ZipReadError("unsupported");
     if (compressedSize === ZIP64_MARKER || size === ZIP64_MARKER) {

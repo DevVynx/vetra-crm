@@ -36,19 +36,23 @@ export function readImportFiles(content: Buffer): Map<string, string> {
   }
 
   try {
+    // Only the files that are read are opened, the first of each name; the rest of what a zip may
+    // carry is not looked at.
+    const wanted = new Set<string>();
     const entries = readZip(content, {
       maxEntries: MAX_FILES,
       maxEntryBytes: MAX_FILE_BYTES,
       maxTotalBytes: MAX_TOTAL_BYTES,
+      accepts: (path) => {
+        const name = basenameOf(path);
+        if (!FILES_READ.has(name) || wanted.has(name)) return false;
+
+        wanted.add(name);
+        return true;
+      },
     });
-    const files = new Map<string, string>();
 
-    for (const entry of entries) {
-      const name = basenameOf(entry.name);
-      if (FILES_READ.has(name) && !files.has(name)) files.set(name, textOf(entry.content));
-    }
-
-    return files;
+    return new Map(entries.map((entry) => [basenameOf(entry.name), textOf(entry.content)]));
   } catch (error) {
     if (error instanceof ZipReadError) throw new InvalidImportFileError();
     throw error;
