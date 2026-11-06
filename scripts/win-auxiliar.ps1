@@ -40,6 +40,14 @@ if ($text -match 'WAHA_API_KEY="change-me"') {
 
 $port = 4720
 
+# With the source next to the scripts (a clone) the app is built here; without it (the installer package) the
+# image already built is pulled.
+if (Test-Path (Join-Path $root "Dockerfile")) {
+  $appImageArgs = @("--build")
+} else {
+  $appImageArgs = @("--pull", "always", "--no-build")
+}
+
 Write-Host "Iniciando o Vetra. Na primeira vez isso demora alguns minutos..."
 # The database and WhatsApp are started (and waited for) first and are left alone if nothing changed.
 # The app is always made again: a container kept from an earlier run can point to a network that
@@ -48,7 +56,7 @@ docker compose -f compose.yaml up -d --wait db waha
 if ($LASTEXITCODE -ne 0) {
   Stop-WithMessage "Nao consegui iniciar o Vetra. Confira se o Docker Desktop esta funcionando e tente de novo."
 }
-docker compose -f compose.yaml --profile app up -d --build --force-recreate --no-deps app
+docker compose -f compose.yaml --profile app up -d @appImageArgs --force-recreate --no-deps app
 if ($LASTEXITCODE -ne 0) {
   Stop-WithMessage "Nao consegui iniciar o Vetra. Confira se o Docker Desktop esta funcionando e tente de novo."
 }

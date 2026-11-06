@@ -24,12 +24,24 @@ fi
 
 port=4720
 
+# With the source next to the scripts (a clone) the app is built here; without it (the installer package) the
+# image already built is pulled.
+if [ -f Dockerfile ]; then
+  app_image_args="--build"
+else
+  app_image_args="--pull always --no-build"
+fi
+# The pinned WAHA image is for amd64 only (the arm one is not verified yet).
+case "$(uname -m)" in
+  arm64|aarch64) export WAHA_IMAGE="devlikeapro/waha:arm" ;;
+esac
+
 echo "Iniciando o Vetra. Na primeira vez isso demora alguns minutos..."
 # The database and WhatsApp are started (and waited for) first and are left alone if nothing changed.
 # The app is always made again: a container kept from an earlier run can point to a network that
 # Docker has since replaced, and then it does not start ("network not found").
 docker compose -f compose.yaml up -d --wait db waha || stop_with "Nao consegui iniciar o Vetra. Confira se o Docker esta funcionando e tente de novo."
-docker compose -f compose.yaml --profile app up -d --build --force-recreate --no-deps app || stop_with "Nao consegui iniciar o Vetra. Confira se o Docker esta funcionando e tente de novo."
+docker compose -f compose.yaml --profile app up -d $app_image_args --force-recreate --no-deps app || stop_with "Nao consegui iniciar o Vetra. Confira se o Docker esta funcionando e tente de novo."
 
 address="http://localhost:${port}"
 echo "Esperando o Vetra responder..."
