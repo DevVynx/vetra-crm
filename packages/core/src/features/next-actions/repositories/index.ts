@@ -8,12 +8,28 @@ import { findCompletedAction } from "./findCompletedAction";
 import { findNextActions } from "./findNextActions";
 import { insertNextAction } from "./insertNextAction";
 import { moveNextActionToCompleted } from "./moveNextActionToCompleted";
+import {
+  cancelQueuedFollowUps,
+  findQueuedFollowUpStates,
+  hasQueuedFollowUps,
+  insertQueuedFollowUps,
+  queueFollowUps,
+  queueFollowUpsIn,
+  scheduleNextQueuedFollowUp,
+} from "./queuedFollowUps";
 import { recordSendProgress } from "./recordSendProgress";
 import { releaseNextActionSending } from "./releaseNextActionSending";
 import { reopenCompletedAction } from "./reopenCompletedAction";
 import { updateNextAction } from "./updateNextAction";
 
 export const nextActionRepositories = {
+  cancelQueuedFollowUps,
+  findQueuedFollowUpStates,
+  hasQueuedFollowUps,
+  insertQueuedFollowUps,
+  queueFollowUps,
+  queueFollowUpsIn,
+  scheduleNextQueuedFollowUp,
   claimNextActionForSending,
   deleteNextAction,
   deleteFollowUpsOfLead,

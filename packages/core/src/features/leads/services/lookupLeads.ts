@@ -1,4 +1,5 @@
 import { canonicalPhoneOf } from "../../../shared/phone";
+import { nextActionRepositories } from "../../next-actions/repositories";
 import { type LeadLookupRow, leadRepositories } from "../repositories";
 
 export type LeadLookupQuery = {
@@ -10,7 +11,23 @@ export type LeadLookupQuery = {
 
 export type LeadLookupMatchKind = "slug" | "phone" | "name_and_city" | "name";
 
-export type LeadLookupHit = LeadLookupRow & { matchedBy: LeadLookupMatchKind[] };
+export type LeadFollowUpState = {
+  step: number;
+  status: "queued" | "scheduled" | "cancelled";
+};
+
+export type LeadLookupHit = LeadLookupRow & {
+  matchedBy: LeadLookupMatchKind[];
+  followUps: LeadFollowUpState[];
+};
+
+// The follow-ups the pipeline already gave each lead, so it sends only the steps that are missing.
+export async function followUpStatesOf(leadIds: string[]) {
+  const rows = await nextActionRepositories.findQueuedFollowUpStates(leadIds);
+
+  return (leadId: string): LeadFollowUpState[] =>
+    rows.filter((row) => row.leadId === leadId).map(({ step, status }) => ({ step, status }));
+}
 
 // A slug or a phone is a sure match. The same name in the same city, or part of a name, is only a
 // hint, because two different businesses can share them.
@@ -30,6 +47,8 @@ export async function lookupLeads(query: LeadLookupQuery): Promise<LeadLookupHit
     nameContains,
   });
 
+  const followUpsOf = await followUpStatesOf(matches.map((match) => match.id));
+
   return matches.map(
     ({ matchedBySlug, matchedByPhone, matchedByNameAndCity, matchedByName, ...lead }) => {
       const matchedBy: LeadLookupMatchKind[] = [];
@@ -38,7 +57,7 @@ export async function lookupLeads(query: LeadLookupQuery): Promise<LeadLookupHit
       if (matchedByNameAndCity) matchedBy.push("name_and_city");
       if (matchedByName) matchedBy.push("name");
 
-      return { ...lead, matchedBy };
+      return { ...lead, matchedBy, followUps: followUpsOf(lead.id) };
     }
   );
 }

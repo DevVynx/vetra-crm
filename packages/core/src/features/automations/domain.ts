@@ -13,6 +13,10 @@ export type AutomationSettings = {
   archiveUnansweredEnabled: boolean;
   archiveUnansweredStageId: string | null;
   archiveUnansweredDays: number;
+  // How many follow-up texts of the pipeline are kept (0 to 3, the first ones in order) and the days to wait before each,
+  // counted from the send of the message before it.
+  followUpLimit: number;
+  followUpWaitDays: number[];
 };
 
 // A lead that comes in starts with its own switch on only if the master switch is on too: with it off the
@@ -33,4 +37,6 @@ export const DEFAULT_AUTOMATION_SETTINGS: AutomationSettings = {
   archiveUnansweredEnabled: false,
   archiveUnansweredStageId: null,
   archiveUnansweredDays: 7,
+  followUpLimit: 1,
+  followUpWaitDays: [2, 3, 5],
 };

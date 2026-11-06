@@ -19,5 +19,7 @@ export async function findAutomationSettings(): Promise<AutomationSettings> {
     archiveUnansweredEnabled: row.archiveUnansweredEnabled,
     archiveUnansweredStageId: row.archiveUnansweredStageId,
     archiveUnansweredDays: row.archiveUnansweredDays,
+    followUpLimit: row.followUpLimit,
+    followUpWaitDays: [row.followUp1WaitDays, row.followUp2WaitDays, row.followUp3WaitDays],
   };
 }

@@ -49,6 +49,10 @@ export type PipelineLeadInput = LeadFields & {
   prospectedAt: Date | null;
   doNotContact: boolean;
   nextAction: (Omit<NextActionInput, "dueAt"> & { dueAt: Date | null }) | null;
+  // The follow-up texts (VET-22), in the order they go, and, for a lead whose opening message went already outside Vetra,
+  // when. How many are kept is up to Vetra's settings.
+  followUps: string[];
+  approachSentAt: Date | null;
 };
 
 // The only fields the pipeline may change on a lead that exists.
@@ -84,7 +88,14 @@ function createFromPipeline(
   now: Date,
   autoSend: boolean
 ): { lead: Lead; nextAction: ReturnType<typeof nextActionDomain.create> | null } {
-  const { prospectedAt, doNotContact, nextAction, ...fields } = input;
+  const {
+    prospectedAt,
+    doNotContact,
+    nextAction,
+    followUps: _followUps,
+    approachSentAt: _sentAt,
+    ...fields
+  } = input;
   const base = create(fields, entryStage, now, autoSend);
   const lead: Lead = { ...base, slug, doNotContact, prospectedAt: prospectedAt ?? now };
 

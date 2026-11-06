@@ -3,6 +3,7 @@ import {
   db,
   desc,
   eq,
+  gt,
   inArray,
   isNull,
   leadsTable,
@@ -426,4 +427,26 @@ export async function markMessagePlayed(
     .returning({ id: whatsappMessagesTable.id });
 
   return updated.length > 0;
+}
+
+// Whether the person wrote to the user since a moment: a lead that answered the opening message is
+// not given follow-ups.
+export async function hasInboundMessageSince(phoneKey: string, since: Date): Promise<boolean> {
+  const [row] = await db
+    .select({ id: whatsappMessagesTable.id })
+    .from(whatsappMessagesTable)
+    .innerJoin(
+      whatsappConversationsTable,
+      eq(whatsappConversationsTable.id, whatsappMessagesTable.conversationId)
+    )
+    .where(
+      and(
+        eq(whatsappConversationsTable.phoneKey, phoneKey),
+        eq(whatsappMessagesTable.direction, "inbound"),
+        gt(whatsappMessagesTable.sentAt, since)
+      )
+    )
+    .limit(1);
+
+  return Boolean(row);
 }

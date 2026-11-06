@@ -18,5 +18,6 @@ export async function saveLeadStages(
         .where(eq(leadsTable.id, id));
     }
     await nextActionRepositories.deleteNextActionsOfLeads(tx, leadIdsLeavingFunnel);
+    await nextActionRepositories.cancelQueuedFollowUps(tx, leadIdsLeavingFunnel);
   });
 }

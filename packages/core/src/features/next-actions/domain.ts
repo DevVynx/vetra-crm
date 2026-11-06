@@ -32,6 +32,19 @@ export type NextActionWithLead = NextAction & NextActionDelivery & { lead: Lead 
 // The pipeline leaves this where the user's own number goes. Sent as it is, it would reach the lead.
 const MARKER = /\[\s*SEU\s+WHATSAPP\s*\]/i;
 
+// What the pipeline hands over for a lead: the text of a follow-up and which of the three it is.
+export type QueuedFollowUpInput = { step: number; body: string };
+
+const MAX_FOLLOW_UPS_FROM_PIPELINE = 3;
+const DAY_MS = 86_400_000;
+
+// When a follow-up is due: the wait of its position in the sequence, counted from the message before it.
+function followUpDueAt(step: number, waitDays: number[], from: Date): Date {
+  const days = waitDays[step - 1] ?? 0;
+
+  return new Date(from.getTime() + days * DAY_MS);
+}
+
 const delivery = {
   // After this many automatic failures an action waits for the user.
   maxAutomaticAttempts: 2,
@@ -95,6 +108,8 @@ function reopen(completed: CompletedAction): NextAction {
   };
 }
 
+export const followUpLimits = { maxFromPipeline: MAX_FOLLOW_UPS_FROM_PIPELINE };
+
 export const nextActionDomain = {
   balloonsOf,
   canBeSent,
@@ -102,6 +117,7 @@ export const nextActionDomain = {
   create,
   delivery,
   edit,
+  followUpDueAt,
   hasMarker,
   reopen,
 };
