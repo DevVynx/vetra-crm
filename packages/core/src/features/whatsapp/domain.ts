@@ -201,6 +201,10 @@ function voiceFilenameOf(mimetype: string): string {
   return `voice.${VOICE_EXTENSION_BY_MIMETYPE[mimetype] ?? "webm"}`;
 }
 
+// The most a file sent to WhatsApp may weigh. The API reads the request with the same limit
+// (WHATSAPP_MEDIA_MAX_BYTES in @vetra/contracts, which the web also needs): keep them equal.
+const MEDIA_MAX_BYTES = 25 * 1024 * 1024;
+
 const MAX_FILENAME_LENGTH = 150;
 
 // Goes into a header: no control characters, no path, no quotes.
@@ -285,6 +289,7 @@ export const whatsappDomain = {
   phoneDigitsOfSearch,
   phoneOfChatId,
   replySnippetOf,
+  MEDIA_MAX_BYTES,
   MESSAGE_TYPE_BY_SEND_KIND,
   safeFilenameOf,
   sendKindOf,

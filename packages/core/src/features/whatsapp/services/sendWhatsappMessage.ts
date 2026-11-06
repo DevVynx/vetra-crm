@@ -1,29 +1,12 @@
-import { wahaClient, WahaSendRestrictedError, type WahaSentMessage } from "@vetra/infra";
+import { wahaClient } from "@vetra/infra";
 
 import { whatsappDomain } from "../domain";
-import {
-  WhatsappConversationNotFoundError,
-  WhatsappNotConnectedError,
-  WhatsappSendRestrictedError,
-} from "../errors";
-import { callWaha } from "../helpers/callWaha";
+import { WhatsappConversationNotFoundError, WhatsappNotConnectedError } from "../errors";
 import { findMessageToReply } from "../helpers/findMessageToReply";
+import { sendThroughWaha } from "../helpers/sendToConversation";
 import { whatsappSyncState } from "../helpers/syncLoop";
 import { notifyWhatsappChange } from "../helpers/whatsappChanges";
 import { whatsappRepositories } from "../repositories";
-
-async function sendThroughWaha(
-  chatId: string,
-  text: string,
-  replyToWahaId: string | undefined
-): Promise<WahaSentMessage | null> {
-  try {
-    return await callWaha(() => wahaClient.sendText(chatId, text, replyToWahaId));
-  } catch (error) {
-    if (error instanceof WahaSendRestrictedError) throw new WhatsappSendRestrictedError();
-    throw error;
-  }
-}
 
 const SECOND_IN_MS = 1_000;
 
@@ -47,7 +30,9 @@ export async function sendWhatsappMessage({
     : null;
   const replyToWahaId = reply ? whatsappDomain.wahaIdOf(reply, conversation.chatId) : undefined;
 
-  const sent = await sendThroughWaha(conversation.chatId, text, replyToWahaId);
+  const sent = await sendThroughWaha(() =>
+    wahaClient.sendText(conversation.chatId, text, replyToWahaId)
+  );
   if (!sent) return;
 
   await whatsappRepositories.saveMessages(

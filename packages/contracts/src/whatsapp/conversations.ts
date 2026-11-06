@@ -10,6 +10,8 @@ import {
 export const WHATSAPP_CONVERSATIONS_PAGE_SIZE = 30;
 export const WHATSAPP_MESSAGES_PAGE_SIZE = 50;
 export const WHATSAPP_MESSAGE_MAX_LENGTH = 4096;
+// The domain checks it again, with its own copy (MEDIA_MAX_BYTES in whatsapp/domain.ts): core does
+// not import the contracts. Keep them equal.
 export const WHATSAPP_MEDIA_MAX_BYTES = 25 * 1024 * 1024;
 export const WHATSAPP_CAPTION_MAX_LENGTH = 1024;
 export const WHATSAPP_MAX_FILES_AT_ONCE = 10;
