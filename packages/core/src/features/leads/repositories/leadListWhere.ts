@@ -25,12 +25,26 @@ const leadFilterColumns: FilterColumns = {
   prospected_at: { kind: "date", expression: sql`${leadsTable.prospectedAt}` },
 };
 
+const MIN_PHONE_DIGITS = 4;
+
+// A number is found by any part of it, however it is typed ("(31) 98888", "98888-77"), whether it
+// was saved with the ninth digit or not: the key is the saved number without it.
+function phoneMatchSql(search: string) {
+  const digits = search.replace(/\D/g, "");
+  if (digits.length < MIN_PHONE_DIGITS) return [];
+
+  const pattern = `%${digits}%`;
+
+  return [sql`${leadsTable.phone} like ${pattern}`, sql`${leadsTable.phoneKey} like ${pattern}`];
+}
+
 export const leadSearchSql = (search: string) =>
   search
     ? or(
         ...[leadsTable.businessName, leadsTable.contactName, leadsTable.niche, leadsTable.city].map(
           (column) => containsSql(sql`${column}`, search)
-        )
+        ),
+        ...phoneMatchSql(search)
       )
     : undefined;
 

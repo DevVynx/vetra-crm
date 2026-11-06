@@ -30,7 +30,7 @@ export function SearchPalette() {
       open={isOpen}
       onOpenChange={setSearchPaletteOpen}
       title="Buscar"
-      description="Busque leads, clientes, projetos, notas e próximas ações, ou vá para uma página."
+      description="Busque leads (também pelo telefone), clientes, projetos, notas e próximas ações, ou vá para uma página."
       className="top-[15svh] flex translate-y-0 flex-col gap-0 max-sm:top-0 max-sm:left-0 max-sm:h-svh max-sm:max-w-none max-sm:translate-x-0 max-sm:rounded-none sm:max-w-2xl"
     >
       <SearchPaletteContent />

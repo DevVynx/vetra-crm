@@ -144,7 +144,7 @@ export function CustomersPage() {
         <ActiveFilters controller={filtering} />
         <SearchField
           className="max-w-sm"
-          placeholder="Buscar por nome, contato, nicho ou cidade"
+          placeholder="Buscar por nome, contato, telefone, nicho ou cidade"
           value={searchText}
           onChange={(value) => {
             setSearchText(value);
