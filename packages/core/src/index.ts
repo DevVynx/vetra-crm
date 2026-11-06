@@ -1,5 +1,6 @@
 export * from "./features/customers";
 export * from "./features/dashboard";
+export * from "./features/data-transfer";
 export * from "./features/lead-notes";
 export * from "./features/leads";
 export * from "./features/ledger";

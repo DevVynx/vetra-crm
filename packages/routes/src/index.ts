@@ -1,6 +1,7 @@
 export * from "./buildPath";
 export * from "./customers";
 export * from "./dashboard";
+export * from "./data";
 export * from "./leadNotes";
 export * from "./leads";
 export * from "./ledger";

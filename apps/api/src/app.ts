@@ -5,6 +5,7 @@ import helmet from "helmet";
 
 import { customersRouter } from "@/features/customers/routes";
 import { dashboardRouter } from "@/features/dashboard/routes";
+import { dataTransferRouter } from "@/features/data-transfer/routes";
 import { leadNotesRouter } from "@/features/lead-notes/routes";
 import { leadsRouter } from "@/features/leads/routes";
 import { ledgerRouter } from "@/features/ledger/routes";
@@ -43,6 +44,7 @@ app.use(
 
 app.use("/api", customersRouter);
 app.use("/api", dashboardRouter);
+app.use("/api", dataTransferRouter);
 app.use("/api", leadNotesRouter);
 app.use("/api", leadsRouter);
 app.use("/api", ledgerRouter);

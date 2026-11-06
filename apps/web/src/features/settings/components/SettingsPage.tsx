@@ -1,3 +1,4 @@
+import { DataSettings } from "./DataSettings";
 import { ProfileSettings } from "./ProfileSettings";
 import { StagesSettings } from "./StagesSettings";
 import { WhatsAppSettings } from "./WhatsAppSettings";
@@ -9,6 +10,7 @@ export function SettingsPage() {
       <ProfileSettings />
       <StagesSettings />
       <WhatsAppSettings />
+      <DataSettings />
     </div>
   );
 }
