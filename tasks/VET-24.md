@@ -1,17 +1,17 @@
-# VET-22 — Update Vetra from Settings
+# VET-24 — Update Vetra from Settings
 
 ## Objective
 
 Let the user see which version is running, learn that a newer one exists and update with a button in Settings, with a backup first and a way back if the new version does not start.
 
 - **What:** the version shown in Settings, a check against the public GitHub releases, an "Update" button, and a small helper container that does the update.
-- **Why:** after VET-21 users run a published image. Updating by hand means a terminal, which these users do not use.
+- **Why:** after VET-23 users run a published image. Updating by hand means a terminal, which these users do not use.
 - **Who benefits:** non-technical users, and the owner, who stops supporting old versions.
 
 ## Decisions already made with the user
 
 - Updating is a button in Settings that fetches the new version and says whether Vetra is already up to date.
-- The repository and the image are public (VET-21).
+- The repository and the image are public (VET-23).
 
 ## Proposed, pending confirmation
 
@@ -26,7 +26,7 @@ Let the user see which version is running, learn that a newer one exists and upd
 
 ## How it works
 
-- **Version.** The image knows its version (VET-21). Settings shows it.
+- **Version.** The image knows its version (VET-23). Settings shows it.
 - **Check.** The API asks the public GitHub releases API for the latest release (no key) and compares. Failures (offline, rate limit) are shown as "could not check", never as an error screen. The result is cached for a while.
 - **The server must not hold the Docker socket.** Whoever opens a server with no login would control the computer. Only a separate **updater** container has it, started with the app, with the socket and nothing else.
 - **Update flow** (the app asks the updater, which does):

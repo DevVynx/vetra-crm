@@ -32,7 +32,7 @@ Change the stage after creating the lead, delete a lead or a note, touch finance
 - Instagram, website, address or Maps link as lead fields. Vetra keeps the state, the pipeline keeps the files.
 - Leads without a phone.
 - The pipeline's own side (slug generation, `lead.json`, the sync skill): that is the other project, decided by its owner.
-- Publishing and updating (VET-21, VET-22).
+- Publishing and updating (VET-23, VET-24).
 
 ---
 
@@ -142,7 +142,7 @@ Requirements that follow:
 - **The new-activity sheet** starts clean each time it opens (the default date is "tomorrow" as of the opening) and, in a list, only exists after its button was clicked, instead of one form per row.
 - **Completing and reopening an action twice at once** is now one success and a 404 for the rest, never a 500 (the delete decides inside the transaction). Checked with 8 simultaneous requests each.
 - **`body` is optional** on `POST` and `PATCH /next-actions` (defaults to none), so a client that does not know the field still works. The limits that must stay equal (the text, the slug) say so in a comment.
-- **Not done, on purpose:** the backup before an automatic migration (to be decided with VET-22); keeping the creation date of a reopened action (documented in `DATABASE.md` instead, since it needs a column and a migration for a date nobody sees); the mark on a customer's page; the index for the name plus city lookup.
+- **Not done, on purpose:** the backup before an automatic migration (to be decided with VET-24); keeping the creation date of a reopened action (documented in `DATABASE.md` instead, since it needs a column and a migration for a date nobody sees); the mark on a customer's page; the index for the name plus city lookup.
 
 ## A route to read a lead's messages, for the pipeline
 

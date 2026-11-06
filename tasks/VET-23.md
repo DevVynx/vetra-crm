@@ -1,4 +1,4 @@
-# VET-21 — Publish Vetra as a ready image
+# VET-23 — Publish Vetra as a ready image
 
 ## Objective
 
@@ -13,7 +13,7 @@ Let someone install Vetra by downloading a small package, with no source code an
 - **The repository and the image are public.** The code is visible, but the license forbids selling, hosting for third parties or redistributing Vetra without permission. Moving to a private repository later stays possible.
 - **The license is source-available, not MIT.** MIT would let anyone resell Vetra. The proposal is **PolyForm Shield 1.0.0** (allows use, including in a business, and modification; forbids competing with Vetra). _Pending the user's confirmation against PolyForm Noncommercial._ The user should have the final text reviewed by a lawyer before selling.
 - **Users download a small release package** (compose file, scripts, `.env.example` and a README written for them), never the repository.
-- **Updating from a button in Settings is VET-22.**
+- **Updating from a button in Settings is VET-24.**
 
 ## Proposed, pending confirmation
 
@@ -23,7 +23,7 @@ Let someone install Vetra by downloading a small package, with no source code an
 
 ## Out of scope
 
-- The update button, the version check and the backup before updating (VET-22).
+- The update button, the version check and the backup before updating (VET-24).
 - Signing images, a private registry or license keys.
 - Windows ARM, other languages, a desktop app.
 
@@ -33,7 +33,7 @@ Let someone install Vetra by downloading a small package, with no source code an
 
 - **License.** A `LICENSE` file with the chosen text, a `license` field in the root `package.json`, and a short note in the README about what is allowed.
 - **Publication.** A GitHub Actions workflow on tags `v*`: builds the `Dockerfile` for `linux/amd64` and `linux/arm64`, pushes to GHCR with the tags `X.Y.Z` and `latest`, then creates the GitHub Release with the installer package attached. Free for a public repository. One manual step, once: set the package to public in GHCR.
-- **The version** comes from the tag and is written into the image (build argument), so the app can show it and VET-22 can compare it.
+- **The version** comes from the tag and is written into the image (build argument), so the app can show it and VET-24 can compare it.
 - **One compose file.** The `app` service gets `image: ghcr.io/devvynx/vetra-crm:${VETRA_VERSION:-latest}` next to `build: .`. The scripts choose: with a `Dockerfile` next to them (a clone) they build; without it (the package) they pull. _To confirm while implementing:_ if Compose cannot start without the build context, the package ships its own `compose.yaml` generated from the main one.
 - **Installer package** (`vetra-instalador.zip`): `compose.yaml`, `scripts/`, `.env.example` and a README for users. Built by the workflow, so it never drifts from the repository.
 - **WAHA on Apple Silicon.** The pinned WAHA image is amd64 only; `devlikeapro/waha:arm` exists for arm64. The image name comes from a variable (`WAHA_IMAGE`) and `iniciar-vetra.sh` sets it on arm64.
