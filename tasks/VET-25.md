@@ -16,11 +16,23 @@ number could both run the automatic sending (VET-20) at the same time.
 - The dev WAHA needs a session of its own. Scanning the same number's QR in both makes one drop the other, so
   testing should use a test number, or keep the dev WAHA off while the built app is in use.
 
-## To decide
+## Decided
 
-- The names of the files, the project, the volumes and the ports.
-- How `pnpm dev` and the docs (`ENV-CONFIG.md`, the env example) point to the dev compose.
-- Whether the automatic sending should refuse to run when the WhatsApp number is shared by two servers.
+- **Names:** `compose.dev.yaml`, project `vetra-dev`, containers `vetra_dev_postgres` and `vetra_dev_waha`, volumes
+  `vetra-dev_postgres_data` and `vetra-dev_waha_sessions`. `compose.override.yaml` is gone: `compose.yaml` is only the
+  built app, so a plain `docker compose up` no longer publishes any port.
+- **Ports:** the same as before (database 5432, WAHA 3001, `VETRA_DB_PORT` and `VETRA_WAHA_PORT`), so `.env` does not change.
+- **Commands:** `pnpm docker:dev` and `pnpm docker:dev:down`.
+- **Existing data:** copied to the development volumes (the current ones, `vetra-crm_*`, are left untouched).
+- **No lock in the automatic sending** for a number shared by two servers: separate stacks and sessions lower the risk a lot,
+  and a lock would be a feature of its own.
+
+## What was done and checked
+
+`compose.dev.yaml`, the removal of `compose.override.yaml`, the two scripts, and the README, `.env.example`, `ENV-CONFIG.md` and
+`compose.yaml` text. Checked both compose files with `docker compose config`, and the dev one in an isolated project (other
+name and ports): both containers healthy, volumes of its own, migrations applied, WAHA answering, and the current containers and
+volumes untouched.
 
 ## Not in this task
 

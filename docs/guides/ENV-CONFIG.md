@@ -72,6 +72,6 @@ program: build with `MSYS_NO_PATHCONV=1`. Docker is not affected.)
 
 `WAHA_URL` and `WAHA_API_KEY` are required, and only the API reads them (through
 `@vetra/env/waha`, used by `packages/infra`). Database commands work without them. The key
-reaches WAHA through `compose.yaml`, so after changing it the service has to be recreated
-(`docker compose up -d waha`). The key must never reach a log, an error message or an API
+reaches WAHA through `compose.dev.yaml` (development) or `compose.yaml` (the built app), so after changing it the
+service has to be recreated (`pnpm docker:dev`, or `docker compose -f compose.yaml up -d waha`). The key must never reach a log, an error message or an API
 response: the WebSocket URL carries it, so it is built and used in one place and never printed.
