@@ -10,6 +10,9 @@ export const toNextAction = (action: NextActionWithLead): NextAction => ({
   description: action.description,
   body: action.body,
   dueAt: action.dueAt.toISOString(),
+  createdAt: action.createdAt.toISOString(),
+  sendAttempts: action.sendAttempts,
+  sendError: action.sendError,
   lead: toLeadSummary(action.lead),
 });
 

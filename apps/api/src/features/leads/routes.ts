@@ -11,6 +11,7 @@ import {
   listLeadsWithoutNextActionController,
   lookupLeadsController,
   restoreLeadStagesController,
+  updateLeadAutoSendController,
   updateLeadController,
   updateLeadDoNotContactController,
   updateLeadsStageController,
@@ -31,6 +32,7 @@ leadsRouter.patch(leadsRoutes.stage, v.updateLeadsStage, updateLeadsStageControl
 leadsRouter.post(leadsRoutes.stageRestore, v.restoreLeadStages, restoreLeadStagesController);
 leadsRouter.get(leadsRoutes.byId, v.getLead, getLeadController);
 leadsRouter.patch(leadsRoutes.byId, v.updateLead, updateLeadController);
+leadsRouter.patch(leadsRoutes.autoSend, v.updateLeadAutoSend, updateLeadAutoSendController);
 leadsRouter.patch(
   leadsRoutes.doNotContact,
   v.updateLeadDoNotContact,

@@ -5,4 +5,5 @@ export * from "./listLeadNextActions";
 export * from "./listNextActions";
 export * from "./reopenNextAction";
 export * from "./restoreNextAction";
+export * from "./sendNextAction";
 export * from "./updateNextAction";

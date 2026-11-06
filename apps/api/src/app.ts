@@ -5,6 +5,7 @@ import cors from "cors";
 import express, { Express } from "express";
 import helmet from "helmet";
 
+import { automationsRouter } from "@/features/automations/routes";
 import { customersRouter } from "@/features/customers/routes";
 import { dashboardRouter } from "@/features/dashboard/routes";
 import { dataTransferRouter } from "@/features/data-transfer/routes";
@@ -45,6 +46,7 @@ app.use(
   })
 );
 
+app.use("/api", automationsRouter);
 app.use("/api", customersRouter);
 app.use("/api", dashboardRouter);
 app.use("/api", dataTransferRouter);

@@ -1,4 +1,10 @@
-import { profileServices, stageServices, systemServices, whatsappServices } from "@vetra/core";
+import {
+  automationServices,
+  profileServices,
+  stageServices,
+  systemServices,
+  whatsappServices,
+} from "@vetra/core";
 import { envConfig } from "@vetra/env/server";
 import { envConfig as wahaEnvConfig } from "@vetra/env/waha";
 
@@ -16,6 +22,7 @@ if (AUTO_MIGRATE) {
 await profileServices.ensureProfile();
 await stageServices.ensureStages();
 whatsappServices.startWhatsappSync();
+automationServices.startAutoSend();
 
 // There is no authentication, so the API must never be reachable from the network: it listens on
 // this computer only, or, in a container, on every interface with the port published only here.

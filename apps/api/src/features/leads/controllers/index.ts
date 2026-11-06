@@ -8,6 +8,7 @@ export * from "./listLeadsWithoutNextAction";
 export * from "./lookupLeads";
 export * from "./restoreLeadStages";
 export * from "./updateLead";
+export * from "./updateLeadAutoSend";
 export * from "./updateLeadDoNotContact";
 export * from "./updateLeadsStage";
 export * from "./upsertLeadBySlug";

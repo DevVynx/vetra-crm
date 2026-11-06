@@ -9,6 +9,7 @@ import {
   listNextActionsController,
   reopenNextActionController,
   restoreNextActionController,
+  sendNextActionController,
   updateNextActionController,
 } from "./controllers";
 import v from "./validators";
@@ -32,3 +33,4 @@ nextActionsRouter.post(
   completeNextActionController
 );
 nextActionsRouter.post(nextActionsRoutes.reopen, v.reopenNextAction, reopenNextActionController);
+nextActionsRouter.post(nextActionsRoutes.send, v.sendNextAction, sendNextActionController);

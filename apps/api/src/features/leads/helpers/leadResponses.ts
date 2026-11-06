@@ -25,6 +25,7 @@ export const toLeadSummary = (lead: Lead): LeadSummary => ({
   prospectedAt: lead.prospectedAt.toISOString(),
   stoppedAtStage: lead.stoppedAtStageId,
   doNotContact: lead.doNotContact,
+  autoSend: lead.autoSend,
 });
 
 export const toPipelineLead = (lead: LeadLookupRow): PipelineLead => ({

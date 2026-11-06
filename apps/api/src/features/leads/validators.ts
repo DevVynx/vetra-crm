@@ -7,6 +7,7 @@ import {
   listLeadsQuerySchema,
   lookupLeadsQuerySchema,
   restoreLeadStagesRequestSchema,
+  updateLeadAutoSendRequestSchema,
   updateLeadDoNotContactRequestSchema,
   updateLeadRequestSchema,
   updateLeadsStageRequestSchema,
@@ -24,6 +25,10 @@ const v = {
   upsertLeadBySlug: validation({
     params: leadSlugParamsSchema,
     body: upsertLeadBySlugRequestSchema,
+  }),
+  updateLeadAutoSend: validation({
+    params: leadParamsSchema,
+    body: updateLeadAutoSendRequestSchema,
   }),
   updateLeadDoNotContact: validation({
     params: leadParamsSchema,
