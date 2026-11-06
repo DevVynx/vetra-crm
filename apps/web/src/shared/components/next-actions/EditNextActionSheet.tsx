@@ -1,13 +1,16 @@
 import type { NextAction } from "@vetra/contracts";
-import { PencilIcon } from "lucide-react";
-import { useEffect } from "react";
+import { PencilIcon, Trash2Icon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
+import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { FormSheet } from "@/shared/components/FormSheet";
 import {
   NextActionFields,
   type NextActionFormValues,
 } from "@/shared/components/next-actions/NextActionFields";
+import { Button } from "@/shared/components/ui/button";
+import { useDeleteNextAction } from "@/shared/mutations/next-actions/useDeleteNextAction";
 import { useUpdateNextAction } from "@/shared/mutations/next-actions/useUpdateNextAction";
 
 type EditNextActionSheetProps = {
@@ -18,15 +21,17 @@ type EditNextActionSheetProps = {
 
 export function EditNextActionSheet({ action, open, onOpenChange }: EditNextActionSheetProps) {
   const updateNextAction = useUpdateNextAction();
-  const { id, type, followUpStep, description, dueAt } = action;
+  const deleteNextAction = useDeleteNextAction();
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const { id, type, followUpStep, description, body, dueAt } = action;
   const form = useForm<NextActionFormValues>({
-    defaultValues: { description, dueAt: new Date(dueAt) },
+    defaultValues: { description, body: body ?? "", dueAt: new Date(dueAt) },
   });
   const { reset } = form;
 
   useEffect(() => {
-    if (open) reset({ description, dueAt: new Date(dueAt) });
-  }, [open, description, dueAt, reset]);
+    if (open) reset({ description, body: body ?? "", dueAt: new Date(dueAt) });
+  }, [open, description, body, dueAt, reset]);
 
   const submit = form.handleSubmit((values) =>
     updateNextAction.mutate(
@@ -35,6 +40,7 @@ export function EditNextActionSheet({ action, open, onOpenChange }: EditNextActi
         type,
         followUpStep,
         description: values.description.trim(),
+        body: values.body.trim() === "" ? null : values.body.trim(),
         dueAt: values.dueAt.toISOString(),
       },
       { onSuccess: () => onOpenChange(false) }
@@ -53,8 +59,34 @@ export function EditNextActionSheet({ action, open, onOpenChange }: EditNextActi
       onSubmit={submit}
     >
       <FormProvider {...form}>
-        <NextActionFields />
+        <NextActionFields withBody />
       </FormProvider>
+      <Button
+        type="button"
+        variant="outline"
+        className="text-destructive self-start"
+        onClick={() => setIsConfirmingDelete(true)}
+      >
+        <Trash2Icon />
+        Excluir atividade
+      </Button>
+      <ConfirmDialog
+        open={isConfirmingDelete}
+        onOpenChange={setIsConfirmingDelete}
+        title="Excluir esta atividade?"
+        description="Ela some da lista e não vai para o histórico. Dá para desfazer logo depois."
+        confirmLabel="Excluir"
+        destructive
+        isPending={deleteNextAction.isPending}
+        onConfirm={() =>
+          deleteNextAction.mutate(action, {
+            onSuccess: () => {
+              setIsConfirmingDelete(false);
+              onOpenChange(false);
+            },
+          })
+        }
+      />
     </FormSheet>
   );
 }

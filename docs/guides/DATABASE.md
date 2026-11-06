@@ -73,7 +73,10 @@ install, whose profile is created after the migrations, starts with it empty.
 
 A next action is deleted when it is completed, and a copy stays in `completed_actions` (its id, lead,
 kind, step, description, due date and **when it was completed**), written in the same transaction that
-removes it and schedules the next one. It is a separate table so none of the queries over pending
+removes it. Completing does not schedule anything: what comes next is the user's to create.
+Undoing a completion moves the copy back to `next_actions` with the same id, in one transaction. The history does not keep the
+date the action was created, so a reopened one gets the date of the undo as its `created_at` (it shows as `criado_em` in the
+export). Of two requests for the same action, the one that finds the row to delete wins and the other is a 404. It is a separate table so none of the queries over pending
 actions had to change, it goes with its lead (`ON DELETE CASCADE`), and it is exported and imported
 with the rest. Nothing reads it yet. What was completed before it existed cannot be recovered.
 

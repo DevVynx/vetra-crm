@@ -1,5 +1,5 @@
 import type { LeadDetail } from "@vetra/contracts";
-import { ArchiveIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { ArchiveIcon, BanIcon, CircleCheckIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 
 import { ActionsMenu, type ActionsMenuItem } from "@/shared/components/ActionsMenu";
@@ -9,6 +9,7 @@ import { useChangeLeadStage } from "@/shared/mutations/leads/useChangeLeadStage"
 import { useStages } from "@/shared/stages/useStages";
 
 import { useDeleteLead } from "../mutations/useDeleteLead";
+import { useUpdateLeadDoNotContact } from "../mutations/useUpdateLeadDoNotContact";
 import { EditLeadSheet } from "./EditLeadSheet";
 
 type Dialog = "edit" | "archive" | "delete" | null;
@@ -17,12 +18,24 @@ export function LeadActionsMenu({ lead }: { lead: LeadDetail }) {
   const [dialog, setDialog] = useState<Dialog>(null);
   const { changeStage, isPending: isChanging } = useChangeLeadStage(lead.id);
   const deleteLead = useDeleteLead(lead.id);
+  const doNotContact = useUpdateLeadDoNotContact(lead.id);
   const stages = useStages();
   const isArchived = stages.isArchive(lead.stage);
   const close = () => setDialog(null);
 
   const items: ActionsMenuItem[] = [
     { label: "Editar lead", icon: PencilIcon, onSelect: () => setDialog("edit") },
+    lead.doNotContact
+      ? {
+          label: "Permitir contato",
+          icon: CircleCheckIcon,
+          onSelect: () => doNotContact.change(false),
+        }
+      : {
+          label: "Marcar como não contatar",
+          icon: BanIcon,
+          onSelect: () => doNotContact.change(true),
+        },
     ...(isArchived
       ? []
       : [{ label: "Arquivar", icon: ArchiveIcon, onSelect: () => setDialog("archive") }]),

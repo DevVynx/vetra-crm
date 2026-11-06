@@ -1,4 +1,4 @@
-import { index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
 
 import { createdAtColumn, instantColumn, updatedAtColumn, uuidPrimaryKeyColumn } from "./common";
 import { stagesTable } from "./stages";
@@ -16,6 +16,10 @@ export const leadsTable = pgTable(
     phoneKey: text().notNull(),
     email: text(),
     demoUrl: text(),
+    // The key the prospecting pipeline knows the lead by; leads typed by hand have none.
+    slug: text(),
+    // Only the user turns it off; see VET-19.md.
+    doNotContact: boolean().notNull().default(false),
     stageId: text()
       .notNull()
       .references(() => stagesTable.id, { onDelete: "restrict" }),
@@ -29,6 +33,7 @@ export const leadsTable = pgTable(
   },
   (table) => [
     uniqueIndex("leads_phone_key_idx").on(table.phoneKey),
+    uniqueIndex("leads_slug_idx").on(table.slug),
     index("leads_stage_id_idx").on(table.stageId),
     index("leads_stopped_at_stage_id_idx").on(table.stoppedAtStageId),
     index("leads_niche_idx").on(table.niche),

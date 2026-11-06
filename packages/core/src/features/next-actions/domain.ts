@@ -8,6 +8,7 @@ export type NextActionInput = {
   type: NextActionType;
   followUpStep: number | null;
   description: string;
+  body: string | null;
   dueAt: Date;
 };
 
@@ -36,14 +37,23 @@ function complete(action: NextAction, now: Date): CompletedAction {
     type: action.type,
     followUpStep: action.followUpStep,
     description: action.description,
+    body: action.body,
     dueAt: action.dueAt,
     completedAt: now,
   };
 }
 
-// Completing an action removes it and schedules the next one for the same lead.
-function followUp(completed: NextAction, next: NextActionInput): NextAction {
-  return create(completed.leadId, next);
+// Undo of a completion: the action is pending again, with the id it had.
+function reopen(completed: CompletedAction): NextAction {
+  return {
+    id: completed.id,
+    leadId: completed.leadId,
+    type: completed.type,
+    followUpStep: completed.followUpStep,
+    description: completed.description,
+    body: completed.body,
+    dueAt: completed.dueAt,
+  };
 }
 
-export const nextActionDomain = { create, complete, edit, followUp };
+export const nextActionDomain = { create, complete, edit, reopen };

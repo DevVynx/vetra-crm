@@ -1,16 +1,14 @@
-import { nextActionDomain, type NextActionInput, type NextActionWithLead } from "../domain";
+import { nextActionDomain } from "../domain";
+import { NextActionNotFoundError } from "../errors";
 import { nextActionRepositories } from "../repositories";
 import { getNextAction } from "./getNextAction";
 
-export async function completeNextAction(
-  id: string,
-  next: NextActionInput
-): Promise<NextActionWithLead> {
-  const { lead, ...pending } = await getNextAction(id);
+// Only completes it. What comes next is the user's to schedule.
+export async function completeNextAction(id: string): Promise<void> {
+  const pending = await getNextAction(id);
 
-  const scheduled = nextActionDomain.followUp(pending, next);
-  const completed = nextActionDomain.complete(pending, new Date());
-  await nextActionRepositories.replaceNextAction(completed, scheduled);
-
-  return { ...scheduled, lead };
+  const moved = await nextActionRepositories.moveNextActionToCompleted(
+    nextActionDomain.complete(pending, new Date())
+  );
+  if (!moved) throw new NextActionNotFoundError();
 }

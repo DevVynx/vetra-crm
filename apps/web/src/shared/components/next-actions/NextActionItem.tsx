@@ -3,8 +3,9 @@ import type { NextAction } from "@vetra/contracts";
 
 import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
 import { LeadStageBadge } from "@/shared/components/LeadStageBadge";
-import { CompleteActionPopover } from "@/shared/components/next-actions/CompleteActionPopover";
+import { CompleteActionButton } from "@/shared/components/next-actions/CompleteActionButton";
 import { EditNextActionButton } from "@/shared/components/next-actions/EditNextActionButton";
+import { NextActionBody } from "@/shared/components/next-actions/NextActionBody";
 import { Button } from "@/shared/components/ui/button";
 import {
   Item,
@@ -80,8 +81,9 @@ export function NextActionItem({
           </Button>
         )}
         <EditNextActionButton action={action} />
-        <CompleteActionPopover action={action} />
+        <CompleteActionButton action={action} />
       </ItemActions>
+      {!showLead && action.body && <NextActionBody body={action.body} />}
     </Item>
   );
 }

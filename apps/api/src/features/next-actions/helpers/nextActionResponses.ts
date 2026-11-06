@@ -8,6 +8,7 @@ export const toNextAction = (action: NextActionWithLead): NextAction => ({
   type: action.type,
   followUpStep: action.followUpStep,
   description: action.description,
+  body: action.body,
   dueAt: action.dueAt.toISOString(),
   lead: toLeadSummary(action.lead),
 });

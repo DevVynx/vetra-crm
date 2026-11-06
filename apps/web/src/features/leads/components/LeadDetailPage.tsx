@@ -9,7 +9,9 @@ import { DetailPanelTrigger } from "@/shared/components/detail/DetailPanelTrigge
 import { DetailNotFound, DetailSkeleton } from "@/shared/components/detail/DetailStates";
 import { SplitDetailLayout } from "@/shared/components/detail/SplitDetailLayout";
 import { WhatsAppButton } from "@/shared/components/detail/WhatsAppButton";
+import { DoNotContactBadge } from "@/shared/components/DoNotContactBadge";
 import { usePageCrumb } from "@/shared/components/layout/PageCrumb";
+import { NewActivitySheet } from "@/shared/components/next-actions/NewActivitySheet";
 import { Button } from "@/shared/components/ui/button";
 import { useHotkey } from "@/shared/hooks/useHotkey";
 import { useLead } from "@/shared/queries/leads/useLead";
@@ -23,7 +25,6 @@ import { LeadActivities } from "./LeadActivities";
 import { LeadConversation } from "./LeadConversation";
 import { LeadNotes } from "./LeadNotes";
 import { LeadStageStepper } from "./LeadStageStepper";
-import { NewActivitySheet } from "./NewActivitySheet";
 
 const route = getRouteApi("/_app/leads/$leadId");
 
@@ -80,6 +81,12 @@ export function LeadDetailPage() {
                 {stages.nameOf(lead.stage)} {formatLastContact(new Date(lead.stageChangedAt))}
                 {" · "}
                 {contactStatus}
+                {lead.doNotContact && (
+                  <>
+                    {" · "}
+                    <DoNotContactBadge />
+                  </>
+                )}
               </>
             }
             actions={<LeadActionsMenu lead={lead} />}

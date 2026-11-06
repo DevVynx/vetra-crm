@@ -4,8 +4,9 @@ import { isBefore } from "date-fns";
 import { type MouseEvent, type ReactNode, useEffect } from "react";
 
 import { BusinessAvatar } from "@/shared/components/BusinessAvatar";
+import { DoNotContactBadge } from "@/shared/components/DoNotContactBadge";
 import { LeadStageBadge } from "@/shared/components/LeadStageBadge";
-import { DefineNextActionPopover } from "@/shared/components/next-actions/DefineNextActionPopover";
+import { DefineNextActionButton } from "@/shared/components/next-actions/DefineNextActionButton";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
@@ -39,11 +40,11 @@ function NextActionCell({ lead }: { lead: LeadListItem }) {
 
   if (!stages.isLive(lead.stage)) return <span className="text-muted-foreground">—</span>;
 
-  // The popover renders in a portal, but its events still bubble to the clickable row.
+  // The sheet renders in a portal, but its events still bubble to the clickable row.
   return (
     <div className="flex items-center gap-2" onClick={(event) => event.stopPropagation()}>
       <span className="text-warning text-xs">Sem próxima ação</span>
-      <DefineNextActionPopover lead={lead} />
+      <DefineNextActionButton lead={lead} />
     </div>
   );
 }
@@ -199,6 +200,11 @@ export function LeadsTable({ leads, activeIndex, isFull, selection }: LeadsTable
                     </Link>
                     {lead.contactName && (
                       <div className="text-muted-foreground text-xs">{lead.contactName}</div>
+                    )}
+                    {lead.doNotContact && (
+                      <div className="mt-0.5">
+                        <DoNotContactBadge />
+                      </div>
                     )}
                   </div>
                 </div>

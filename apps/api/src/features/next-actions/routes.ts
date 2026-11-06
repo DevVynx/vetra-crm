@@ -4,8 +4,11 @@ import { Router } from "express";
 import {
   completeNextActionController,
   createNextActionController,
+  deleteNextActionController,
   listLeadNextActionsController,
   listNextActionsController,
+  reopenNextActionController,
+  restoreNextActionController,
   updateNextActionController,
 } from "./controllers";
 import v from "./validators";
@@ -19,9 +22,13 @@ nextActionsRouter.get(
   listLeadNextActionsController
 );
 nextActionsRouter.post(nextActionsRoutes.base, v.createNextAction, createNextActionController);
+// /next-actions/restore goes before the routes with an id, otherwise "restore" would be read as one.
+nextActionsRouter.post(nextActionsRoutes.restore, v.restoreNextAction, restoreNextActionController);
 nextActionsRouter.patch(nextActionsRoutes.byId, v.updateNextAction, updateNextActionController);
+nextActionsRouter.delete(nextActionsRoutes.byId, v.deleteNextAction, deleteNextActionController);
 nextActionsRouter.post(
   nextActionsRoutes.complete,
   v.completeNextAction,
   completeNextActionController
 );
+nextActionsRouter.post(nextActionsRoutes.reopen, v.reopenNextAction, reopenNextActionController);

@@ -17,6 +17,7 @@ export const completedActionsTable = pgTable(
     type: nextActionTypeEnum().notNull(),
     followUpStep: integer(),
     description: text().notNull(),
+    body: text(),
     dueAt: instantColumn("due_at").notNull(),
     completedAt: instantColumn("completed_at").notNull(),
   },

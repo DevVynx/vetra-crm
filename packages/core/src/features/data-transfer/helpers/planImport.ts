@@ -80,6 +80,7 @@ type NewNextAction = {
   type: "first_approach" | "follow_up" | "meeting" | "proposal" | "custom";
   followUpStep: number | null;
   description: string;
+  body: string | null;
   dueAt: Date;
 };
 
@@ -100,6 +101,7 @@ export type ImportContext = {
   timeZone: string;
   stages: Stage[];
   existingPhoneKeys: Set<string>;
+  existingSlugs: Set<string>;
   now: Date;
 };
 
@@ -114,9 +116,13 @@ const MAX_TEXT = {
   document: 40,
   name: 200,
   description: 1000,
+  // Equal to the limits of the contracts (nextAction.ts, pipeline.ts), which core does not import.
+  body: 4000,
+  slug: 80,
   note: 20_000,
 };
-const LEAD_HEADERS = ["empresa", "nicho", "cidade", "telefone", "etapa"];
+const LEAD_HEADERS = ["empresa", "nicho", "cidade", "telefone"];
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const PROJECT_STATUSES = fromWords(PROJECT_STATUS_WORDS);
 const EXPENSE_STATUSES = fromWords(EXPENSE_STATUS_WORDS);
 const ACTION_TYPES = fromWords(NEXT_ACTION_WORDS);
@@ -239,7 +245,9 @@ function readLeads(files: Map<string, string>, context: ImportContext, state: St
   if (!table) return;
 
   const stages = new Map(context.stages.map((stage) => [normalizedName(stage.name), stage]));
+  const entryStage = context.stages.find((item) => item.role === "entry");
   const seenPhoneKeys = new Set<string>();
+  const seenSlugs = new Set<string>();
 
   for (const row of table.rows) {
     const reader = readerOf(file, row, state.errors, context.timeZone);
@@ -262,9 +270,19 @@ function readLeads(files: Map<string, string>, context: ImportContext, state: St
     const demoUrl = reader.optional("link_demo", 2048);
     if (demoUrl !== null && !isHttpUrl(demoUrl)) reader.fail("link_demo", "invalid_url");
 
-    const stageName = reader.required("etapa", MAX_TEXT.name);
-    const stage = stages.get(normalizedName(stageName));
-    if (stageName !== "" && !stage) reader.fail("etapa", "unknown_stage");
+    const slug = reader.optional("slug", MAX_TEXT.slug);
+    if (slug !== null && !SLUG.test(slug)) reader.fail("slug", "invalid_value");
+
+    const rawDoNotContact = reader.raw("nao_contatar").toLowerCase();
+    if (!["", "sim", "nao", "não"].includes(rawDoNotContact)) {
+      reader.fail("nao_contatar", "invalid_value");
+    }
+
+    // Without a stage the lead starts where every new one does, so a file made elsewhere does not
+    // depend on the name of a stage, which the user can change.
+    const stageName = reader.optional("etapa", MAX_TEXT.name);
+    const stage = stageName === null ? entryStage : stages.get(normalizedName(stageName));
+    if (stageName !== null && !stage) reader.fail("etapa", "unknown_stage");
 
     let stoppedAtStageId: string | null = null;
     const stoppedName = reader.optional("etapa_onde_parou", MAX_TEXT.name);
@@ -313,11 +331,10 @@ function readLeads(files: Map<string, string>, context: ImportContext, state: St
     }
 
     const phoneKey = canonicalPhoneOf(phone);
-    const skipReason = context.existingPhoneKeys.has(phoneKey)
-      ? "exists"
-      : seenPhoneKeys.has(phoneKey)
-        ? "repeated"
-        : null;
+    const isKnown =
+      context.existingPhoneKeys.has(phoneKey) || (slug !== null && context.existingSlugs.has(slug));
+    const isRepeated = seenPhoneKeys.has(phoneKey) || (slug !== null && seenSlugs.has(slug));
+    const skipReason = isKnown ? "exists" : isRepeated ? "repeated" : null;
     if (skipReason) {
       state.leadStatus.set(key, { kind: "skipped" });
       state.counts.leads.skipped++;
@@ -325,6 +342,7 @@ function readLeads(files: Map<string, string>, context: ImportContext, state: St
       continue;
     }
     seenPhoneKeys.add(phoneKey);
+    if (slug !== null) seenSlugs.add(slug);
 
     const lead: Lead = {
       id: uuidv7(),
@@ -336,6 +354,8 @@ function readLeads(files: Map<string, string>, context: ImportContext, state: St
       phoneKey,
       email,
       demoUrl,
+      slug,
+      doNotContact: rawDoNotContact === "sim",
       stageId: stage.id,
       stoppedAtStageId,
       stageChangedAt,
@@ -539,6 +559,7 @@ function readActivities(files: Map<string, string>, context: ImportContext, stat
     (reader, leadId) => {
       const type = reader.oneOf("tipo", ACTION_TYPES);
       const description = reader.required("descricao", MAX_TEXT.description);
+      const body = reader.optional("texto", MAX_TEXT.body);
       const dueAt = reader.requiredInstant("vence_em");
       const followUpStep = readFollowUpStep(reader);
       if (!reader.isValid() || !type) return false;
@@ -549,6 +570,7 @@ function readActivities(files: Map<string, string>, context: ImportContext, stat
         type,
         followUpStep,
         description,
+        body,
         dueAt,
       });
 
@@ -568,6 +590,7 @@ function readCompletedActivities(files: Map<string, string>, context: ImportCont
     (reader, leadId) => {
       const type = reader.oneOf("tipo", ACTION_TYPES);
       const description = reader.required("descricao", MAX_TEXT.description);
+      const body = reader.optional("texto", MAX_TEXT.body);
       const dueAt = reader.requiredInstant("vence_em");
       const completedAt = reader.requiredInstant("concluida_em");
       const followUpStep = readFollowUpStep(reader);
@@ -579,6 +602,7 @@ function readCompletedActivities(files: Map<string, string>, context: ImportCont
         type,
         followUpStep,
         description,
+        body,
         dueAt,
         completedAt,
       });

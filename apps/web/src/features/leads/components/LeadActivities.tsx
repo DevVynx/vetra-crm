@@ -2,7 +2,7 @@ import type { LeadDetail } from "@vetra/contracts";
 import { isBefore } from "date-fns";
 import { CalendarCheckIcon, CircleAlertIcon, ListChecksIcon } from "lucide-react";
 
-import { DefineNextActionPopover } from "@/shared/components/next-actions/DefineNextActionPopover";
+import { DefineNextActionButton } from "@/shared/components/next-actions/DefineNextActionButton";
 import { NextActionItem } from "@/shared/components/next-actions/NextActionItem";
 import { Section } from "@/shared/components/Section";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
@@ -57,7 +57,7 @@ export function LeadActivities({ lead }: { lead: LeadDetail }) {
           title="Sem próxima ação"
           description="Defina o próximo passo para não perder este lead."
         >
-          <DefineNextActionPopover lead={lead} />
+          <DefineNextActionButton lead={lead} />
         </SectionEmpty>
       ) : (
         <SectionEmpty icon={CalendarCheckIcon} title="Nenhuma atividade agendada" />

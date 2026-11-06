@@ -9,9 +9,12 @@ import {
   listLeadIdsController,
   listLeadsController,
   listLeadsWithoutNextActionController,
+  lookupLeadsController,
   restoreLeadStagesController,
   updateLeadController,
+  updateLeadDoNotContactController,
   updateLeadsStageController,
+  upsertLeadBySlugController,
 } from "./controllers";
 import v from "./validators";
 
@@ -22,10 +25,17 @@ leadsRouter.post(leadsRoutes.base, v.createLead, createLeadController);
 // Fixed paths go before /leads/:id, otherwise "filter-options", "ids" and "stage" would be read as ids.
 leadsRouter.get(leadsRoutes.filterOptions, v.getLeadFilterOptions, getLeadFilterOptionsController);
 leadsRouter.get(leadsRoutes.ids, v.listLeadIds, listLeadIdsController);
+leadsRouter.get(leadsRoutes.lookup, v.lookupLeads, lookupLeadsController);
+leadsRouter.put(leadsRoutes.bySlug, v.upsertLeadBySlug, upsertLeadBySlugController);
 leadsRouter.patch(leadsRoutes.stage, v.updateLeadsStage, updateLeadsStageController);
 leadsRouter.post(leadsRoutes.stageRestore, v.restoreLeadStages, restoreLeadStagesController);
 leadsRouter.get(leadsRoutes.byId, v.getLead, getLeadController);
 leadsRouter.patch(leadsRoutes.byId, v.updateLead, updateLeadController);
+leadsRouter.patch(
+  leadsRoutes.doNotContact,
+  v.updateLeadDoNotContact,
+  updateLeadDoNotContactController
+);
 leadsRouter.delete(leadsRoutes.byId, v.deleteLead, deleteLeadController);
 leadsRouter.get(
   dashboardRoutes.leadsWithoutNextAction,

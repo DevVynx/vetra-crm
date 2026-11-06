@@ -10,6 +10,8 @@ export const leadColumns = {
   phoneKey: leadsTable.phoneKey,
   email: leadsTable.email,
   demoUrl: leadsTable.demoUrl,
+  slug: leadsTable.slug,
+  doNotContact: leadsTable.doNotContact,
   stageId: leadsTable.stageId,
   stoppedAtStageId: leadsTable.stoppedAtStageId,
   stageChangedAt: leadsTable.stageChangedAt,

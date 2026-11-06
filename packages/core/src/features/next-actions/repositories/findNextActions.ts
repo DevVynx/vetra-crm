@@ -19,6 +19,7 @@ export async function findNextActions({ id, leadId }: findNextActionsInput = {})
       type: nextActionsTable.type,
       followUpStep: nextActionsTable.followUpStep,
       description: nextActionsTable.description,
+      body: nextActionsTable.body,
       dueAt: nextActionsTable.dueAt,
       lead: leadColumns,
     })

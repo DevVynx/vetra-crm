@@ -19,6 +19,8 @@ type LeadRow = {
   phone: string;
   email: string | null;
   demoUrl: string | null;
+  slug: string | null;
+  doNotContact: boolean;
   stageId: string;
   stoppedAtStageId: string | null;
   stageChangedAt: Date;
@@ -96,6 +98,7 @@ type NextActionRow = {
   type: NextActionType;
   followUpStep: number | null;
   description: string;
+  body: string | null;
   dueAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -107,6 +110,7 @@ type CompletedActionRow = {
   type: NextActionType;
   followUpStep: number | null;
   description: string;
+  body: string | null;
   dueAt: Date;
   completedAt: Date;
 };
@@ -143,6 +147,8 @@ function leadsFile(data: ExportData, formatInstant: ReturnType<typeof instantFor
       phoneCell(lead.phone),
       textCell(lead.email),
       textCell(lead.demoUrl),
+      textCell(lead.slug),
+      lead.doNotContact ? "sim" : "nao",
       textCell(stageNames.get(lead.stageId) ?? ""),
       textCell(lead.stoppedAtStageId ? (stageNames.get(lead.stoppedAtStageId) ?? "") : ""),
       formatInstant(lead.stageChangedAt),
@@ -170,6 +176,8 @@ function leadsFile(data: ExportData, formatInstant: ReturnType<typeof instantFor
         "telefone",
         "email",
         "link_demo",
+        "slug",
+        "nao_contatar",
         "etapa",
         "etapa_onde_parou",
         "etapa_alterada_em",
@@ -296,6 +304,7 @@ function exportFiles(data: ExportData, timeZone: string): ExportFile[] {
           "tipo",
           "passo_follow_up",
           "descricao",
+          "texto",
           "vence_em",
           "criado_em",
           "atualizado_em",
@@ -306,6 +315,7 @@ function exportFiles(data: ExportData, timeZone: string): ExportFile[] {
           NEXT_ACTION_WORDS[action.type],
           optionalNumber(action.followUpStep),
           textCell(action.description),
+          textCell(action.body),
           formatInstant(action.dueAt),
           formatInstant(action.createdAt),
           formatInstant(action.updatedAt),
@@ -315,13 +325,23 @@ function exportFiles(data: ExportData, timeZone: string): ExportFile[] {
     {
       name: "atividades_concluidas.csv",
       csv: csvOf(
-        ["id", "lead_id", "tipo", "passo_follow_up", "descricao", "vence_em", "concluida_em"],
+        [
+          "id",
+          "lead_id",
+          "tipo",
+          "passo_follow_up",
+          "descricao",
+          "texto",
+          "vence_em",
+          "concluida_em",
+        ],
         data.completedActions.map((action) => [
           action.id,
           action.leadId,
           NEXT_ACTION_WORDS[action.type],
           optionalNumber(action.followUpStep),
           textCell(action.description),
+          textCell(action.body),
           formatInstant(action.dueAt),
           formatInstant(action.completedAt),
         ])

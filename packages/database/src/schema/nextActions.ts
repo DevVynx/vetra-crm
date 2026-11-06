@@ -22,6 +22,8 @@ export const nextActionsTable = pgTable(
     type: nextActionTypeEnum().notNull(),
     followUpStep: integer(),
     description: text().notNull(),
+    // The text to use when doing it (a message to send); the description stays a one-line title.
+    body: text(),
     dueAt: instantColumn("due_at").notNull(),
     createdAt: createdAtColumn(),
     updatedAt: updatedAtColumn(),

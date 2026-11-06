@@ -16,6 +16,7 @@ export const nextActionSchema = z.object({
   type: nextActionTypeSchema,
   followUpStep: z.number().int().positive().nullable(),
   description: z.string().min(1),
+  body: z.string().nullable(),
   dueAt: z.iso.datetime(),
   lead: leadSummarySchema,
 });
@@ -25,6 +26,15 @@ export const nextActionInputSchema = z.object({
   type: nextActionTypeSchema,
   followUpStep: z.number().int().positive().nullable(),
   description: z.string().trim().min(1),
+  // 4000 is also the limit of the import (core does not import contracts) and of the text area in
+  // the web: keep the three equal.
+  body: z
+    .string()
+    .trim()
+    .max(4000)
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .default(null),
   dueAt: z.iso.datetime(),
 });
 export type NextActionInput = z.infer<typeof nextActionInputSchema>;
@@ -34,13 +44,23 @@ export const listNextActionsResponseSchema = z.object({
 });
 export type ListNextActionsResponse = z.infer<typeof listNextActionsResponseSchema>;
 
-export const completeNextActionRequestSchema = z.object({
-  next: nextActionInputSchema,
-});
-export type CompleteNextActionRequest = z.infer<typeof completeNextActionRequestSchema>;
-
-export const completeNextActionResponseSchema = nextActionSchema;
+export const completeNextActionResponseSchema = z.void();
 export type CompleteNextActionResponse = z.infer<typeof completeNextActionResponseSchema>;
+
+export const reopenNextActionResponseSchema = nextActionSchema;
+export type ReopenNextActionResponse = z.infer<typeof reopenNextActionResponseSchema>;
+
+export const deleteNextActionResponseSchema = z.void();
+export type DeleteNextActionResponse = z.infer<typeof deleteNextActionResponseSchema>;
+
+export const restoreNextActionRequestSchema = nextActionInputSchema.extend({
+  id: z.string().min(1),
+  leadId: z.string().min(1),
+});
+export type RestoreNextActionRequest = z.infer<typeof restoreNextActionRequestSchema>;
+
+export const restoreNextActionResponseSchema = z.void();
+export type RestoreNextActionResponse = z.infer<typeof restoreNextActionResponseSchema>;
 
 export const updateNextActionRequestSchema = nextActionInputSchema;
 export type UpdateNextActionRequest = z.infer<typeof updateNextActionRequestSchema>;

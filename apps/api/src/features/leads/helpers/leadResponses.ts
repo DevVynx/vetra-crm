@@ -1,7 +1,14 @@
-import type { LeadDetail, LeadListItem, LeadStageState, LeadSummary } from "@vetra/contracts";
+import type {
+  LeadDetail,
+  LeadListItem,
+  LeadStageState,
+  LeadSummary,
+  PipelineLead,
+} from "@vetra/contracts";
 import type {
   Lead,
   LeadListRow,
+  LeadLookupRow,
   LeadStageState as DomainLeadStageState,
   LeadWithPhoto,
 } from "@vetra/core";
@@ -17,6 +24,17 @@ export const toLeadSummary = (lead: Lead): LeadSummary => ({
   stage: lead.stageId,
   prospectedAt: lead.prospectedAt.toISOString(),
   stoppedAtStage: lead.stoppedAtStageId,
+  doNotContact: lead.doNotContact,
+});
+
+export const toPipelineLead = (lead: LeadLookupRow): PipelineLead => ({
+  id: lead.id,
+  slug: lead.slug,
+  businessName: lead.businessName,
+  city: lead.city,
+  phone: lead.phone,
+  doNotContact: lead.doNotContact,
+  stage: { name: lead.stageName, role: lead.stageRole },
 });
 
 export const toLeadDetail = (lead: LeadWithPhoto): LeadDetail => ({

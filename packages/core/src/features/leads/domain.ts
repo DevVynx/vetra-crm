@@ -2,6 +2,7 @@ import { v7 as uuidv7 } from "uuid";
 
 import type { Filter } from "../../shared/filters";
 import { canonicalPhoneOf } from "../../shared/phone";
+import { nextActionDomain, type NextActionInput } from "../next-actions/domain";
 import type { Stage } from "../stages/domain";
 import { LeadIsCustomerError, LeadMustCloseWithDealError } from "./errors";
 
@@ -15,6 +16,8 @@ export type Lead = {
   phoneKey: string;
   email: string | null;
   demoUrl: string | null;
+  slug: string | null;
+  doNotContact: boolean;
   stageId: string;
   stoppedAtStageId: string | null;
   stageChangedAt: Date;
@@ -40,10 +43,24 @@ export type LeadStageState = Pick<Lead, "id" | "stageId" | "stoppedAtStageId" | 
 
 const isLive = (stage: Stage) => stage.role === "entry" || stage.role === "middle";
 
+// What the prospecting pipeline sends for a lead. The next action is only used when the lead is created.
+export type PipelineLeadInput = LeadFields & {
+  prospectedAt: Date | null;
+  doNotContact: boolean;
+  nextAction: (Omit<NextActionInput, "dueAt"> & { dueAt: Date | null }) | null;
+};
+
+// The only fields the pipeline may change on a lead that exists.
+export type PipelineLeadPatch = Partial<Pick<Lead, "demoUrl" | "contactName" | "email">> & {
+  doNotContact?: true;
+};
+
 // New leads start in the entry stage, prospected now.
 function create(fields: LeadFields, entryStage: Stage, now: Date): Lead {
   return {
     ...fields,
+    slug: null,
+    doNotContact: false,
     id: uuidv7(),
     phoneKey: canonicalPhoneOf(fields.phone),
     stageId: entryStage.id,
@@ -54,6 +71,40 @@ function create(fields: LeadFields, entryStage: Stage, now: Date): Lead {
     createdAt: now,
     updatedAt: now,
   };
+}
+
+// The lead and, if it came with one, its first action are made together, so there is never a lead
+// that was meant to have the action and does not.
+function createFromPipeline(
+  slug: string,
+  input: PipelineLeadInput,
+  entryStage: Stage,
+  now: Date
+): { lead: Lead; nextAction: ReturnType<typeof nextActionDomain.create> | null } {
+  const { prospectedAt, doNotContact, nextAction, ...fields } = input;
+  const base = create(fields, entryStage, now);
+  const lead: Lead = { ...base, slug, doNotContact, prospectedAt: prospectedAt ?? now };
+
+  return {
+    lead,
+    nextAction: nextAction
+      ? nextActionDomain.create(lead.id, { ...nextAction, dueAt: nextAction.dueAt ?? now })
+      : null,
+  };
+}
+
+// The pipeline owns the demo link, so a new one replaces the old. Everything else it only fills when
+// empty, and it can only turn "do not contact" on: the user is the one who turns it off.
+function pipelinePatchOf(lead: Lead, input: PipelineLeadInput): PipelineLeadPatch | null {
+  const patch: PipelineLeadPatch = {};
+
+  if (input.demoUrl !== null && input.demoUrl !== lead.demoUrl) patch.demoUrl = input.demoUrl;
+  if (lead.contactName === null && input.contactName !== null)
+    patch.contactName = input.contactName;
+  if (lead.email === null && input.email !== null) patch.email = input.email;
+  if (input.doNotContact && !lead.doNotContact) patch.doNotContact = true;
+
+  return Object.keys(patch).length > 0 ? patch : null;
 }
 
 // A customer created directly, without going through the funnel, starts already closed.
@@ -110,8 +161,10 @@ export const leadDomain = {
   close,
   create,
   createClosed,
+  createFromPipeline,
   ensureIsNotCustomer,
   moveToStage,
+  pipelinePatchOf,
   stageStateOf,
   visibleStageIdsFor,
 };

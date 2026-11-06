@@ -12,5 +12,6 @@ export const leadSummarySchema = z.object({
   stage: z.string(),
   prospectedAt: z.iso.datetime(),
   stoppedAtStage: z.string().nullable(),
+  doNotContact: z.boolean(),
 });
 export type LeadSummary = z.infer<typeof leadSummarySchema>;

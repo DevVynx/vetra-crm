@@ -7,10 +7,11 @@ export async function updateNextAction({
   type,
   followUpStep,
   description,
+  body,
   dueAt,
 }: NextAction): Promise<void> {
   await db
     .update(nextActionsTable)
-    .set({ type, followUpStep, description, dueAt })
+    .set({ type, followUpStep, description, body, dueAt })
     .where(eq(nextActionsTable.id, id));
 }

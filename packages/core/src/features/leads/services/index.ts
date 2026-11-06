@@ -6,8 +6,11 @@ import { listLeadFieldValues } from "./listLeadFieldValues";
 import { listLeadIds } from "./listLeadIds";
 import { listLeads } from "./listLeads";
 import { listLeadsWithoutNextAction } from "./listLeadsWithoutNextAction";
+import { lookupLeads } from "./lookupLeads";
 import { restoreLeadStages } from "./restoreLeadStages";
 import { updateLead } from "./updateLead";
+import { updateLeadDoNotContact } from "./updateLeadDoNotContact";
+import { upsertLeadBySlug } from "./upsertLeadBySlug";
 
 export const leadServices = {
   changeLeadsStage,
@@ -18,6 +21,9 @@ export const leadServices = {
   listLeadIds,
   listLeads,
   listLeadsWithoutNextAction,
+  lookupLeads,
   restoreLeadStages,
   updateLead,
+  updateLeadDoNotContact,
+  upsertLeadBySlug,
 };

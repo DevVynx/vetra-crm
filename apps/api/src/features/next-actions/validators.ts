@@ -1,8 +1,8 @@
 import {
-  completeNextActionRequestSchema,
   createNextActionRequestSchema,
   leadParamsSchema,
   nextActionParamsSchema,
+  restoreNextActionRequestSchema,
   updateNextActionRequestSchema,
 } from "@vetra/contracts";
 
@@ -16,10 +16,10 @@ const v = {
     params: nextActionParamsSchema,
     body: updateNextActionRequestSchema,
   }),
-  completeNextAction: validation({
-    params: nextActionParamsSchema,
-    body: completeNextActionRequestSchema,
-  }),
+  completeNextAction: validation({ params: nextActionParamsSchema }),
+  reopenNextAction: validation({ params: nextActionParamsSchema }),
+  deleteNextAction: validation({ params: nextActionParamsSchema }),
+  restoreNextAction: validation({ body: restoreNextActionRequestSchema }),
 };
 
 export default v;

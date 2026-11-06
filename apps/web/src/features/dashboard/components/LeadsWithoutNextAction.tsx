@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { CircleAlertIcon, CircleCheckIcon } from "lucide-react";
 
 import { LeadStageBadge } from "@/shared/components/LeadStageBadge";
-import { DefineNextActionPopover } from "@/shared/components/next-actions/DefineNextActionPopover";
+import { DefineNextActionButton } from "@/shared/components/next-actions/DefineNextActionButton";
 import { Section } from "@/shared/components/Section";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
@@ -50,7 +50,7 @@ export function LeadsWithoutNextAction() {
                 </ItemDescription>
               </ItemContent>
               <ItemActions>
-                <DefineNextActionPopover lead={lead} />
+                <DefineNextActionButton lead={lead} />
               </ItemActions>
             </Item>
           ))}

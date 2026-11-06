@@ -4,4 +4,5 @@ export * from "./dealPayment";
 export * from "./detail";
 export * from "./list";
 export * from "./nextAction";
+export * from "./pipeline";
 export * from "./stage";

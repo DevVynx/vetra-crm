@@ -202,6 +202,7 @@ describe, regardless of whether you're on the API or Web side.
 - `docs/guides/ERROR-HANDLING.md` - The `DomainError` → `HttpError` registry-driven mapping architecture
 - `docs/guides/SHARED-CONTRACTS.md` - `packages/contracts`, the Zod schema contract between API and Web
 - `docs/guides/ENV-CONFIG.md` - `packages/config/env`, client vs. server variables
+- `docs/guides/PIPELINE-INTEGRATION.md` - How the prospecting pipeline talks to Vetra (lookup, upsert by slug, `doNotContact`, the text of an action)
 
 ### Practical Guides
 

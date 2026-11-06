@@ -6,16 +6,18 @@ import { dataTransferRepositories } from "../repositories";
 
 export async function planImportOf(content: Buffer): Promise<ImportPlan> {
   const files = readImportFiles(content);
-  const [profile, stages, phoneKeys] = await Promise.all([
+  const [profile, stages, phoneKeys, slugs] = await Promise.all([
     getProfile(),
     stageRepositories.findStages(),
     dataTransferRepositories.findLeadPhoneKeys(),
+    dataTransferRepositories.findLeadSlugs(),
   ]);
 
   return planImport(files, {
     timeZone: profile.timeZone,
     stages,
     existingPhoneKeys: new Set(phoneKeys),
+    existingSlugs: new Set(slugs),
     now: new Date(),
   });
 }
