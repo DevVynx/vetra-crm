@@ -1,4 +1,4 @@
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import type { Filter, LeadSortField } from "@vetra/contracts";
 import { ListChecksIcon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { useState } from "react";
@@ -8,9 +8,9 @@ import { ActiveFilters } from "@/shared/components/filters/ActiveFilters";
 import { FilterButton } from "@/shared/components/filters/FilterButton";
 import { useFilterController } from "@/shared/components/filters/useFilterController";
 import { CreateLeadSheet } from "@/shared/components/leads/CreateLeadSheet";
+import { PageEmpty } from "@/shared/components/PageEmpty";
 import { Pagination } from "@/shared/components/Pagination";
 import { SearchField } from "@/shared/components/SearchField";
-import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SortButton } from "@/shared/components/sort/SortButton";
 import type { SortValue } from "@/shared/components/sort/types";
 import { useSortController } from "@/shared/components/sort/useSortController";
@@ -250,21 +250,31 @@ export function LeadsPage() {
           {isPending || !data ? (
             <LeadsTableSkeleton rows={pageSize} />
           ) : data.items.length === 0 ? (
-            <div className="p-4">
-              <SectionEmpty
-                icon={UsersIcon}
-                title={hasActiveFilters ? "Nenhum lead encontrado" : "Nenhum lead ainda"}
-                description={
-                  hasActiveFilters ? "Tente outra busca ou limpe os filtros." : undefined
-                }
-              >
-                {hasActiveFilters && (
-                  <Button size="sm" variant="outline" onClick={clearFilters}>
-                    Limpar filtros
+            <PageEmpty
+              icon={UsersIcon}
+              title={hasActiveFilters ? "Nenhum lead encontrado" : "Nenhum lead ainda"}
+              description={
+                hasActiveFilters
+                  ? "Tente outra busca ou limpe os filtros."
+                  : "Cadastre o primeiro lead ou importe uma lista em Configurações. Quem chega pela pipeline aparece aqui sozinho."
+              }
+            >
+              {hasActiveFilters ? (
+                <Button variant="outline" onClick={clearFilters}>
+                  Limpar filtros
+                </Button>
+              ) : (
+                <>
+                  <Button onClick={() => setIsCreating(true)}>
+                    <UserPlusIcon />
+                    Novo lead
                   </Button>
-                )}
-              </SectionEmpty>
-            </div>
+                  <Button variant="outline" nativeButton={false} render={<Link to="/settings" />}>
+                    Importar lista
+                  </Button>
+                </>
+              )}
+            </PageEmpty>
           ) : (
             <LeadsTable
               leads={data.items}

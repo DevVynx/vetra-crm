@@ -6,9 +6,9 @@ import { useState } from "react";
 import { ActiveFilters } from "@/shared/components/filters/ActiveFilters";
 import { FilterButton } from "@/shared/components/filters/FilterButton";
 import { useFilterController } from "@/shared/components/filters/useFilterController";
+import { PageEmpty } from "@/shared/components/PageEmpty";
 import { Pagination } from "@/shared/components/Pagination";
 import { SearchField } from "@/shared/components/SearchField";
-import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SortButton } from "@/shared/components/sort/SortButton";
 import type { SortValue } from "@/shared/components/sort/types";
 import { useSortController } from "@/shared/components/sort/useSortController";
@@ -167,23 +167,26 @@ export function CustomersPage() {
           {isPending || !data ? (
             <CustomersTableSkeleton rows={pageSize} />
           ) : data.items.length === 0 ? (
-            <div className="p-4">
-              <SectionEmpty
-                icon={HandshakeIcon}
-                title={hasActiveFilters ? "Nenhum cliente encontrado" : "Nenhum cliente ainda"}
-                description={
-                  hasActiveFilters
-                    ? "Tente outra busca ou limpe os filtros."
-                    : "Quando um lead fechar, ele aparece aqui."
-                }
-              >
-                {hasActiveFilters && (
-                  <Button size="sm" variant="outline" onClick={clearFilters}>
-                    Limpar filtros
-                  </Button>
-                )}
-              </SectionEmpty>
-            </div>
+            <PageEmpty
+              icon={HandshakeIcon}
+              title={hasActiveFilters ? "Nenhum cliente encontrado" : "Nenhum cliente ainda"}
+              description={
+                hasActiveFilters
+                  ? "Tente outra busca ou limpe os filtros."
+                  : "Quando um lead fechar, ele aparece aqui. Você também pode cadastrar um cliente que já tem."
+              }
+            >
+              {hasActiveFilters ? (
+                <Button variant="outline" onClick={clearFilters}>
+                  Limpar filtros
+                </Button>
+              ) : (
+                <Button onClick={() => setIsCreating(true)}>
+                  <UserPlusIcon />
+                  Novo cliente
+                </Button>
+              )}
+            </PageEmpty>
           ) : (
             <CustomersTable
               customers={data.items}
