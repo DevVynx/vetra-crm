@@ -18,6 +18,7 @@ import { projectsRouter } from "@/features/projects/routes";
 import { searchRouter } from "@/features/search/routes";
 import { stagesRouter } from "@/features/stages/routes";
 import { systemRouter } from "@/features/system/routes";
+import { updatesRouter } from "@/features/updates/routes";
 import { whatsappRouter } from "@/features/whatsapp/routes";
 import { handleGlobalError } from "@/shared/middlewares/handleGlobalError";
 import { notFoundHandler } from "@/shared/middlewares/notFoundHandler";
@@ -59,6 +60,7 @@ app.use("/api", projectsRouter);
 app.use("/api", searchRouter);
 app.use("/api", stagesRouter);
 app.use("/api", systemRouter);
+app.use("/api", updatesRouter);
 app.use("/api", whatsappRouter);
 
 // The built web, when there is one. Every address that is not the API gives the page, which is
