@@ -14,6 +14,7 @@ import { getWhatsappConversation } from "./getWhatsappConversation";
 import { getWhatsappMessageMedia } from "./getWhatsappMessageMedia";
 import { getWhatsappQrCode } from "./getWhatsappQrCode";
 import { getWhatsappStatus } from "./getWhatsappStatus";
+import { isWhatsappConnected } from "./isWhatsappConnected";
 import { listAwaitingWhatsappConversations } from "./listAwaitingWhatsappConversations";
 import { listWhatsappConversations } from "./listWhatsappConversations";
 import { listWhatsappMessages } from "./listWhatsappMessages";
@@ -41,6 +42,7 @@ export const whatsappServices = {
   getWhatsappMessageMedia,
   getWhatsappQrCode,
   getWhatsappStatus,
+  isWhatsappConnected,
   listAwaitingWhatsappConversations,
   listWhatsappConversations,
   listWhatsappMessages,

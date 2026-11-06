@@ -9,6 +9,7 @@ import { listLeadsWithoutNextAction } from "./listLeadsWithoutNextAction";
 import { lookupLeads } from "./lookupLeads";
 import { restoreLeadStages } from "./restoreLeadStages";
 import { updateLead } from "./updateLead";
+import { updateLeadAutoSend } from "./updateLeadAutoSend";
 import { updateLeadDoNotContact } from "./updateLeadDoNotContact";
 import { upsertLeadBySlug } from "./upsertLeadBySlug";
 
@@ -24,6 +25,7 @@ export const leadServices = {
   lookupLeads,
   restoreLeadStages,
   updateLead,
+  updateLeadAutoSend,
   updateLeadDoNotContact,
   upsertLeadBySlug,
 };

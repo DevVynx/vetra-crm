@@ -13,6 +13,7 @@ import { insertLead } from "./insertLead";
 import { insertLeadWithNextAction } from "./insertLeadWithNextAction";
 import { moveLeadsToStage } from "./moveLeadsToStage";
 import { saveLeadStages } from "./saveLeadStages";
+import { setLeadAutoSend } from "./setLeadAutoSend";
 import { setLeadDoNotContact } from "./setLeadDoNotContact";
 import { updateLeadContact } from "./updateLeadContact";
 import { updateLeadFromPipeline } from "./updateLeadFromPipeline";
@@ -37,6 +38,7 @@ export const leadRepositories = {
   insertLeadWithNextAction,
   moveLeadsToStage,
   saveLeadStages,
+  setLeadAutoSend,
   setLeadDoNotContact,
   updateLeadContact,
   updateLeadFromPipeline,

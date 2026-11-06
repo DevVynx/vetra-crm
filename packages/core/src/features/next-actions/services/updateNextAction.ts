@@ -6,10 +6,21 @@ export async function updateNextAction(
   id: string,
   input: NextActionInput
 ): Promise<NextActionWithLead> {
-  const { lead, ...action } = await getNextAction(id);
+  const {
+    lead: _lead,
+    createdAt: _c,
+    sendAttempts: _a,
+    sendError: _e,
+    sendBlocksDone: _b,
+    ...action
+  } = await getNextAction(id);
 
   const edited = nextActionDomain.edit(action, input);
-  await nextActionRepositories.updateNextAction(edited);
+  // An edit is the user looking at it again, so a failed send is given a fresh start. What already
+  // went of the text only starts over when the text itself changed.
+  await nextActionRepositories.updateNextAction(edited, {
+    textChanged: action.body !== edited.body,
+  });
 
-  return { ...edited, lead };
+  return getNextAction(id);
 }

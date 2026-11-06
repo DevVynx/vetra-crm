@@ -1,6 +1,8 @@
 import { isUniqueViolation } from "@vetra/database";
 
 import { canonicalPhoneOf } from "../../../shared/phone";
+import { newLeadAutoSendOf } from "../../automations/domain";
+import { getAutomationSettings } from "../../automations/services/getAutomationSettings";
 import { stageDomain } from "../../stages/domain";
 import { stageRepositories } from "../../stages/repositories";
 import { type Lead, leadDomain, type PipelineLeadInput } from "../domain";
@@ -49,12 +51,16 @@ export async function upsertLeadBySlug(
   const phoneOwner = await leadRepositories.findLeadIdByPhoneKey(phoneKey);
   if (phoneOwner) return phoneConflict(phoneOwner);
 
-  const stages = await stageRepositories.findStages();
+  const [stages, settings] = await Promise.all([
+    stageRepositories.findStages(),
+    getAutomationSettings(),
+  ]);
   const { lead, nextAction } = leadDomain.createFromPipeline(
     slug,
     input,
     stageDomain.entryOf(stages),
-    new Date()
+    new Date(),
+    newLeadAutoSendOf(settings)
   );
 
   try {

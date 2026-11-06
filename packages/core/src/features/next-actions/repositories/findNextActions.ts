@@ -8,21 +8,26 @@ type findNextActionsInput = {
   leadId?: string;
 };
 
+export const nextActionColumns = {
+  id: nextActionsTable.id,
+  leadId: nextActionsTable.leadId,
+  type: nextActionsTable.type,
+  followUpStep: nextActionsTable.followUpStep,
+  description: nextActionsTable.description,
+  body: nextActionsTable.body,
+  dueAt: nextActionsTable.dueAt,
+  createdAt: nextActionsTable.createdAt,
+  sendAttempts: nextActionsTable.sendAttempts,
+  sendError: nextActionsTable.sendError,
+  sendBlocksDone: nextActionsTable.sendBlocksDone,
+};
+
 // Every pending action (or one lead's, or a single one) with its lead, soonest first.
 export async function findNextActions({ id, leadId }: findNextActionsInput = {}): Promise<
   NextActionWithLead[]
 > {
   const rows = await db
-    .select({
-      id: nextActionsTable.id,
-      leadId: nextActionsTable.leadId,
-      type: nextActionsTable.type,
-      followUpStep: nextActionsTable.followUpStep,
-      description: nextActionsTable.description,
-      body: nextActionsTable.body,
-      dueAt: nextActionsTable.dueAt,
-      lead: leadColumns,
-    })
+    .select({ ...nextActionColumns, lead: leadColumns })
     .from(nextActionsTable)
     .innerJoin(leadsTable, eq(leadsTable.id, nextActionsTable.leadId))
     .where(

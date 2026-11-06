@@ -21,6 +21,7 @@ type LeadRow = {
   demoUrl: string | null;
   slug: string | null;
   doNotContact: boolean;
+  autoSend: boolean;
   stageId: string;
   stoppedAtStageId: string | null;
   stageChangedAt: Date;
@@ -149,6 +150,7 @@ function leadsFile(data: ExportData, formatInstant: ReturnType<typeof instantFor
       textCell(lead.demoUrl),
       textCell(lead.slug),
       lead.doNotContact ? "sim" : "nao",
+      lead.autoSend ? "sim" : "nao",
       textCell(stageNames.get(lead.stageId) ?? ""),
       textCell(lead.stoppedAtStageId ? (stageNames.get(lead.stoppedAtStageId) ?? "") : ""),
       formatInstant(lead.stageChangedAt),
@@ -178,6 +180,7 @@ function leadsFile(data: ExportData, formatInstant: ReturnType<typeof instantFor
         "link_demo",
         "slug",
         "nao_contatar",
+        "envio_automatico",
         "etapa",
         "etapa_onde_parou",
         "etapa_alterada_em",

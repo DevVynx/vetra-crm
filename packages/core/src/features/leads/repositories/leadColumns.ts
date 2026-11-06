@@ -12,6 +12,7 @@ export const leadColumns = {
   demoUrl: leadsTable.demoUrl,
   slug: leadsTable.slug,
   doNotContact: leadsTable.doNotContact,
+  autoSend: leadsTable.autoSend,
   stageId: leadsTable.stageId,
   stoppedAtStageId: leadsTable.stoppedAtStageId,
   stageChangedAt: leadsTable.stageChangedAt,

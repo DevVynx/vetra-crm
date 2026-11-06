@@ -18,6 +18,7 @@ export type Lead = {
   demoUrl: string | null;
   slug: string | null;
   doNotContact: boolean;
+  autoSend: boolean;
   stageId: string;
   stoppedAtStageId: string | null;
   stageChangedAt: Date;
@@ -56,11 +57,12 @@ export type PipelineLeadPatch = Partial<Pick<Lead, "demoUrl" | "contactName" | "
 };
 
 // New leads start in the entry stage, prospected now.
-function create(fields: LeadFields, entryStage: Stage, now: Date): Lead {
+function create(fields: LeadFields, entryStage: Stage, now: Date, autoSend = false): Lead {
   return {
     ...fields,
     slug: null,
     doNotContact: false,
+    autoSend,
     id: uuidv7(),
     phoneKey: canonicalPhoneOf(fields.phone),
     stageId: entryStage.id,
@@ -79,10 +81,11 @@ function createFromPipeline(
   slug: string,
   input: PipelineLeadInput,
   entryStage: Stage,
-  now: Date
+  now: Date,
+  autoSend: boolean
 ): { lead: Lead; nextAction: ReturnType<typeof nextActionDomain.create> | null } {
   const { prospectedAt, doNotContact, nextAction, ...fields } = input;
-  const base = create(fields, entryStage, now);
+  const base = create(fields, entryStage, now, autoSend);
   const lead: Lead = { ...base, slug, doNotContact, prospectedAt: prospectedAt ?? now };
 
   return {

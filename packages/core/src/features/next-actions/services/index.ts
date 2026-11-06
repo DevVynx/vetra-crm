@@ -5,6 +5,7 @@ import { listLeadNextActions } from "./listLeadNextActions";
 import { listNextActions } from "./listNextActions";
 import { reopenNextAction } from "./reopenNextAction";
 import { restoreNextAction } from "./restoreNextAction";
+import { sendNextAction } from "./sendNextAction";
 import { updateNextAction } from "./updateNextAction";
 
 export const nextActionServices = {
@@ -15,5 +16,6 @@ export const nextActionServices = {
   listNextActions,
   reopenNextAction,
   restoreNextAction,
+  sendNextAction,
   updateNextAction,
 };

@@ -102,6 +102,8 @@ export type ImportContext = {
   stages: Stage[];
   existingPhoneKeys: Set<string>;
   existingSlugs: Set<string>;
+  // What a lead with no "envio_automatico" column starts with.
+  newLeadsAutoSend: boolean;
   now: Date;
 };
 
@@ -278,6 +280,12 @@ function readLeads(files: Map<string, string>, context: ImportContext, state: St
       reader.fail("nao_contatar", "invalid_value");
     }
 
+    const rawAutoSend = reader.raw("envio_automatico").toLowerCase();
+    if (!["", "sim", "nao", "não"].includes(rawAutoSend)) {
+      reader.fail("envio_automatico", "invalid_value");
+    }
+    const autoSend = rawAutoSend === "" ? context.newLeadsAutoSend : rawAutoSend === "sim";
+
     // Without a stage the lead starts where every new one does, so a file made elsewhere does not
     // depend on the name of a stage, which the user can change.
     const stageName = reader.optional("etapa", MAX_TEXT.name);
@@ -355,7 +363,9 @@ function readLeads(files: Map<string, string>, context: ImportContext, state: St
       email,
       demoUrl,
       slug,
-      doNotContact: rawDoNotContact === "sim",
+      // A customer is no longer prospected: it never comes in with these marks on.
+      doNotContact: !wantsDeal && rawDoNotContact === "sim",
+      autoSend: !wantsDeal && autoSend,
       stageId: stage.id,
       stoppedAtStageId,
       stageChangedAt,

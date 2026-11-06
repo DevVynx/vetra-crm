@@ -1,3 +1,4 @@
+export * from "./features/automations";
 export * from "./features/customers";
 export * from "./features/dashboard";
 export * from "./features/data-transfer";
