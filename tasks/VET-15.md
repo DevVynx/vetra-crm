@@ -33,15 +33,16 @@ Delivered in **two steps, each validated by the user before the next one starts*
 
 ## The files
 
-| File             | One row per                     | Notes                                                                                                             |
-| ---------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `leads.csv`      | lead and customer (same record) | stage names, where it stopped, and the deal columns (closed value, document, monthly fee), archived ones included |
-| `projetos.csv`   | project                         | points to the lead                                                                                                |
-| `parcelas.csv`   | installment (revenue)           | points to the lead and, if any, the project                                                                       |
-| `despesas.csv`   | expense                         | points to the lead and, if any, the project                                                                       |
-| `notas.csv`      | note                            | points to the lead                                                                                                |
-| `atividades.csv` | next action                     | points to the lead                                                                                                |
-| `etapas.csv`     | stage                           | name, color, role, position                                                                                       |
+| File                        | One row per                             | Notes                                                                                                             |
+| --------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `leads.csv`                 | lead and customer (same record)         | stage names, where it stopped, and the deal columns (closed value, document, monthly fee), archived ones included |
+| `projetos.csv`              | project                                 | points to the lead                                                                                                |
+| `parcelas.csv`              | installment (revenue)                   | points to the lead and, if any, the project                                                                       |
+| `despesas.csv`              | expense                                 | points to the lead and, if any, the project                                                                       |
+| `notas.csv`                 | note                                    | points to the lead                                                                                                |
+| `atividades.csv`            | pending next action                     | points to the lead                                                                                                |
+| `atividades_concluidas.csv` | completed next action (added in VET-16) | points to the lead, with when it was completed                                                                    |
+| `etapas.csv`                | stage                                   | name, color, role, position                                                                                       |
 
 Every row keeps its own `id`, and the child files carry `lead_id`, so a spreadsheet can join them and the import can restore the links.
 
@@ -91,6 +92,6 @@ Every row keeps its own `id`, and the child files carry `lead_id`, so a spreadsh
 
 ## Acceptance Criteria (step 1)
 
-- One click in Settings downloads a `.zip` with the seven files.
+- One click in Settings downloads a `.zip` with the files (seven when it was written; eight since VET-16 added the completed activities).
 - Each file opens in a spreadsheet with the right accents, one row per record, and the ids that tie the files together.
 - Nothing from WhatsApp is in it.
