@@ -18,6 +18,14 @@ export const systemResponseSchema = z.object({
 });
 export type SystemResponse = z.infer<typeof systemResponseSchema>;
 
+export const MAX_PIPELINE_FOLLOW_UPS = 3;
+
+// What Vetra knows of the follow-ups the pipeline gave a lead, so it sends only the steps that are missing.
+export const pipelineFollowUpStateSchema = z.object({
+  step: z.number().int().min(1).max(MAX_PIPELINE_FOLLOW_UPS),
+  status: z.enum(["queued", "scheduled", "cancelled"]),
+});
+
 export const pipelineLeadSchema = z.object({
   id: z.string(),
   slug: z.string().nullable(),
@@ -26,6 +34,7 @@ export const pipelineLeadSchema = z.object({
   phone: z.string(),
   doNotContact: z.boolean(),
   stage: z.object({ name: z.string(), role: stageRoleSchema }),
+  followUps: z.array(pipelineFollowUpStateSchema),
 });
 export type PipelineLead = z.infer<typeof pipelineLeadSchema>;
 
@@ -77,24 +86,55 @@ const pipelineNextActionSchema = z
     path: ["followUpStep"],
   });
 
-export const upsertLeadBySlugRequestSchema = z.object({
-  businessName: leadContactFieldsSchema.shape.businessName,
-  niche: leadContactFieldsSchema.shape.niche,
-  city: leadContactFieldsSchema.shape.city,
-  phone: leadContactFieldsSchema.shape.phone,
-  contactName: leadContactFieldsSchema.shape.contactName.default(null),
-  email: leadContactFieldsSchema.shape.email.default(null),
-  demoUrl: demoUrlSchema.nullable().default(null),
-  prospectedAt: pipelineInstantSchema.nullable().default(null),
-  doNotContact: z.boolean().default(false),
-  nextAction: pipelineNextActionSchema.nullable().default(null),
+// The pipeline only gives the texts, in the order they go. How many are kept and when each is sent is Vetra's.
+const pipelineFollowUpSchema = z.object({
+  body: z.string().trim().min(1).max(4000),
 });
+
+export const upsertLeadBySlugRequestSchema = z
+  .object({
+    businessName: leadContactFieldsSchema.shape.businessName,
+    niche: leadContactFieldsSchema.shape.niche,
+    city: leadContactFieldsSchema.shape.city,
+    phone: leadContactFieldsSchema.shape.phone,
+    contactName: leadContactFieldsSchema.shape.contactName.default(null),
+    email: leadContactFieldsSchema.shape.email.default(null),
+    demoUrl: demoUrlSchema.nullable().default(null),
+    prospectedAt: pipelineInstantSchema.nullable().default(null),
+    doNotContact: z.boolean().default(false),
+    nextAction: pipelineNextActionSchema.nullable().default(null),
+    followUps: z.array(pipelineFollowUpSchema).max(MAX_PIPELINE_FOLLOW_UPS).default([]),
+    // When the opening message was already sent outside Vetra. Only for a lead that has no opening activity here.
+    approachSentAt: pipelineInstantSchema.nullable().default(null),
+  })
+  .refine((request) => !(request.nextAction && request.approachSentAt), {
+    message: "approachSentAtWithNextAction",
+    path: ["approachSentAt"],
+  })
+  .refine(
+    (request) => request.followUps.length === 0 || request.nextAction || request.approachSentAt,
+    { message: "followUpsNeedAnOpening", path: ["followUps"] }
+  );
 export type UpsertLeadBySlugRequest = z.infer<typeof upsertLeadBySlugRequestSchema>;
 
 export const upsertLeadBySlugResponseSchema = z.object({
   created: z.boolean(),
   conflict: z.literal("phone").nullable(),
   lead: pipelineLeadSchema,
+  // Not an error when the follow-ups were not taken: the lead is upserted all the same.
+  followUps: z.object({
+    queued: z.number().int().min(0),
+    ignored: z
+      .enum([
+        "already_has",
+        "replied",
+        "not_in_funnel",
+        "do_not_contact",
+        "needs_approach_sent_at",
+        "follow_ups_off",
+      ])
+      .nullable(),
+  }),
 });
 export type UpsertLeadBySlugResponse = z.infer<typeof upsertLeadBySlugResponseSchema>;
 

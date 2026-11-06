@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const MAX_DELAY_MINUTES = 1440;
 const MAX_UNANSWERED_DAYS = 3650;
+const MAX_FOLLOW_UPS = 3;
 
 export const automationSettingsSchema = z.object({
   // The master switch: nothing is sent by itself while it is off.
@@ -18,6 +19,9 @@ export const automationSettingsSchema = z.object({
   archiveUnansweredEnabled: z.boolean(),
   archiveUnansweredStageId: z.string().nullable(),
   archiveUnansweredDays: z.number().int().min(1).max(MAX_UNANSWERED_DAYS),
+  // How many follow-up texts of the pipeline are kept (the first ones, in order) and the days to wait before each.
+  followUpLimit: z.number().int().min(0).max(MAX_FOLLOW_UPS),
+  followUpWaitDays: z.array(z.number().int().min(0).max(MAX_UNANSWERED_DAYS)).length(3),
 });
 export type AutomationSettings = z.infer<typeof automationSettingsSchema>;
 
