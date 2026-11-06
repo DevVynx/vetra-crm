@@ -197,7 +197,7 @@ export function MessageComposer({
             <Button
               size="icon"
               aria-label="Gravar áudio"
-              disabled={!isConnected || isPending}
+              disabled={!isConnected || isPending || recorder.isStarting}
               onClick={() => void startRecording()}
             >
               <MicIcon />

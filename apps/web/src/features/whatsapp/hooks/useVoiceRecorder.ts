@@ -22,7 +22,8 @@ type Session = {
   recorder: MediaRecorder;
   stream: MediaStream;
   context: AudioContext;
-  chunks: Blob[];
+  // What was recorded, once the recorder has really stopped (the stop event, and not only its state).
+  done: Promise<Blob>;
   startedAt: number;
   levels: number[];
   timer: number;
@@ -45,6 +46,15 @@ function levelOf(analyser: AnalyserNode, buffer: Uint8Array<ArrayBuffer>): numbe
   return Math.min(1, Math.sqrt(sum / buffer.length) * 4);
 }
 
+// A recorder that stopped by itself (the microphone was unplugged) is already inactive, and stop()
+// would throw. But its state changes before its data arrives, so what was recorded is only taken
+// from `done`, which waits for the stop event either way.
+function stopRecorder({ recorder, done }: Session): Promise<Blob> {
+  if (recorder.state !== "inactive") recorder.stop();
+
+  return done;
+}
+
 function release({ timer, stream, context }: Session) {
   window.clearInterval(timer);
   for (const track of stream.getTracks()) track.stop();
@@ -58,14 +68,19 @@ export function useVoiceRecorder() {
   const session = useRef<Session | null>(null);
   const recorded = useRef<Recording | null>(null);
   const isMounted = useRef(true);
+  // Counts the times the recording was dropped, so a start still waiting for the microphone knows
+  // it was left behind (cancelled, or the conversation changed) and must not open it.
+  const generation = useRef(0);
+  const isStartingRef = useRef(false);
+  const [isStarting, setIsStarting] = useState(false);
 
   const cancel = useCallback(() => {
     const current = session.current;
     session.current = null;
     recorded.current = null;
+    generation.current += 1;
 
     if (current) {
-      current.recorder.onstop = null;
       if (current.recorder.state !== "inactive") current.recorder.stop();
       release(current);
     }
@@ -77,13 +92,8 @@ export function useVoiceRecorder() {
     if (!current) return recorded.current;
 
     session.current = null;
-    const stopped = new Promise<Blob>((resolve) => {
-      current.recorder.onstop = () =>
-        resolve(new Blob(current.chunks, { type: current.recorder.mimeType }));
-    });
-    current.recorder.stop();
 
-    const blob = await stopped;
+    const blob = await stopRecorder(current);
     const seconds = (performance.now() - current.startedAt) / SECOND_IN_MS;
     release(current);
 
@@ -94,20 +104,31 @@ export function useVoiceRecorder() {
   }, []);
 
   const start = useCallback(async (): Promise<VoiceRecorderProblem | null> => {
-    if (session.current) return null;
+    // A second click while the first still waits for the microphone would open it twice, and the
+    // first one would never be released.
+    if (session.current || isStartingRef.current) return null;
     if (typeof MediaRecorder === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       return "unsupported";
     }
+
+    const startedIn = generation.current;
+    isStartingRef.current = true;
+    setIsStarting(true);
 
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (error) {
+      isStartingRef.current = false;
+      setIsStarting(false);
       return problemOf(error);
     }
 
     try {
-      if (!isMounted.current) throw new Error("The recorder was closed.");
+      if (!isMounted.current || generation.current !== startedIn) {
+        for (const track of stream.getTracks()) track.stop();
+        return null;
+      }
 
       const mimeType = MIME_TYPES.find((type) => MediaRecorder.isTypeSupported(type));
       const recorder = new MediaRecorder(stream, {
@@ -121,18 +142,26 @@ export function useVoiceRecorder() {
       context.createMediaStreamSource(stream).connect(analyser);
       const buffer = new Uint8Array(analyser.fftSize);
 
+      const chunks: Blob[] = [];
+      const done = new Promise<Blob>((resolve) => {
+        recorder.onstop = () => resolve(new Blob(chunks, { type: recorder.mimeType }));
+      });
+
       const current: Session = {
         recorder,
         stream,
         context,
-        chunks: [],
+        done,
         startedAt: performance.now(),
         levels: [],
         timer: 0,
       };
       recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) current.chunks.push(event.data);
+        if (event.data.size > 0) chunks.push(event.data);
       };
+      // The microphone went away mid-recording: what was recorded is kept, and sending is up to the user.
+      recorder.onerror = () => void finish();
+      for (const track of stream.getAudioTracks()) track.onended = () => void finish();
       current.timer = window.setInterval(() => {
         const seconds = (performance.now() - current.startedAt) / SECOND_IN_MS;
         if (seconds >= WHATSAPP_VOICE_MAX_SECONDS) return void finish();
@@ -150,6 +179,9 @@ export function useVoiceRecorder() {
     } catch {
       for (const track of stream.getTracks()) track.stop();
       return "failed";
+    } finally {
+      isStartingRef.current = false;
+      setIsStarting(false);
     }
   }, [finish]);
 
@@ -162,5 +194,5 @@ export function useVoiceRecorder() {
     };
   }, [cancel]);
 
-  return { state, start, finish, cancel };
+  return { state, isStarting, start, finish, cancel };
 }
