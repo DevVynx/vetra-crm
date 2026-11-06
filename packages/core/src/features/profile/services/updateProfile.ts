@@ -13,5 +13,5 @@ export async function updateProfile(input: updateProfileInput): Promise<ProfileW
   const updated = profileDomain.applyChanges(await getProfile(), input);
   await profileRepositories.updateProfile(updated);
 
-  return { ...updated, photoVersion: await profilePhotoStorage.version() };
+  return profileDomain.withPhoto(updated, await profilePhotoStorage.version());
 }

@@ -1,3 +1,4 @@
+import { completeOnboarding } from "./completeOnboarding";
 import { ensureProfile } from "./ensureProfile";
 import { getProfile } from "./getProfile";
 import { getProfileWithPhoto } from "./getProfileWithPhoto";
@@ -7,6 +8,7 @@ import { saveProfilePhoto } from "./saveProfilePhoto";
 import { updateProfile } from "./updateProfile";
 
 export const profileServices = {
+  completeOnboarding,
   ensureProfile,
   getProfile,
   getProfileWithPhoto,

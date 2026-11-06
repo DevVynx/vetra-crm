@@ -5,6 +5,7 @@ import { Router } from "express";
 import { rawFileBody } from "@/shared/middlewares/rawFileBody";
 
 import {
+  completeOnboardingController,
   getProfileController,
   getProfilePhotoController,
   removeProfilePhotoController,
@@ -25,3 +26,4 @@ profileRouter.put(
   saveProfilePhotoController
 );
 profileRouter.delete(profileRoutes.photo, v.removePhoto, removeProfilePhotoController);
+profileRouter.post(profileRoutes.onboarding, v.completeOnboarding, completeOnboardingController);

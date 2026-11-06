@@ -4,7 +4,12 @@ import type { Profile } from "../domain";
 
 export async function findProfile(): Promise<Profile | undefined> {
   const [row] = await db
-    .select({ id: profileTable.id, name: profileTable.name, timeZone: profileTable.timeZone })
+    .select({
+      id: profileTable.id,
+      name: profileTable.name,
+      timeZone: profileTable.timeZone,
+      onboardedAt: profileTable.onboardedAt,
+    })
     .from(profileTable)
     .limit(1);
   return row;
