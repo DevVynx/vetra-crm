@@ -11,8 +11,6 @@ import {
   ComboboxLabel,
   ComboboxList,
 } from "@/shared/components/ui/combobox";
-import { useUpdateProfile } from "@/shared/mutations/profile/useUpdateProfile";
-
 import {
   currentTimeIn,
   findTimeZoneOption,
@@ -23,11 +21,14 @@ import {
   type TimeZoneOption,
   type TimeZoneOptionGroup,
   timeZoneTitleOf,
-} from "../utils/timeZoneOptions";
+} from "@/shared/utils/timeZoneOptions";
+
 import { TimeZoneFlag } from "./TimeZoneFlag";
 
 type TimeZoneFieldProps = {
-  savedTimeZone: string;
+  timeZone: string;
+  onSelect: (timeZone: string) => void;
+  className?: string;
 };
 
 function TimeZoneItem({ option }: { option: TimeZoneOption }) {
@@ -50,13 +51,13 @@ function TimeZoneItem({ option }: { option: TimeZoneOption }) {
   );
 }
 
-export function TimeZoneField({ savedTimeZone }: TimeZoneFieldProps) {
-  const updateProfile = useUpdateProfile();
+// Only picks: what happens with the choice is up to the one who uses it.
+export function TimeZoneField({ timeZone, onSelect, className = "w-80" }: TimeZoneFieldProps) {
   const anchorRef = useRef<HTMLDivElement>(null);
-  const selected = findTimeZoneOption(savedTimeZone) ?? null;
+  const selected = findTimeZoneOption(timeZone) ?? null;
 
   const select = (option: TimeZoneOption | null) => {
-    if (option && option.name !== selected?.name) updateProfile.mutate({ timeZone: option.name });
+    if (option && option.name !== selected?.name) onSelect(option.name);
   };
 
   return (
@@ -70,7 +71,7 @@ export function TimeZoneField({ savedTimeZone }: TimeZoneFieldProps) {
     >
       <ComboboxInput
         aria-label="Fuso horário"
-        className="w-80"
+        className={className}
         placeholder="Buscar país ou cidade"
         anchorRef={anchorRef}
         startAddon={selected && <TimeZoneFlag countryCode={selected.countryCode} />}

@@ -4,6 +4,7 @@ import { SearchPalette } from "@/features/search/components/SearchPalette";
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { AppSidebar } from "@/shared/components/layout/AppSidebar";
 import { ConnectionLostNotice } from "@/shared/components/layout/ConnectionLostNotice";
+import { OnboardingGate } from "@/shared/components/layout/OnboardingGate";
 import { PageCrumbProvider } from "@/shared/components/layout/PageCrumb";
 import { WhatsAppStatusBar } from "@/shared/components/layout/WhatsAppStatusBar";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
@@ -24,7 +25,7 @@ function readSidebarOpen() {
 function AppLayout() {
   const isConnectionLost = useConnectionStore((state) => state.isLost);
 
-  return (
+  const shell = (
     <div className="flex h-svh flex-col">
       <SidebarProvider defaultOpen={readSidebarOpen()} className="min-h-0 flex-1">
         <PageCrumbProvider>
@@ -49,6 +50,10 @@ function AppLayout() {
       <WhatsAppStatusBar />
     </div>
   );
+
+  // The whole app waits for the introduction, so its menu never shows before it. A lost server has
+  // no profile to ask, so it shows its own notice inside the app instead.
+  return isConnectionLost ? shell : <OnboardingGate>{shell}</OnboardingGate>;
 }
 
 export const Route = createFileRoute("/_app")({

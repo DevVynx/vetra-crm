@@ -23,6 +23,10 @@ export const findTimeZoneOption = (timeZone: string) =>
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+// The zone of the browser, when it is one of the options; what a new install starts from.
+export const suggestedTimeZoneOf = (fallback: string): string =>
+  findTimeZoneOption(browserTimeZone)?.name ?? fallback;
+
 export function groupedTimeZoneOptions(): TimeZoneOptionGroup[] {
   const suggested = findTimeZoneOption(browserTimeZone);
   const others = options.filter((option) => option !== suggested);

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
@@ -20,6 +21,11 @@ import { Route as AppLeadsLeadIdRouteImport } from './routes/_app/leads.$leadId'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -60,6 +66,7 @@ const AppLeadsLeadIdRoute = AppLeadsLeadIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/welcome': typeof WelcomeRoute
   '/settings': typeof AppSettingsRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/customers/$customerId': typeof AppCustomersCustomerIdRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/leads/': typeof AppLeadsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/welcome': typeof WelcomeRoute
   '/settings': typeof AppSettingsRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/': typeof AppIndexRoute
@@ -79,6 +87,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/welcome': typeof WelcomeRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
   '/_app/': typeof AppIndexRoute
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/welcome'
     | '/settings'
     | '/whatsapp'
     | '/customers/$customerId'
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/leads/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/welcome'
     | '/settings'
     | '/whatsapp'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/welcome'
     | '/_app/settings'
     | '/_app/whatsapp'
     | '/_app/'
@@ -120,6 +132,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  WelcomeRoute: typeof WelcomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -129,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -207,6 +227,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  WelcomeRoute: WelcomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

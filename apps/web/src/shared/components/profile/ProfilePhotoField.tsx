@@ -10,7 +10,8 @@ import { useProfile } from "@/shared/queries/profile/useProfile";
 import { useProfilePhotoUrl } from "@/shared/queries/profile/useProfilePhotoUrl";
 import { toProfilePhoto } from "@/shared/utils/toProfilePhoto";
 
-export function ProfilePhotoField() {
+// The initials follow the name typed, when there is one, instead of the saved one.
+export function ProfilePhotoField({ name }: { name?: string }) {
   const { data: profile } = useProfile();
   const photoUrl = useProfilePhotoUrl();
   const save = useSaveProfilePhoto();
@@ -33,7 +34,11 @@ export function ProfilePhotoField() {
 
   return (
     <div className="flex items-center gap-3">
-      <BusinessAvatar name={profile?.name ?? ""} photoUrl={photoUrl} className="size-10 text-sm" />
+      <BusinessAvatar
+        name={name ?? profile?.name ?? ""}
+        photoUrl={photoUrl}
+        className="size-10 text-sm"
+      />
       <input
         ref={inputRef}
         type="file"

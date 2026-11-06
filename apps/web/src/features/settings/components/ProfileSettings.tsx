@@ -1,14 +1,16 @@
+import { Link } from "@tanstack/react-router";
 import { PROFILE_NAME_MAX_LENGTH } from "@vetra/contracts";
 import { useState } from "react";
 
+import { ProfilePhotoField } from "@/shared/components/profile/ProfilePhotoField";
+import { TimeZoneField } from "@/shared/components/profile/TimeZoneField";
+import { buttonVariants } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { useUpdateProfile } from "@/shared/mutations/profile/useUpdateProfile";
 import { useProfile } from "@/shared/queries/profile/useProfile";
 
-import { ProfilePhotoField } from "./ProfilePhotoField";
 import { SettingsRow } from "./SettingsRow";
 import { SettingsSection } from "./SettingsSection";
-import { TimeZoneField } from "./TimeZoneField";
 
 type NameFieldProps = {
   savedName: string;
@@ -37,6 +39,17 @@ function NameField({ savedName }: NameFieldProps) {
   );
 }
 
+function TimeZoneSetting({ savedTimeZone }: { savedTimeZone: string }) {
+  const updateProfile = useUpdateProfile();
+
+  return (
+    <TimeZoneField
+      timeZone={savedTimeZone}
+      onSelect={(timeZone) => updateProfile.mutate({ timeZone })}
+    />
+  );
+}
+
 export function ProfileSettings() {
   const { data: profile } = useProfile();
 
@@ -52,7 +65,15 @@ export function ProfileSettings() {
         <ProfilePhotoField />
       </SettingsRow>
       <SettingsRow title="Fuso horário" description="Usado nas datas e nos períodos do Painel.">
-        {profile && <TimeZoneField savedTimeZone={profile.timeZone} />}
+        {profile && <TimeZoneSetting savedTimeZone={profile.timeZone} />}
+      </SettingsRow>
+      <SettingsRow
+        title="Introdução"
+        description="As boas-vindas que aparecem no primeiro acesso, para rever e ajustar o nome e o fuso."
+      >
+        <Link to="/welcome" className={buttonVariants({ variant: "outline" })}>
+          Rever
+        </Link>
       </SettingsRow>
     </SettingsSection>
   );
