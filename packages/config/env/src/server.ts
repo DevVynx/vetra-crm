@@ -13,7 +13,13 @@ export type ServerConfig = {
   // Applies the migrations when the server starts, from this folder. Only the container turns it on.
   AUTO_MIGRATE: boolean;
   MIGRATIONS_DIR: string | null;
+  // The version this build is, written into the image when it is published. "dev" outside an image.
+  VETRA_VERSION: string;
+  // Where the published releases are listed, to tell the user a newer version exists.
+  VETRA_RELEASES_URL: string;
 };
+
+const DEFAULT_RELEASES_URL = "https://api.github.com/repos/DevVynx/vetra-crm/releases?per_page=30";
 
 function load(): ServerConfig {
   return {
@@ -26,6 +32,8 @@ function load(): ServerConfig {
     WEB_DIST_DIR: process.env.WEB_DIST_DIR || null,
     AUTO_MIGRATE: process.env.AUTO_MIGRATE === "true",
     MIGRATIONS_DIR: process.env.MIGRATIONS_DIR || null,
+    VETRA_VERSION: process.env.VETRA_VERSION || "dev",
+    VETRA_RELEASES_URL: process.env.VETRA_RELEASES_URL || DEFAULT_RELEASES_URL,
   };
 }
 

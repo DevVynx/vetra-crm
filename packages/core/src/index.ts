@@ -11,5 +11,6 @@ export * from "./features/projects";
 export * from "./features/search";
 export * from "./features/stages";
 export * from "./features/system";
+export * from "./features/updates";
 export * from "./features/whatsapp";
 export * from "./shared/errors";
