@@ -39,7 +39,6 @@ if ($text -match 'WAHA_API_KEY="change-me"') {
 }
 
 $port = 4720
-if ($text -match '(?m)^VETRA_PORT="?(\d+)"?') { $port = [int]$Matches[1] }
 
 Write-Host "Iniciando o Vetra. Na primeira vez isso demora alguns minutos..."
 # The database and WhatsApp are started (and waited for) first and are left alone if nothing changed.

@@ -22,9 +22,7 @@ if grep -q 'WAHA_API_KEY="change-me"' .env; then
   sed -i.bak "s|WAHA_API_KEY=\"change-me\"|WAHA_API_KEY=\"${key}\"|" .env && rm -f .env.bak
 fi
 
-# No VETRA_PORT line (the default) is not an error, which pipefail would make it.
-port="$(grep -E '^VETRA_PORT=' .env | head -1 | tr -dc '0-9' || true)"
-port="${port:-4720}"
+port=4720
 
 echo "Iniciando o Vetra. Na primeira vez isso demora alguns minutos..."
 # The database and WhatsApp are started (and waited for) first and are left alone if nothing changed.

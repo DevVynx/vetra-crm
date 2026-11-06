@@ -23,7 +23,7 @@ Let someone who is not a developer run Vetra with one double click, from a build
 - **Everything in Docker** (the app, Postgres and WAHA). No Node, no pnpm for whoever installs it.
 - **The security rules are relaxed**, since it is local. Inside the container the API listens on every interface (the only way a published port reaches it); the port is published only on this computer (`127.0.0.1` in the compose file), so nothing else on the network can reach a server with no login. The Host check against DNS rebinding stays, since it costs nothing.
 - **The address people see is `localhost`**, not an IP.
-- **An unusual port, `4720`**, only so it does not clash with something else. It is set in `.env` (`VETRA_PORT`).
+- **An unusual port, `4720`**, only so it does not clash with something else. It is fixed in `compose.yaml` and in the launcher scripts (an earlier version read it from `.env`, which nobody needed).
 - The repository will be public. **Updating from a button in Settings** is a separate task (VET-22), decided after looking at how.
 - The prospecting pipeline comes after this.
 

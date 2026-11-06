@@ -61,8 +61,8 @@ The compiled server reads a few more variables, all optional and all set by `com
   Empty in development, where Vite serves the web.
 - `AUTO_MIGRATE` (`true` in the container) applies the migrations when the server starts, from
   `MIGRATIONS_DIR`. It is off in development, where nothing may be applied to a database unasked.
-- `VETRA_PORT` (in `.env`, default `4720`) is the port the container answers on; it is also the
-  `API_PORT` and the port in `FRONTEND_URL` there, since the Host check compares them.
+- The container answers on port `4720`, fixed in `compose.yaml` (and in the launcher scripts). It is also
+  the `API_PORT` and the port in `FRONTEND_URL` there, since the Host check compares them.
 
 The web build is made with `VITE_API_URL=/api`, a relative address, so the same build works on any
 port. (On Windows, Git Bash rewrites a value that starts with `/` into a path when it launches a

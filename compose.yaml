@@ -50,13 +50,14 @@ services:
         condition: service_started
     environment:
       DATABASE_URL: postgresql://dev:dev@db:5432/vetra
-      FRONTEND_URL: http://localhost:${VETRA_PORT:-4720}
-      API_PORT: ${VETRA_PORT:-4720}
+      FRONTEND_URL: http://localhost:4720
+      API_PORT: 4720
       WAHA_URL: http://waha:3000
       WAHA_API_KEY: ${WAHA_API_KEY:?Set WAHA_API_KEY in .env}
     ports:
-      # Published only on this computer: there is no login, so nothing else may reach it.
-      - "127.0.0.1:${VETRA_PORT:-4720}:${VETRA_PORT:-4720}"
+      # Published only on this computer: there is no login, so nothing else may reach it. 4720 is unusual
+      # on purpose, so it does not clash with other programs; the launcher scripts use the same number.
+      - "127.0.0.1:4720:4720"
     volumes:
       - vetra_data:/data
     healthcheck:

@@ -18,8 +18,8 @@ Na primeira vez ele demora alguns minutos, porque monta tudo. Quando terminar, o
 - **Para o Vetra voltar sozinho quando o computador ligar:** no Docker Desktop, abra **Settings →
   General** e marque **Start Docker Desktop when you sign in to your computer**. Depois disso, ao ligar o
   computador e entrar, o Vetra já está no ar.
-- **Se a porta 4720 estiver ocupada** por outro programa, escolha outra: no arquivo `.env`, que é criado
-  na primeira vez, tire o `#` da linha `VETRA_PORT` e troque o número.
+- **A porta é a 4720**, escolhida por ser incomum. Se outro programa a usar, troque o número nas linhas
+  com `4720` do `compose.yaml` e dos scripts da pasta `scripts`.
 
 O Vetra só aceita conexões do próprio computador. Não existe login, porque ninguém mais consegue
 abri-lo.
