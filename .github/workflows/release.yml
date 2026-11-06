@@ -54,6 +54,8 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build the installer package
+        env:
+          VETRA_VERSION: ${{ steps.meta.outputs.version }}
         run: bash scripts/montar-instalador.sh
 
       - name: Create the release

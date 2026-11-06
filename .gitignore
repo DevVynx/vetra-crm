@@ -52,3 +52,6 @@ yarn-error.log*
 
 # Browser automation scratch
 .playwright-mcp/
+
+# Database backups made by the update script
+backups/

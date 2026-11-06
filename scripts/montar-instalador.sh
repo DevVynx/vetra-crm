@@ -12,7 +12,16 @@ cp compose.yaml LICENSE README.md "$out/"
 cp packaging/env.example "$out/.env.example"
 cp scripts/iniciar-vetra-windows.bat scripts/iniciar-vetra-mac-linux.sh \
   scripts/parar-vetra-windows.bat scripts/parar-vetra-mac-linux.sh scripts/win-auxiliar.ps1 \
+  scripts/atualizar-vetra-windows.bat scripts/atualizar-vetra-mac-linux.sh scripts/win-auxiliar-atualizar.ps1 \
   "$out/scripts/"
+
+# The package fixes the version it was made for (the update script changes it later). Without a version, as in a local
+# run, the line stays commented and the latest is used.
+if [ -n "${VETRA_VERSION:-}" ]; then
+  sed -i.bak -E "s|^# *VETRA_VERSION=.*|VETRA_VERSION=\"${VETRA_VERSION}\"|" "$out/.env.example"
+  rm -f "$out/.env.example.bak"
+  grep -q "^VETRA_VERSION=\"${VETRA_VERSION}\"" "$out/.env.example" || { echo "The version was not written in .env.example." >&2; exit 1; }
+fi
 
 # The package has no Dockerfile on purpose: that is how the launcher knows to pull the image instead of building it.
 if [ -e "$out/Dockerfile" ]; then
