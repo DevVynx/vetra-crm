@@ -16,6 +16,10 @@ export function isConnectionProblem(error: unknown): boolean {
   return !error.response || SERVER_ERROR_STATUSES.includes(error.response.status);
 }
 
+// The server answered, and said no (not found, conflict, invalid): asking again gets the same answer.
+export const isClientError = (error: unknown): boolean =>
+  isAxiosError(error) && error.response !== undefined && error.response.status < 500;
+
 // The profile is the cheapest thing the API answers from its database, so a server that is up but
 // has no database fails this too.
 export async function isServerReachable(): Promise<boolean> {
