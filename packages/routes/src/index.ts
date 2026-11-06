@@ -12,4 +12,5 @@ export * from "./projects";
 export * from "./search";
 export * from "./stages";
 export * from "./system";
+export * from "./updates";
 export * from "./whatsapp";

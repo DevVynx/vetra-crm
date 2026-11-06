@@ -8,5 +8,6 @@ export * from "./search";
 export * from "./shared";
 export * from "./sort";
 export * from "./stages";
+export * from "./updates";
 export * from "./whatsapp";
 export * from "./data";
