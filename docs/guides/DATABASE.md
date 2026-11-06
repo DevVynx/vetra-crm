@@ -64,6 +64,19 @@ by hand. Add a column in steps when it must end up `NOT NULL` and unique: add it
 fill it in a custom migration, then require it. Run each on a copy first, and apply to real
 data only with the owner's OK.
 
+The same shape is used to start marking something for the rows that already exist:
+`profile.onboarded_at` (when the introduction was done) is added by one migration and filled for the
+existing profile by a second, custom one (`UPDATE ... WHERE onboarded_at IS NULL`), so only a new
+install, whose profile is created after the migrations, starts with it empty.
+
+## History is kept in its own table
+
+A next action is deleted when it is completed, and a copy stays in `completed_actions` (its id, lead,
+kind, step, description, due date and **when it was completed**), written in the same transaction that
+removes it and schedules the next one. It is a separate table so none of the queries over pending
+actions had to change, it goes with its lead (`ON DELETE CASCADE`), and it is exported and imported
+with the rest. Nothing reads it yet. What was completed before it existed cannot be recovered.
+
 ## Derived columns stay in step through one function
 
 `leads.phone_key` is the phone in a form that compares equal with and without the Brazilian

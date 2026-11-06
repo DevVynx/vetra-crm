@@ -31,6 +31,11 @@ Delivered in **two steps, each validated by the user before the next one starts*
 - Yes/no, statuses and kinds in Portuguese words.
 - A text cell that starts with `=`, `+`, `-`, `@`, a tab or a carriage return gets a leading `'`, so a spreadsheet never runs it as a formula (phones are the exception: they are checked to be only phone characters).
 
+**Open question, to check in Excel:** a phone is written as `+55 (31) 99999-0000` and is not guarded
+like the other texts. Excel treats a leading `+` as the start of a formula when a cell is typed; it was
+not confirmed what it does with a cell read from a CSV. If a phone shows as an error (`#NAME?`), the
+phone cell has to change, and the import already reads the number however it is written.
+
 ## The files
 
 | File                        | One row per                             | Notes                                                                                                             |

@@ -33,6 +33,15 @@ layout (navigation, page frame), not access control.
 cross-cutting concern (state, theming, etc.) is added here, not sprinkled across
 individual routes or components.
 
+## What the app shell waits for
+
+`routes/_app.tsx` is the layout of every page, and it decides what is shown before a screen is:
+`ConnectionLostNotice` when the server can't be reached, and `OnboardingGate`, which sends to
+`/welcome` while the profile says the introduction wasn't done (`isOnboarded`). The gate wraps the
+whole shell so the menu never shows before the introduction, and the lost-server notice stays above
+it, since there is no profile to ask when the server is down. `/welcome` is a route **outside** the
+layout, with no menu, and always reachable, so it can be seen again from Settings.
+
 ## Path alias
 
 `@/*` resolves to `apps/web/src/*`. Same convention as `apps/api`'s alias — see the

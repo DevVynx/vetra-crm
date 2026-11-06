@@ -93,3 +93,34 @@ sandbox`, `Cache-Control: no-store`, and a file name with no control character, 
 - **Only the path the upstream gives is used,** on the address already trusted, and only under the
   folder it should come from. The host in the URL it returns is ignored.
 - **Nothing is stored:** the file is asked for, handed over and forgotten.
+
+## Receiving a file
+
+A file reaches the API as the **bytes of the request**, not as JSON or a form, so no library is
+needed and nothing is read until it is known to be small enough. It is used by the WhatsApp files
+and voice messages, the profile photo and the import of data.
+
+- **`rawFileBody(maxBytes)`** reads the body as a `Buffer` whatever its type, and a body over the
+  limit is a clear 422, not a 500. It goes **after** the validator of the route, so a request that is
+  wrong in its address is refused without reading the file.
+- **What describes the file travels in the query** (name, type, length, caption), validated with Zod
+  like any query. The real type is not the `Content-Type`, which is always
+  `application/octet-stream`, so a JSON file is never read by `express.json()`.
+- **The limit is also checked by the domain**, since it is a rule and not only a transport detail. The
+  domain has its own copy of the number (core does not import the contracts); the two are commented
+  to be kept equal.
+- **A file that is read by hand is not trusted:** the import reads a zip with `readZip`, which checks
+  the sizes before opening, caps what opens, verifies every checksum and refuses encrypted and
+  Zip64 zips. Only the files it wants are opened.
+
+## Files the API owns
+
+The few files Vetra keeps itself (today the profile photo, `profile-photo.webp`) live in
+`STORAGE_DIR`, written through `@vetra/infra`: a temporary file renamed over the real one, so a
+half-written file is never read. They are never in the database or in `apps/web`.
+
+The photo is the **one file served to an `<img src>`** (see "Files asked for on demand" in
+`WEB-VITE-DATA-LAYER.md`): it is the user's own avatar, small, and is shown in many places. Its route
+answers `Cross-Origin-Resource-Policy: cross-origin`, `nosniff` and a long cache, and its address
+carries a version (`?v=`) that changes with the photo. A page on another site could ask for it, but
+cannot read it; it could only learn that a photo exists. Do not copy this for anything else.
