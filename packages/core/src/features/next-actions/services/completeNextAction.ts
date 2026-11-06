@@ -6,10 +6,11 @@ export async function completeNextAction(
   id: string,
   next: NextActionInput
 ): Promise<NextActionWithLead> {
-  const { lead, ...completed } = await getNextAction(id);
+  const { lead, ...pending } = await getNextAction(id);
 
-  const scheduled = nextActionDomain.followUp(completed, next);
-  await nextActionRepositories.replaceNextAction(completed.id, scheduled);
+  const scheduled = nextActionDomain.followUp(pending, next);
+  const completed = nextActionDomain.complete(pending, new Date());
+  await nextActionRepositories.replaceNextAction(completed, scheduled);
 
   return { ...scheduled, lead };
 }

@@ -1,3 +1,4 @@
+export * from "./completedActions";
 export * from "./deals";
 export * from "./expenses";
 export * from "./installments";

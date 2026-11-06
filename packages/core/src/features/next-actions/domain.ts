@@ -16,6 +16,8 @@ export type NextAction = NextActionInput & {
   leadId: string;
 };
 
+export type CompletedAction = NextAction & { completedAt: Date };
+
 export type NextActionWithLead = NextAction & { lead: Lead };
 
 function create(leadId: string, input: NextActionInput): NextAction {
@@ -26,9 +28,22 @@ function edit(action: NextAction, input: NextActionInput): NextAction {
   return { ...action, ...input };
 }
 
+// A done action leaves the pending ones, and what was done stays as history, with when.
+function complete(action: NextAction, now: Date): CompletedAction {
+  return {
+    id: action.id,
+    leadId: action.leadId,
+    type: action.type,
+    followUpStep: action.followUpStep,
+    description: action.description,
+    dueAt: action.dueAt,
+    completedAt: now,
+  };
+}
+
 // Completing an action removes it and schedules the next one for the same lead.
 function followUp(completed: NextAction, next: NextActionInput): NextAction {
   return create(completed.leadId, next);
 }
 
-export const nextActionDomain = { create, edit, followUp };
+export const nextActionDomain = { create, complete, edit, followUp };

@@ -134,6 +134,13 @@
       "when": 1793915114700,
       "tag": "0018_refill_audio_details",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793928640641,
+      "tag": "0019_add_completed_actions",
+      "breakpoints": true
     }
   ]
 }
