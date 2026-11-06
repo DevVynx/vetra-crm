@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const MAX_DELAY_MINUTES = 1440;
+const MAX_UNANSWERED_DAYS = 3650;
 
 export const automationSettingsSchema = z.object({
   // The master switch: nothing is sent by itself while it is off.
@@ -8,6 +9,15 @@ export const automationSettingsSchema = z.object({
   autoSendDelayMinutes: z.number().int().min(0).max(MAX_DELAY_MINUTES),
   // Whether a lead that comes in starts with its own "Envio automático" on.
   newLeadsAutoSend: z.boolean(),
+  // Reactions to the conversation, each with its own switch and, when it moves a lead, the stage to move it to.
+  moveOnSendEnabled: z.boolean(),
+  moveOnSendStageId: z.string().nullable(),
+  moveOnReplyEnabled: z.boolean(),
+  moveOnReplyStageId: z.string().nullable(),
+  cancelFollowUpsOnReply: z.boolean(),
+  archiveUnansweredEnabled: z.boolean(),
+  archiveUnansweredStageId: z.string().nullable(),
+  archiveUnansweredDays: z.number().int().min(1).max(MAX_UNANSWERED_DAYS),
 });
 export type AutomationSettings = z.infer<typeof automationSettingsSchema>;
 
