@@ -93,6 +93,28 @@ not to be contacted; turning it **off** reaches every lead that has it on. The c
 says how many texts already due would go at once, since a lead's overdue activities are sent as soon as
 its switch is on (the wait of minutes counts from when the activity was created).
 
+## Reactions to the conversation
+
+Four automations, each with its own switch in Settings, **off by default, except cancelling follow-ups on a reply**, and all under the master switch
+(with it off they do nothing and are not shown). They never send anything: they react to what was sent and to
+what came back. Each one that moves a lead has a stage chosen by the user, because stages can be renamed and
+reordered; its switch only turns on once a stage is chosen. A target that was deleted, or that the move is not
+allowed to reach, is skipped quietly.
+
+- **First message sent** (`reactToSentText`, called by `deliverNextAction` once the text went): a lead still in
+  the entry stage moves to the chosen funnel stage. It never throws, since the message already went.
+- **Reply** (`reactToReply`, called when a message arrives live from the lead): moves the lead forward, never to an
+  earlier stage and never out of the funnel, and/or deletes its pending follow-ups (`type = follow_up`, not the
+  one being sent right now). A lead marked "Não contatar" is treated the same: a reply is information, not
+  contact. Archived leads and customers are left alone. Messages read from the history by the sync are not
+  replies.
+- **No reply** (`archiveUnanswered`, one pass after each pass of the 15 s loop): archives, at the chosen archive
+  stage, a lead in the funnel whose last sent text is at least N days old (default 7, no upper limit), with no
+  message from it since and no follow-up still pending. Archiving drops its pending activities, as always.
+
+How many follow-ups there are and how far apart is VET-22; until then "no follow-up pending" simply means the
+last text Vetra sent was the last one.
+
 ## When a lead becomes a customer
 
 A customer is no longer prospected, so closing a lead turns **both** "Envio automático" and "Não contatar"
