@@ -208,6 +208,7 @@ describe, regardless of whether you're on the API or Web side.
 ### Practical Guides
 
 - `docs/guides/ADDING-A-FEATURE.md` - End-to-end walkthrough of every file a new feature touches, across every layer
+- `docs/guides/DEMO.md` - The separate demonstration environment: a Vetra with example data and a fake WhatsApp, to present the CRM
 
 ### Project
 
