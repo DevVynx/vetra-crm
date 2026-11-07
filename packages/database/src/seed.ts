@@ -14,6 +14,7 @@ import {
   leadsTable,
   nextActionsTable,
   projectsTable,
+  queuedFollowUpsTable,
   stagesTable,
 } from "./schema";
 
@@ -555,15 +556,37 @@ async function seed() {
     description: string,
     dueInDays: number,
     followUpStep: number | null = null,
-    utcHour = 13
+    utcHour = 13,
+    body: string | null = null
   ): NextActionRow => ({
     id: uuidv7(),
     leadId: leadNamed(leadName),
     type,
     followUpStep,
     description,
+    body,
     dueAt: at(dueInDays, utcHour),
   });
+
+  // The text of a first approach, the way the prospecting pipeline writes it: a few short bubbles, separated by a blank
+  // line, that point to the preview of the lead's site.
+  const approachText = (leadName: string, observation: string) =>
+    [
+      "Olá! Eu sou o Vinicius.",
+      `Estive olhando ${leadName} e percebi que ${observation}.`,
+      `Montei uma prévia do site de vocês usando o logo e as fotos que já divulgam. Dá uma espiada: https://${slug(leadName)}.vercel.app`,
+      "Não tem compromisso nenhum. É só para você ver como poderia ficar.",
+    ].join("\n\n");
+  const followUpText = (leadName: string, lastOne = false) =>
+    lastOne
+      ? [
+          "Última mensagem por aqui, prometo!",
+          `Se não fizer sentido agora, tudo bem: a prévia do site continua no ar se mudar de ideia. https://${slug(leadName)}.vercel.app`,
+        ].join("\n\n")
+      : [
+          "Oi! Passando só para saber se você chegou a ver a prévia do site que mandei.",
+          "Se quiser, ajusto qualquer coisa: cores, textos, fotos.",
+        ].join("\n\n");
   const nextActions = [
     nextAction(
       "Padaria Trigo de Ouro",
@@ -571,18 +594,77 @@ async function seed() {
       "Enviar a primeira abordagem",
       0,
       null,
-      23
+      23,
+      approachText(
+        "a Padaria Trigo de Ouro",
+        "a ficha de vocês no Google Maps não tem site, só o telefone e o horário"
+      )
     ),
-    nextAction("Barbearia Navalha Fina", "first_approach", "Enviar a primeira abordagem", 1),
-    nextAction("Pet Shop Patinhas", "first_approach", "Enviar a primeira abordagem", -2),
-    nextAction("Salão Bella Donna", "follow_up", "Perguntar se viu a demo", -1, 1),
-    nextAction("Oficina Pit Stop", "follow_up", "Segundo follow-up", 0, 2, 22),
-    nextAction("Academia Corpo em Forma", "follow_up", "Retomar a conversa", 2, 1),
+    nextAction(
+      "Barbearia Navalha Fina",
+      "first_approach",
+      "Enviar a primeira abordagem",
+      1,
+      null,
+      13,
+      `${approachText(
+        "a Barbearia Navalha Fina",
+        "no Instagram vocês mostram os cortes, mas não há um lugar para agendar"
+      )}\n\nSe preferir, me chama direto no WhatsApp: [SEU WHATSAPP]`
+    ),
+    nextAction(
+      "Pet Shop Patinhas",
+      "first_approach",
+      "Enviar a primeira abordagem",
+      -2,
+      null,
+      13,
+      approachText(
+        "o Pet Shop Patinhas",
+        "vocês divulgam banho e tosa, mas os clientes não acham os preços em lugar nenhum"
+      )
+    ),
+    nextAction(
+      "Salão Bella Donna",
+      "follow_up",
+      "Perguntar se viu a demo",
+      -1,
+      1,
+      13,
+      followUpText("o Salão Bella Donna")
+    ),
+    nextAction(
+      "Oficina Pit Stop",
+      "follow_up",
+      "Segundo follow-up",
+      0,
+      2,
+      22,
+      followUpText("a Oficina Pit Stop", true)
+    ),
+    nextAction(
+      "Academia Corpo em Forma",
+      "follow_up",
+      "Retomar a conversa",
+      2,
+      1,
+      13,
+      followUpText("a Academia Corpo em Forma")
+    ),
     nextAction("Odonto Sorriso Kids", "meeting", "Reunião para apresentar o site", 3),
     nextAction("Confeitaria Doce Encanto", "meeting", "Confirmar a reunião de quinta", -3),
     nextAction("Auto Center Rota 40", "proposal", "Cobrar resposta da proposta", 0, null, 20),
     nextAction("Espaço Beleza Pura", "proposal", "Ajustar a proposta com desconto", 5),
   ];
+
+  // --- Follow-ups handed over by the pipeline, waiting for their first approach to go --------
+  const queuedFollowUps = ["Padaria Trigo de Ouro", "Barbearia Navalha Fina"].map((leadName) => ({
+    id: uuidv7(),
+    leadId: leadNamed(leadName),
+    step: 1,
+    body: followUpText(leadName),
+    status: "queued" as const,
+  }));
 
   // --- Notes --------------------------------------------------------------------------------
   const note = (leadId: string, content: string, daysAgo: number): NoteRow => ({
@@ -613,6 +695,7 @@ async function seed() {
     await tx.insert(installmentsTable).values(installments);
     await tx.insert(expensesTable).values(expenses);
     await tx.insert(nextActionsTable).values(nextActions);
+    await tx.insert(queuedFollowUpsTable).values(queuedFollowUps);
     await tx.insert(leadNotesTable).values(notes);
   });
 
