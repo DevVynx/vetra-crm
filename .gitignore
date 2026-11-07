@@ -55,3 +55,6 @@ yarn-error.log*
 
 # Database backups made by the update script
 backups/
+
+# Conversations made by the demo script
+demo/.generated/

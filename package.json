@@ -7,6 +7,8 @@
     "dev": "turbo run dev",
     "docker:dev": "docker compose -f compose.dev.yaml up -d --wait",
     "docker:dev:down": "docker compose -f compose.dev.yaml down",
+    "demo:up": "node demo/demo.mjs up",
+    "demo:down": "node demo/demo.mjs down",
     "check-types": "turbo run check-types",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",

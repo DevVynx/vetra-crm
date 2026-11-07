@@ -1,0 +1,67 @@
+# A separate Vetra for demonstrations (`pnpm demo:up`): its own database, its own volumes and a fake WhatsApp, so nothing
+# of it touches the real Vetra or a real WhatsApp. It runs the published image (VETRA_DEMO_VERSION picks another tag).
+# Only this computer: the app answers on 14720 and the database on 55450 (for the seed).
+name: vetra-demo
+
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: vetra_demo_db
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: vetra
+    ports:
+      - "127.0.0.1:55450:5432"
+    volumes:
+      - demo_db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d vetra"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # The fake WhatsApp: a small Node server (demo/fake-waha.mjs) with the conversations made by the demo script.
+  waha:
+    image: node:24-alpine
+    container_name: vetra_demo_waha
+    working_dir: /demo
+    command: ["node", "fake-waha.mjs"]
+    environment:
+      WAHA_API_KEY: demo-waha-key
+      PORT: "3000"
+    volumes:
+      - ./fake-waha.mjs:/demo/fake-waha.mjs:ro
+      - ./.generated:/data:ro
+    ports:
+      - "127.0.0.1:13000:3000"
+
+  app:
+    image: ghcr.io/devvynx/vetra-crm:${VETRA_DEMO_VERSION:-latest}
+    container_name: vetra_demo_app
+    depends_on:
+      db:
+        condition: service_healthy
+      waha:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://dev:dev@db:5432/vetra
+      FRONTEND_URL: http://localhost:14720
+      # The app only accepts the Host it listens on, so the port inside is the one of this computer too.
+      API_PORT: 14720
+      WAHA_URL: http://waha:3000
+      WAHA_API_KEY: demo-waha-key
+    ports:
+      - "127.0.0.1:14720:14720"
+    volumes:
+      - demo_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:$$API_PORT/api/profile > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  demo_db:
+  demo_data:
