@@ -56,7 +56,7 @@ jobs:
       - name: Build the installer package
         env:
           VETRA_VERSION: ${{ steps.meta.outputs.version }}
-        run: bash scripts/montar-instalador.sh
+        run: bash scripts/instalador/montar-instalador.sh
 
       - name: Create the release
         env:

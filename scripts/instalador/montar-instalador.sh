@@ -2,18 +2,16 @@
 # Builds the installer package (dist/vetra-instalador.zip): what someone needs to run Vetra without the source code.
 # The release workflow runs it, so the package never drifts from the repository. It does not build or publish anything.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 out="dist/instalador"
 rm -rf dist
-mkdir -p "$out/scripts"
+mkdir -p "$out/scripts/windows" "$out/scripts/mac-linux"
 
 cp compose.yaml LICENSE README.md "$out/"
-cp packaging/env.example "$out/.env.example"
-cp scripts/iniciar-vetra-windows.bat scripts/iniciar-vetra-mac-linux.sh \
-  scripts/parar-vetra-windows.bat scripts/parar-vetra-mac-linux.sh scripts/win-auxiliar.ps1 \
-  scripts/atualizar-vetra-windows.bat scripts/atualizar-vetra-mac-linux.sh scripts/win-auxiliar-atualizar.ps1 \
-  "$out/scripts/"
+cp scripts/instalador/env.example "$out/.env.example"
+cp scripts/windows/* "$out/scripts/windows/"
+cp scripts/mac-linux/* "$out/scripts/mac-linux/"
 
 # The package fixes the version it was made for (the update script changes it later). Without a version, as in a local
 # run, the line stays commented and the latest is used.

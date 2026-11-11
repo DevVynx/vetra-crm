@@ -8,7 +8,7 @@ param(
 # Not "Stop": docker writes its progress to the error output, and PowerShell would take every line for a failure. Each
 # command is checked by its exit code instead.
 $ErrorActionPreference = "Continue"
-$root = Split-Path -Parent $PSScriptRoot
+$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $root
 
 $port = if ($env:VETRA_PORT) { $env:VETRA_PORT } else { 4720 }

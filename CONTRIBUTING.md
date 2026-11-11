@@ -46,4 +46,4 @@ tem leads ele recusa, a não ser que você passe `--yes`.
 - `packages/*` — domínio, contratos, banco, rotas e configurações compartilhadas
 - `docs/` — guias de arquitetura e visão do projeto
 - `tasks/` — tarefas planejadas (`VET-<n>.md`)
-- `Dockerfile`, `compose.yaml` e `scripts/` (`iniciar-vetra-windows`, `iniciar-vetra-mac-linux`, `parar-vetra-*`) — rodar o Vetra compilado, no Docker; `compose.dev.yaml` — o banco e o WhatsApp só do desenvolvimento (`pnpm docker:dev`)
+- `Dockerfile`, `compose.yaml` e `scripts/` (`windows/` e `mac-linux/`: `iniciar-vetra-*`, `parar-vetra-*`, `atualizar-vetra-*`; `instalador/`: o que monta o zip do instalador) — rodar o Vetra compilado, no Docker; `compose.dev.yaml` — o banco e o WhatsApp só do desenvolvimento (`pnpm docker:dev`)

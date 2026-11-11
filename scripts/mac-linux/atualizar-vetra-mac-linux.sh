@@ -3,7 +3,7 @@
 # pulls the new image, restarts the app and waits for it. If the new version does not answer, it goes back to the one
 # that was running. Usage: atualizar-vetra-mac-linux.sh [version] [--yes]
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 port="${VETRA_PORT:-4720}"
 # How many times (2 seconds apart) to ask whether the app answers before giving up.

@@ -10,7 +10,7 @@ instalar Node nem usar o terminal.
 1. Instale e abra o Docker Desktop. Espere ele terminar de iniciar.
 2. Baixe o **`vetra-instalador.zip`** na página de Releases do Vetra
    (https://github.com/DevVynx/vetra-crm/releases/latest) e extraia a pasta. Ele tem só o necessário, sem o código-fonte.
-3. Abra a pasta **`scripts`** e dê um duplo clique em **`iniciar-vetra-windows.bat`** (no macOS e no Linux, rode `bash scripts/iniciar-vetra-mac-linux.sh`). O arquivo `win-auxiliar.ps1` da mesma pasta é só um auxiliar do `.bat`: não precisa abri-lo.
+3. Abra a pasta **`scripts/windows`** e dê um duplo clique em **`iniciar-vetra-windows.bat`** (no macOS e no Linux, rode `bash scripts/mac-linux/iniciar-vetra-mac-linux.sh`). O arquivo `win-auxiliar.ps1` da mesma pasta é só um auxiliar do `.bat`: não precisa abri-lo.
 
 Na primeira vez ele demora alguns minutos, porque baixa tudo. Quando terminar, o navegador abre em
 **http://localhost:4720**. Nas próximas vezes é rápido.
@@ -21,7 +21,7 @@ e escreva o número (por exemplo, `0.1.0`).
 **Mac com chip Apple (M1 ou mais novo) e Linux ARM:** o Vetra publica a imagem para esses computadores, mas ainda
 **não foi testado** neles. Pode funcionar, pode não funcionar.
 
-- **Para parar:** `scripts/parar-vetra-windows.bat` (ou `bash scripts/parar-vetra-mac-linux.sh`). Seus dados ficam guardados. Depois de parar, o Vetra só volta quando você iniciar de novo, mesmo que o computador seja reiniciado.
+- **Para parar:** `scripts/windows/parar-vetra-windows.bat` (ou `bash scripts/mac-linux/parar-vetra-mac-linux.sh`). Seus dados ficam guardados. Depois de parar, o Vetra só volta quando você iniciar de novo, mesmo que o computador seja reiniciado.
 - **Para o Vetra voltar sozinho quando o computador ligar:** no Docker Desktop, abra **Settings →
   General** e marque **Start Docker Desktop when you sign in to your computer**. Depois disso, ao ligar o
   computador e entrar, o Vetra já está no ar.
@@ -36,8 +36,8 @@ abri-lo.
 Em **Configurações → Atualizações** o Vetra mostra a versão instalada e avisa quando existe uma nova
 (o botão **Verificar agora** consulta de novo). Para atualizar:
 
-1. Abra a pasta **`scripts`** e dê duplo clique em **`atualizar-vetra-windows.bat`** (no macOS e no Linux, rode
-   `bash scripts/atualizar-vetra-mac-linux.sh`). O Vetra precisa estar aberto, porque é ele que diz qual é a versão mais nova.
+1. Abra a pasta **`scripts/windows`** e dê duplo clique em **`atualizar-vetra-windows.bat`** (no macOS e no Linux, rode
+   `bash scripts/mac-linux/atualizar-vetra-mac-linux.sh`). O Vetra precisa estar aberto, porque é ele que diz qual é a versão mais nova.
 2. Confirme com **s**. O Vetra fica fora do ar por alguns instantes.
 
 O que o atualizador faz, nesta ordem: baixa a versão nova, guarda um **backup do banco** na pasta `backups` (os 5 mais
@@ -49,7 +49,7 @@ Uma mudança que a versão nova já tenha feito no banco não é desfeita pela v
 ### Voltando a um backup
 
 Para trazer os dados de um backup (os arquivos `backups/vetra-AAAAMMDD-HHMMSS-vX.Y.Z.sql.gz`), com o Vetra parado
-(`scripts/parar-vetra-*`), rode no terminal, dentro da pasta do Vetra, trocando `ARQUIVO` pelo nome do backup:
+(`scripts/windows/parar-vetra-windows.bat` ou `scripts/mac-linux/parar-vetra-mac-linux.sh`), rode no terminal, dentro da pasta do Vetra, trocando `ARQUIVO` pelo nome do backup:
 
 ```sh
 docker compose -f compose.yaml up -d --wait db

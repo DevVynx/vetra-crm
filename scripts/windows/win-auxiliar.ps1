@@ -3,7 +3,7 @@
 # Starts Vetra for someone who doesn't program: checks Docker, makes the .env the first time,
 # starts the services, waits until Vetra answers and opens the browser.
 $ErrorActionPreference = "Stop"
-$root = Split-Path -Parent $PSScriptRoot
+$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $root
 
 function Stop-WithMessage($message) {

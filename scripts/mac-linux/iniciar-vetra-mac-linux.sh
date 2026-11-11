@@ -2,7 +2,7 @@
 # Starts Vetra on macOS and Linux: checks Docker, makes the .env the first time, starts the
 # services, waits until Vetra answers and opens the browser.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 stop_with() {
   echo
