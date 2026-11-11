@@ -107,7 +107,8 @@ allowed to reach, is skipped quietly.
   earlier stage and never out of the funnel, and/or deletes its pending follow-ups (`type = follow_up`, not the
   one being sent right now). A lead marked "Não contatar" is treated the same: a reply is information, not
   contact. Archived leads and customers are left alone. Messages read from the history by the sync are not
-  replies.
+  replies. A reply that comes up to 3 seconds after a message the user sent looks like a bot's (`isAutomaticReply`):
+  it still moves the lead, but does not cancel its follow-ups.
 - **No reply** (`archiveUnanswered`, one pass after each pass of the 15 s loop): archives, at the chosen archive
   stage, a lead in the funnel whose last sent text is at least N days old (default 7, no upper limit), with no
   message from it since and no follow-up still pending. Archiving drops its pending activities, as always.
@@ -123,7 +124,9 @@ default 1, which is the recommendation: more follow-ups raise the risk of a bloc
 opening message, or a follow-up of the queue (sent by click or by itself, or ticked as done), makes the lowest queued step
 an activity "Follow-up N", due the wait of that step after that moment. The next is only made when the previous one is done.
 Undoing a completion deletes the follow-up it made and puts it back in the queue. A reply (with the switch on) or leaving the
-funnel cancels the queue; hand-made activities are never limited. The waits are three numbers of days in Settings (the one of the position), always applied.
+funnel cancels the queue; the user can also cancel a lead's follow-ups by hand, from its menu or from the notice shown
+in its conversation, and the response carries what was removed so the client can send it back to resume them.
+Hand-made activities are never limited. The waits are three numbers of days in Settings (the one of the position), always applied.
 Sending is still the usual: the lead's switch, the master switch, never to "Não contatar", never with the marker.
 
 ## When a lead becomes a customer
