@@ -7,6 +7,7 @@ import {
   inArray,
   isNull,
   leadsTable,
+  lte,
   or,
   qualified,
   sql,
@@ -466,4 +467,22 @@ export async function findChatIdOfMessage(externalId: string): Promise<string | 
     .limit(1);
 
   return row?.chatId ?? null;
+}
+
+// When the user last wrote in a conversation, up to a moment: what a message received is an answer to.
+export async function findLastSentAt(conversationId: string, until: Date): Promise<Date | null> {
+  const [row] = await db
+    .select({ sentAt: whatsappMessagesTable.sentAt })
+    .from(whatsappMessagesTable)
+    .where(
+      and(
+        eq(whatsappMessagesTable.conversationId, conversationId),
+        eq(whatsappMessagesTable.direction, "outbound"),
+        lte(whatsappMessagesTable.sentAt, until)
+      )
+    )
+    .orderBy(desc(whatsappMessagesTable.sentAt))
+    .limit(1);
+
+  return row?.sentAt ?? null;
 }

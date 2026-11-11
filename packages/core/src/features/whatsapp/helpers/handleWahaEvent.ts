@@ -76,7 +76,12 @@ async function saveLiveMessage(message: WahaMessage): Promise<void> {
 
   const saved = await whatsappRepositories.saveMessages(conversation.id, [toSave], true);
   if (saved > 0) {
-    if (toSave.direction === "inbound") await reactToReply(conversation.phoneKey);
+    if (toSave.direction === "inbound") {
+      const lastSentAt = await whatsappRepositories.findLastSentAt(conversation.id, toSave.sentAt);
+      await reactToReply(conversation.phoneKey, {
+        isAutomatic: whatsappDomain.isAutomaticReply(toSave.sentAt, lastSentAt),
+      });
+    }
     return notifyWhatsappChange();
   }
 

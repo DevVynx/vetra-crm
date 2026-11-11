@@ -64,6 +64,8 @@ type MessageExtras = Pick<
 >;
 
 const HISTORY_DAYS = 365;
+// A person takes longer than this to answer a message; an automatic reply (a bot) comes right after it.
+const AUTOMATIC_REPLY_MS = 3_000;
 const DAY_IN_MS = 86_400_000;
 const PHONE_CHAT_ID = /^(\d+)(?::\d+)?@(?:c\.us|s\.whatsapp\.net)$/;
 const INDIVIDUAL_CHAT_ID = /@(?:c\.us|s\.whatsapp\.net|lid)$/;
@@ -82,6 +84,12 @@ const connectionStatusOf = (wahaStatus: string): WhatsappConnectionStatus =>
 const phoneOfChatId = (chatId: string): string | null => PHONE_CHAT_ID.exec(chatId)?.[1] ?? null;
 
 const isIndividualChat = (chatId: string): boolean => INDIVIDUAL_CHAT_ID.test(chatId);
+
+// Whether a message received looks like a bot's, by coming right after one the user sent.
+const isAutomaticReply = (receivedAt: Date, lastSentAt: Date | null): boolean =>
+  lastSentAt !== null &&
+  receivedAt.getTime() >= lastSentAt.getTime() &&
+  receivedAt.getTime() - lastSentAt.getTime() <= AUTOMATIC_REPLY_MS;
 
 const isLidChat = (chatId: string): boolean => chatId.endsWith("@lid");
 
@@ -282,6 +290,7 @@ export const whatsappDomain = {
   externalIdOf,
   historyStart,
   isIndividualChat,
+  isAutomaticReply,
   isLidChat,
   messageStatusOf,
   mediaServingOf,
