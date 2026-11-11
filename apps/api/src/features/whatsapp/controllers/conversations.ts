@@ -60,6 +60,22 @@ export async function markWhatsappConversationReadController(
   res.status(204).send();
 }
 
+export async function endWhatsappConversationController(
+  req: ValidatedRequest<typeof v.endConversation>,
+  res: Response
+) {
+  await whatsappServices.endWhatsappConversation(req.params.id);
+  res.status(204).send();
+}
+
+export async function reopenWhatsappConversationController(
+  req: ValidatedRequest<typeof v.reopenConversation>,
+  res: Response
+) {
+  await whatsappServices.reopenWhatsappConversation(req.params.id);
+  res.status(204).send();
+}
+
 export async function listAwaitingWhatsappConversationsController(
   _req: Request,
   res: Response<ListAwaitingConversationsResponse>

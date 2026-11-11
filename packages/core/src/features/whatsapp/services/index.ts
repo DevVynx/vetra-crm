@@ -8,6 +8,7 @@ import { deleteWhatsappConversations } from "./deleteWhatsappConversations";
 import { deleteWhatsappMessages } from "./deleteWhatsappMessages";
 import { disconnectWhatsapp } from "./disconnectWhatsapp";
 import { editWhatsappMessage } from "./editWhatsappMessage";
+import { endWhatsappConversation } from "./endWhatsappConversation";
 import { getLeadConversation } from "./getLeadConversation";
 import { getLeadMessages } from "./getLeadMessages";
 import { getWhatsappConversation } from "./getWhatsappConversation";
@@ -22,6 +23,7 @@ import { markWhatsappConversationRead } from "./markWhatsappConversationRead";
 import { markWhatsappMessagePlayed } from "./markWhatsappMessagePlayed";
 import { openLeadConversation } from "./openLeadConversation";
 import { openWhatsappConversation } from "./openWhatsappConversation";
+import { reopenWhatsappConversation } from "./reopenWhatsappConversation";
 import { resolveWhatsappAccountChange } from "./resolveWhatsappAccountChange";
 import { sendWhatsappMedia } from "./sendWhatsappMedia";
 import { sendWhatsappMessage } from "./sendWhatsappMessage";
@@ -36,6 +38,7 @@ export const whatsappServices = {
   deleteWhatsappMessages,
   disconnectWhatsapp,
   editWhatsappMessage,
+  endWhatsappConversation,
   getLeadConversation,
   getLeadMessages,
   getWhatsappConversation,
@@ -51,6 +54,7 @@ export const whatsappServices = {
   openLeadConversation,
   openWhatsappConversation,
   removeWhatsappChangeListener,
+  reopenWhatsappConversation,
   resolveWhatsappAccountChange,
   sendWhatsappMedia,
   sendWhatsappMessage,

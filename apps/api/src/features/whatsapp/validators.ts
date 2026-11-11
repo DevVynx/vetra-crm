@@ -30,6 +30,8 @@ const v = {
     body: sendWhatsappMessageRequestSchema,
   }),
   markRead: validation({ params: whatsappConversationParamsSchema }),
+  endConversation: validation({ params: whatsappConversationParamsSchema }),
+  reopenConversation: validation({ params: whatsappConversationParamsSchema }),
   getMessageMedia: validation({ params: whatsappMessageParamsSchema }),
   markMessagePlayed: validation({ params: whatsappMessageParamsSchema }),
   sendVoice: validation({

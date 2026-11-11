@@ -25,6 +25,7 @@ export const whatsappConversationSchema = z.object({
   photoUrl: z.string().nullable(),
   unreadCount: z.number().int().nonnegative(),
   lastMessageAt: z.iso.datetime().nullable(),
+  isAwaitingYou: z.boolean(),
   lead: z
     .object({
       id: z.string(),

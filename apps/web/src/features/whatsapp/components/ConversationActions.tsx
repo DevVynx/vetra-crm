@@ -1,11 +1,12 @@
 import { getRouteApi, Link } from "@tanstack/react-router";
 import type { WhatsappConversation } from "@vetra/contracts";
-import { UserPlusIcon, UserRoundIcon, XIcon } from "lucide-react";
+import { CircleCheckIcon, UserPlusIcon, UserRoundIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { ActionsMenu } from "@/shared/components/ActionsMenu";
 import { CreateLeadSheet } from "@/shared/components/leads/CreateLeadSheet";
 import { Button } from "@/shared/components/ui/button";
+import { useEndWhatsappConversation } from "@/shared/mutations/whatsapp/useEndWhatsappConversation";
 import { formatPhone } from "@/shared/utils/format";
 import { maskPhone } from "@/shared/utils/masks";
 
@@ -54,6 +55,7 @@ function ContactLink({ lead }: { lead: NonNullable<WhatsappConversation["lead"]>
 export function ConversationActions({ conversation }: { conversation: WhatsappConversation }) {
   const navigate = route.useNavigate();
   const { lead } = conversation;
+  const endConversation = useEndWhatsappConversation();
 
   return (
     <div className="flex shrink-0 items-center gap-2">
@@ -63,6 +65,15 @@ export function ConversationActions({ conversation }: { conversation: WhatsappCo
       <ActionsMenu
         label="Mais ações da conversa"
         items={[
+          ...(conversation.isAwaitingYou
+            ? [
+                {
+                  label: "Encerrar conversa",
+                  icon: CircleCheckIcon,
+                  onSelect: () => endConversation.mutate(conversation.id),
+                },
+              ]
+            : []),
           {
             label: "Fechar conversa",
             icon: XIcon,

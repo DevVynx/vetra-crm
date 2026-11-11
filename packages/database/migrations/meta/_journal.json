@@ -204,6 +204,13 @@
       "when": 1793990802073,
       "tag": "0028_default_one_follow_up",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1794422847533,
+      "tag": "0029_add_whatsapp_conversation_resolved_at",
+      "breakpoints": true
     }
   ]
 }

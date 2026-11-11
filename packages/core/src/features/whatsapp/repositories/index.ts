@@ -20,6 +20,7 @@ import {
   findConversationsPage,
   insertConversationIfNew,
   saveConversationFromOverview,
+  setConversationResolvedAt,
   updateConversationPhoto,
 } from "./conversations";
 import {
@@ -71,6 +72,7 @@ export const whatsappRepositories = {
   replaceWhatsappAccount,
   saveConversationFromOverview,
   saveMessages,
+  setConversationResolvedAt,
   updateAudioDetails,
   updateConversationPhoto,
   updateMessageContent,

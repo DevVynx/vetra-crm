@@ -33,6 +33,7 @@ export type WhatsappConversationRow = {
   photoUrl: string | null;
   unreadCount: number;
   lastMessageAt: Date | null;
+  isAwaitingYou: boolean;
   lead: {
     id: string;
     businessName: string;
@@ -71,6 +72,18 @@ const latestMessageOfConversationSql = sql`
   order by ${qualified(whatsappMessagesTable.sentAt)} desc, ${qualified(whatsappMessagesTable.id)} desc
   limit 1`;
 
+const lastMessageIsInboundSql = sql`(
+  select ${qualified(whatsappMessagesTable.direction)} ${latestMessageOfConversationSql}
+) = 'inbound'`;
+
+// Ending a conversation only holds until the next message: one that arrives later makes it wait again.
+const notEndedSinceLastMessageSql = sql`(
+  ${qualified(whatsappConversationsTable.resolvedAt)} is null
+  or ${qualified(whatsappConversationsTable.lastMessageAt)} > ${qualified(whatsappConversationsTable.resolvedAt)}
+)`;
+
+const waitingOnUserSql = sql`${lastMessageIsInboundSql} and ${notEndedSinceLastMessageSql}`;
+
 const conversationRowColumns = {
   id: whatsappConversationsTable.id,
   phone: whatsappConversationsTable.phone,
@@ -79,6 +92,7 @@ const conversationRowColumns = {
   photoUrl: whatsappConversationsTable.photoUrl,
   unreadCount: whatsappConversationsTable.unreadCount,
   lastMessageAt: whatsappConversationsTable.lastMessageAt,
+  isAwaitingYou: sql<boolean>`coalesce(${waitingOnUserSql}, false)`,
   // Read through the number instead of stored, so it can't go stale when a lead is created, gets
   // another phone or is deleted. Conversations with no phone never match; see VET-12.md.
   lead: sql<WhatsappConversationRow["lead"]>`(
@@ -162,9 +176,7 @@ export async function findConversationsPage({
 // Family and friends also write, but only leads and customers are work waiting on the user.
 const awaitingSql = and(
   sql`exists (select 1 from ${leadsTable} where ${leadOfConversationSql})`,
-  sql`(
-    select ${qualified(whatsappMessagesTable.direction)} ${latestMessageOfConversationSql}
-  ) = 'inbound'`
+  waitingOnUserSql
 );
 
 export async function findAwaitingConversations(
@@ -316,5 +328,15 @@ export async function updateConversationPhoto(
   await db
     .update(whatsappConversationsTable)
     .set({ photoUrl, photoFetchedAt: now })
+    .where(eq(whatsappConversationsTable.id, id));
+}
+
+export async function setConversationResolvedAt(
+  id: string,
+  resolvedAt: Date | null
+): Promise<void> {
+  await db
+    .update(whatsappConversationsTable)
+    .set({ resolvedAt })
     .where(eq(whatsappConversationsTable.id, id));
 }

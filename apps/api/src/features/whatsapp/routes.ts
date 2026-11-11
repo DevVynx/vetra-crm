@@ -11,6 +11,7 @@ import {
   deleteWhatsappMessagesController,
   disconnectWhatsappController,
   editWhatsappMessageController,
+  endWhatsappConversationController,
   getLeadConversationController,
   getLeadMessagesController,
   getWhatsappConversationController,
@@ -24,6 +25,7 @@ import {
   markWhatsappMessagePlayedController,
   openLeadConversationController,
   openWhatsappConversationController,
+  reopenWhatsappConversationController,
   resolveWhatsappAccountChangeController,
   sendWhatsappMediaController,
   sendWhatsappMessageController,
@@ -81,6 +83,16 @@ whatsappRouter.post(
   whatsappRoutes.conversationRead,
   v.markRead,
   markWhatsappConversationReadController
+);
+whatsappRouter.post(
+  whatsappRoutes.conversationEnd,
+  v.endConversation,
+  endWhatsappConversationController
+);
+whatsappRouter.post(
+  whatsappRoutes.conversationReopen,
+  v.reopenConversation,
+  reopenWhatsappConversationController
 );
 whatsappRouter.get(
   whatsappRoutes.leadConversation,

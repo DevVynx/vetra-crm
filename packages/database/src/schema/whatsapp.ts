@@ -51,6 +51,8 @@ export const whatsappConversationsTable = pgTable(
     photoFetchedAt: instantColumn("photo_fetched_at"),
     unreadCount: integer().notNull().default(0),
     lastMessageAt: instantColumn("last_message_at"),
+    // When the user ended the conversation; a message that arrives after it makes the conversation wait again.
+    resolvedAt: instantColumn("resolved_at"),
     createdAt: createdAtColumn(),
     updatedAt: updatedAtColumn(),
   },

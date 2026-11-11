@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BellRingIcon, ClockIcon, MessageCircleIcon } from "lucide-react";
+import { BellRingIcon, CircleCheckIcon, ClockIcon, MessageCircleIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
@@ -67,16 +67,14 @@ export function LeadConversation({ leadId }: { leadId: string }) {
           <div
             className={cn(
               "flex w-fit items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold",
-              state.awaiting === "you"
-                ? "border-warning/40 bg-warning/10 text-warning"
-                : "border-primary/30 bg-primary/10 text-primary"
+              state.awaiting === "you" && "border-warning/40 bg-warning/10 text-warning",
+              state.awaiting === "lead" && "border-primary/30 bg-primary/10 text-primary",
+              state.awaiting === "ended" && "bg-muted text-muted-foreground"
             )}
           >
-            {state.awaiting === "you" ? (
-              <BellRingIcon className="size-4" />
-            ) : (
-              <ClockIcon className="size-4" />
-            )}
+            {state.awaiting === "you" && <BellRingIcon className="size-4" />}
+            {state.awaiting === "lead" && <ClockIcon className="size-4" />}
+            {state.awaiting === "ended" && <CircleCheckIcon className="size-4" />}
             {state.waitingText}
             {conversation.unreadCount > 0 && (
               <Badge>
