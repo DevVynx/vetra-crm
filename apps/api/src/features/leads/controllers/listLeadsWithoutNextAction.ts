@@ -14,6 +14,8 @@ export async function listLeadsWithoutNextActionController(
   _req: ValidatedRequest<typeof v.listLeadsWithoutNextAction>,
   res: Response<ListLeadsWithoutNextActionResponse>
 ) {
-  const leads = await leadServices.listLeadsWithoutNextAction();
-  res.json(listLeadsWithoutNextActionResponseSchema.parse({ leads: leads.map(toLeadSummary) }));
+  const { items, total } = await leadServices.listLeadsWithoutNextAction();
+  res.json(
+    listLeadsWithoutNextActionResponseSchema.parse({ leads: items.map(toLeadSummary), total })
+  );
 }

@@ -90,6 +90,8 @@ export type CreateNextActionResponse = z.infer<typeof createNextActionResponseSc
 
 export const listLeadsWithoutNextActionResponseSchema = z.object({
   leads: z.array(leadSummarySchema),
+  // How many have none in all, since the list is capped.
+  total: z.number().int().nonnegative(),
 });
 export type ListLeadsWithoutNextActionResponse = z.infer<
   typeof listLeadsWithoutNextActionResponseSchema
