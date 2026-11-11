@@ -3,6 +3,7 @@ import {
   leadParamsSchema,
   nextActionParamsSchema,
   restoreNextActionRequestSchema,
+  resumeFollowUpsRequestSchema,
   sendNextActionRequestSchema,
   updateNextActionRequestSchema,
 } from "@vetra/contracts";
@@ -22,6 +23,8 @@ const v = {
   sendNextAction: validation({ params: nextActionParamsSchema, body: sendNextActionRequestSchema }),
   deleteNextAction: validation({ params: nextActionParamsSchema }),
   restoreNextAction: validation({ body: restoreNextActionRequestSchema }),
+  cancelFollowUps: validation({ params: leadParamsSchema }),
+  resumeFollowUps: validation({ params: leadParamsSchema, body: resumeFollowUpsRequestSchema }),
 };
 
 export default v;

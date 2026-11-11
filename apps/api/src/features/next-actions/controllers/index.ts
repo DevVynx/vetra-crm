@@ -1,3 +1,4 @@
+export * from "./cancelFollowUps";
 export * from "./completeNextAction";
 export * from "./createNextAction";
 export * from "./deleteNextAction";
@@ -5,5 +6,6 @@ export * from "./listLeadNextActions";
 export * from "./listNextActions";
 export * from "./reopenNextAction";
 export * from "./restoreNextAction";
+export * from "./resumeFollowUps";
 export * from "./sendNextAction";
 export * from "./updateNextAction";

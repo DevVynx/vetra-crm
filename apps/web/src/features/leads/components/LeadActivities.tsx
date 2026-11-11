@@ -7,10 +7,10 @@ import { NextActionItem } from "@/shared/components/next-actions/NextActionItem"
 import { Section } from "@/shared/components/Section";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
+import { useLeadNextActions } from "@/shared/queries/next-actions/useLeadNextActions";
 import { useStages } from "@/shared/stages/useStages";
 import { startOfTodayInProfileZone } from "@/shared/time-zone/zonedDate";
 
-import { useLeadNextActions } from "../queries/useLeadNextActions";
 import { NextActionHighlight } from "./NextActionHighlight";
 
 export function LeadActivities({ lead }: { lead: LeadDetail }) {

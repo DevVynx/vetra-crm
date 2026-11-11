@@ -71,6 +71,29 @@ export const restoreNextActionRequestSchema = nextActionInputSchema.extend({
 });
 export type RestoreNextActionRequest = z.infer<typeof restoreNextActionRequestSchema>;
 
+export const followUpQueueStateSchema = z.object({
+  id: z.string().min(1),
+  status: z.enum(["queued", "scheduled", "cancelled"]),
+  scheduledActionId: z.string().nullable(),
+  scheduledByActionId: z.string().nullable(),
+});
+
+// What cancelling a lead's follow-ups removed: the client keeps it and sends it back to undo.
+export const followUpsSnapshotSchema = z.object({
+  actions: z.array(restoreNextActionRequestSchema),
+  queue: z.array(followUpQueueStateSchema),
+});
+export type FollowUpsSnapshot = z.infer<typeof followUpsSnapshotSchema>;
+
+export const cancelFollowUpsResponseSchema = followUpsSnapshotSchema;
+export type CancelFollowUpsResponse = z.infer<typeof cancelFollowUpsResponseSchema>;
+
+export const resumeFollowUpsRequestSchema = followUpsSnapshotSchema;
+export type ResumeFollowUpsRequest = z.infer<typeof resumeFollowUpsRequestSchema>;
+
+export const resumeFollowUpsResponseSchema = z.void();
+export type ResumeFollowUpsResponse = z.infer<typeof resumeFollowUpsResponseSchema>;
+
 export const restoreNextActionResponseSchema = z.void();
 export type RestoreNextActionResponse = z.infer<typeof restoreNextActionResponseSchema>;
 

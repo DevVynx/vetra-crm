@@ -27,6 +27,15 @@ export type NextActionDelivery = {
   sendBlocksDone: number;
 };
 
+// What cancelling a lead's follow-ups removed, kept by the client so the cancellation can be undone.
+export type FollowUpQueueState = {
+  id: string;
+  status: "queued" | "scheduled" | "cancelled";
+  scheduledActionId: string | null;
+  scheduledByActionId: string | null;
+};
+export type FollowUpsSnapshot = { actions: NextAction[]; queue: FollowUpQueueState[] };
+
 export type NextActionWithLead = NextAction & NextActionDelivery & { lead: Lead };
 
 // The pipeline leaves this where the user's own number goes. Sent as it is, it would reach the lead.

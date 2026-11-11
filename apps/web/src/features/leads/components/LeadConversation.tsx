@@ -3,6 +3,7 @@ import { BellRingIcon, CircleCheckIcon, ClockIcon, MessageCircleIcon } from "luc
 import type { ReactNode } from "react";
 
 import { WhatsAppIcon } from "@/shared/components/icons/WhatsAppIcon";
+import { ScheduledFollowUpNotice } from "@/shared/components/next-actions/ScheduledFollowUpNotice";
 import { Section } from "@/shared/components/Section";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
@@ -83,6 +84,7 @@ export function LeadConversation({ leadId }: { leadId: string }) {
               </Badge>
             )}
           </div>
+          <ScheduledFollowUpNotice className="rounded-lg border" leadId={leadId} />
           <div className="flex flex-col gap-2">
             {conversation.messages.map((message) => (
               <MessageBubble key={message.id} message={message} compact />

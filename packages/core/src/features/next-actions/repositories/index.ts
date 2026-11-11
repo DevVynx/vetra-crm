@@ -1,3 +1,4 @@
+import { cancelFollowUpsOfLead } from "./cancelFollowUpsOfLead";
 import { claimNextActionForSending } from "./claimNextActionForSending";
 import { deleteFollowUpsOfLead } from "./deleteFollowUpsOfLead";
 import { deleteNextAction } from "./deleteNextAction";
@@ -20,9 +21,12 @@ import {
 import { recordSendProgress } from "./recordSendProgress";
 import { releaseNextActionSending } from "./releaseNextActionSending";
 import { reopenCompletedAction } from "./reopenCompletedAction";
+import { restoreFollowUpsOfLead } from "./restoreFollowUpsOfLead";
 import { updateNextAction } from "./updateNextAction";
 
 export const nextActionRepositories = {
+  cancelFollowUpsOfLead,
+  restoreFollowUpsOfLead,
   cancelQueuedFollowUps,
   findQueuedFollowUpStates,
   hasQueuedFollowUps,

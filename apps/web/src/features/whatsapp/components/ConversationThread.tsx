@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { BusinessAvatar } from "@/shared/components/BusinessAvatar";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
+import { ScheduledFollowUpNotice } from "@/shared/components/next-actions/ScheduledFollowUpNotice";
 import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
@@ -141,6 +142,9 @@ export function ConversationThread({ conversationId, isConnected }: Conversation
             onSelect: (message) => setSelection(new Set([message.id])),
           }}
         />
+        {!selection && conversation?.lead && (
+          <ScheduledFollowUpNotice className="border-t" leadId={conversation.lead.id} />
+        )}
         {!selection && <AttachmentTray />}
         {selection ? (
           <SelectionBar

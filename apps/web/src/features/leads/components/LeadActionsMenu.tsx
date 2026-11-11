@@ -2,6 +2,7 @@ import type { LeadDetail } from "@vetra/contracts";
 import {
   ArchiveIcon,
   BanIcon,
+  BellOffIcon,
   CircleCheckIcon,
   PencilIcon,
   Trash2Icon,
@@ -14,7 +15,9 @@ import { ActionsMenu, type ActionsMenuItem } from "@/shared/components/ActionsMe
 import { ArchiveLeadDialog } from "@/shared/components/ArchiveLeadDialog";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { useChangeLeadStage } from "@/shared/mutations/leads/useChangeLeadStage";
+import { useCancelFollowUps } from "@/shared/mutations/next-actions/useCancelFollowUps";
 import { useIsAutoSendEnabled } from "@/shared/queries/automations/useAutomationSettings";
+import { useLeadNextActions } from "@/shared/queries/next-actions/useLeadNextActions";
 import { useStages } from "@/shared/stages/useStages";
 
 import { useDeleteLead } from "../mutations/useDeleteLead";
@@ -31,6 +34,9 @@ export function LeadActionsMenu({ lead }: { lead: LeadDetail }) {
   const doNotContact = useUpdateLeadDoNotContact(lead.id);
   const autoSend = useUpdateLeadAutoSend(lead.id);
   const isAutoSendOn = useIsAutoSendEnabled();
+  const cancelFollowUps = useCancelFollowUps(lead.id);
+  const { data: nextActions } = useLeadNextActions(lead.id);
+  const hasFollowUps = nextActions?.nextActions.some(({ type }) => type === "follow_up") ?? false;
   const stages = useStages();
   const isArchived = stages.isArchive(lead.stage);
   const close = () => setDialog(null);
@@ -61,6 +67,15 @@ export function LeadActionsMenu({ lead }: { lead: LeadDetail }) {
                 icon: ZapIcon,
                 onSelect: () => autoSend.change(true),
               },
+        ]
+      : []),
+    ...(hasFollowUps
+      ? [
+          {
+            label: "Cancelar follow-ups",
+            icon: BellOffIcon,
+            onSelect: () => cancelFollowUps.mutate(),
+          },
         ]
       : []),
     ...(isArchived

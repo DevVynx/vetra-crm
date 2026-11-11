@@ -2,6 +2,7 @@ import { dashboardRoutes, nextActionsRoutes } from "@vetra/routes";
 import { Router } from "express";
 
 import {
+  cancelFollowUpsController,
   completeNextActionController,
   createNextActionController,
   deleteNextActionController,
@@ -9,6 +10,7 @@ import {
   listNextActionsController,
   reopenNextActionController,
   restoreNextActionController,
+  resumeFollowUpsController,
   sendNextActionController,
   updateNextActionController,
 } from "./controllers";
@@ -25,6 +27,16 @@ nextActionsRouter.get(
 nextActionsRouter.post(nextActionsRoutes.base, v.createNextAction, createNextActionController);
 // /next-actions/restore goes before the routes with an id, otherwise "restore" would be read as one.
 nextActionsRouter.post(nextActionsRoutes.restore, v.restoreNextAction, restoreNextActionController);
+nextActionsRouter.post(
+  nextActionsRoutes.cancelFollowUps,
+  v.cancelFollowUps,
+  cancelFollowUpsController
+);
+nextActionsRouter.post(
+  nextActionsRoutes.resumeFollowUps,
+  v.resumeFollowUps,
+  resumeFollowUpsController
+);
 nextActionsRouter.patch(nextActionsRoutes.byId, v.updateNextAction, updateNextActionController);
 nextActionsRouter.delete(nextActionsRoutes.byId, v.deleteNextAction, deleteNextActionController);
 nextActionsRouter.post(
