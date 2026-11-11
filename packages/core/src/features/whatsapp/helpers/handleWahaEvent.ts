@@ -27,7 +27,15 @@ async function resolveChatId(message: WahaMessage): Promise<string | null> {
   const phoneId = alternative ?? (await wahaClient.getPhoneIdOfLid(chat));
   const resolved = phoneId ? whatsappDomain.phoneOfChatId(phoneId) : null;
 
-  return resolved ? whatsappDomain.chatIdOfPhone(resolved) : chat;
+  if (resolved) return whatsappDomain.chatIdOfPhone(resolved);
+
+  // WAHA does not know yet who a new number is behind its hidden id, as when Vetra writes to it for
+  // the first time. The message is stored already, under the phone, and the event only repeats it.
+  const storedChatId = await whatsappRepositories.findChatIdOfMessage(
+    whatsappDomain.externalIdOf(message.id)
+  );
+
+  return storedChatId ?? chat;
 }
 
 async function conversationFor(

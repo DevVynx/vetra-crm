@@ -26,6 +26,7 @@ import {
 import {
   advanceMessageStatus,
   fillAudioWaveform,
+  findChatIdOfMessage,
   findConversationsWithAudioMissingDetails,
   findConversationsWithCaptionlessImages,
   findMessageById,
@@ -55,6 +56,7 @@ export const whatsappRepositories = {
   findConversationsPage,
   findMessageById,
   fillAudioWaveform,
+  findChatIdOfMessage,
   findMessagesPage,
   findWhatsappAccount,
   hasInboundMessageSince,

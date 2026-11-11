@@ -450,3 +450,20 @@ export async function hasInboundMessageSince(phoneKey: string, since: Date): Pro
 
   return Boolean(row);
 }
+
+// Where a message is stored already, whatever id the person is named by in the event that repeats it.
+// A conversation with a phone is preferred over one known only by its hidden id.
+export async function findChatIdOfMessage(externalId: string): Promise<string | null> {
+  const [row] = await db
+    .select({ chatId: whatsappConversationsTable.chatId })
+    .from(whatsappMessagesTable)
+    .innerJoin(
+      whatsappConversationsTable,
+      eq(whatsappConversationsTable.id, whatsappMessagesTable.conversationId)
+    )
+    .where(eq(whatsappMessagesTable.externalId, externalId))
+    .orderBy(sql`${whatsappConversationsTable.phone} is null`)
+    .limit(1);
+
+  return row?.chatId ?? null;
+}

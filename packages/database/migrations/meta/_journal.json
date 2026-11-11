@@ -211,6 +211,13 @@
       "when": 1794422847533,
       "tag": "0029_add_whatsapp_conversation_resolved_at",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1794427183830,
+      "tag": "0030_remove_duplicate_lid_conversations",
+      "breakpoints": true
     }
   ]
 }
