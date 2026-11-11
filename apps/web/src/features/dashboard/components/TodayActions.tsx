@@ -7,6 +7,7 @@ import { SectionEmpty } from "@/shared/components/SectionEmpty";
 import { SectionSkeleton } from "@/shared/components/SectionSkeleton";
 import { cn } from "@/shared/utils/cn";
 
+import { SCROLL_COLUMN } from "../constants/scrollColumn";
 import { useGroupedNextActions } from "../queries/useGroupedNextActions";
 
 type ActionGroupProps = {
@@ -15,7 +16,7 @@ type ActionGroupProps = {
   isOverdue?: boolean;
 };
 
-const SECTION_ICON = { icon: ListTodoIcon, iconClassName: "text-info" };
+const SECTION_PROPS = { icon: ListTodoIcon, iconClassName: "text-info" };
 
 function ActionGroup({ label, actions, isOverdue }: ActionGroupProps) {
   if (actions.length === 0) return null;
@@ -43,9 +44,11 @@ export function TodayActions() {
 
   if (isPending || !data) {
     return (
-      <Section title="Ações do dia" {...SECTION_ICON}>
-        <SectionSkeleton rows={4} />
-      </Section>
+      <div className={SCROLL_COLUMN}>
+        <Section title="Ações do dia" {...SECTION_PROPS}>
+          <SectionSkeleton rows={4} />
+        </Section>
+      </div>
     );
   }
 
@@ -53,19 +56,21 @@ export function TodayActions() {
   const total = overdue.length + today.length;
 
   return (
-    <Section title="Ações do dia" count={total} {...SECTION_ICON}>
-      {total === 0 ? (
-        <SectionEmpty
-          icon={PartyPopperIcon}
-          title="Tudo em dia"
-          description="Nenhuma ação atrasada ou para hoje."
-        />
-      ) : (
-        <div className="flex flex-col gap-5">
-          <ActionGroup label="Atrasadas" actions={overdue} isOverdue />
-          <ActionGroup label="Hoje" actions={today} />
-        </div>
-      )}
-    </Section>
+    <div className={SCROLL_COLUMN}>
+      <Section title="Ações do dia" count={total} {...SECTION_PROPS}>
+        {total === 0 ? (
+          <SectionEmpty
+            icon={PartyPopperIcon}
+            title="Tudo em dia"
+            description="Nenhuma ação atrasada ou para hoje."
+          />
+        ) : (
+          <div className="flex flex-col gap-5">
+            <ActionGroup label="Atrasadas" actions={overdue} isOverdue />
+            <ActionGroup label="Hoje" actions={today} />
+          </div>
+        )}
+      </Section>
+    </div>
   );
 }
