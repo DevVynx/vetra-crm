@@ -29,10 +29,10 @@ export function UpdateSettings() {
         <div className="flex flex-col gap-2 px-5 py-3.5 text-xs">
           <p className="text-muted-foreground">
             Para atualizar, feche esta aba, abra a pasta <strong>scripts</strong> do Vetra e dê
-            duplo clique em <strong>atualizar-vetra-windows.bat</strong> (no macOS e no Linux, rode{" "}
-            <code>bash scripts/atualizar-vetra-mac-linux.sh</code>). Antes de trocar, o Vetra guarda
-            um backup do banco na pasta <strong>backups</strong>, e, se a versão nova não iniciar,
-            volta sozinho à anterior.
+            duplo clique em <strong>atualizar-vetra-windows.bat</strong> (no macOS e no Linux, rode
+            o <code>atualizar-vetra-mac-linux.sh</code>). Antes de trocar, o Vetra guarda um backup
+            do banco na pasta <strong>backups</strong>, e, se a versão nova não iniciar, volta
+            sozinho à anterior.
           </p>
           {info.releaseUrl && (
             <a
