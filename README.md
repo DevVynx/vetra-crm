@@ -103,4 +103,3 @@ O código está aberto para ler, mas o Vetra **não é software livre**: ele usa
 - **Não pode:** usar o código para oferecer um produto ou serviço que concorra com o Vetra (por exemplo, vendê-lo ou hospedá-lo para terceiros).
 
 O texto da licença no arquivo `LICENSE` é o que vale. Para qualquer uso fora disso, fale com o autor.
-Quer mexer no código? Veja o [CONTRIBUTING.md](https://github.com/DevVynx/vetra-crm/blob/main/CONTRIBUTING.md).
